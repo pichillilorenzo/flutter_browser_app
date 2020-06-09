@@ -1,14 +1,13 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
-import 'package:share/share.dart';
 
+import 'long_press_alert_dialog.dart';
 import 'models/browser_model.dart';
 
 class WebViewTab extends StatefulWidget {
@@ -20,8 +19,40 @@ class WebViewTab extends StatefulWidget {
   _WebViewTabState createState() => _WebViewTabState();
 }
 
-class _WebViewTabState extends State<WebViewTab> {
+class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
   InAppWebViewController _webViewController;
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addObserver(this);
+    super.initState();
+  }
+
+  @override void dispose() {
+    _webViewController = null;
+    widget.webViewModel.webViewController = null;
+
+    WidgetsBinding.instance.removeObserver(this);
+
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_webViewController != null) {
+      if (state == AppLifecycleState.paused) {
+        _webViewController.pauseTimers();
+        if (Platform.isAndroid) {
+          _webViewController.android.pause();
+        }
+      } else {
+        _webViewController.resumeTimers();
+        if (Platform.isAndroid) {
+          _webViewController.android.resume();
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,24 +71,31 @@ class _WebViewTabState extends State<WebViewTab> {
                       debuggingEnabled: settings.debuggingEnabled,
                       incognito: widget.webViewModel.isIncognitoMode,
                       useOnDownloadStart: true,
+                      useOnLoadResource: true
                     )),
             onWebViewCreated: (controller) async {
               _webViewController = controller;
               widget.webViewModel.webViewController = controller;
 
               widget.webViewModel.options = await controller.getOptions();
+
+              browserModel.notify();
             },
             onLoadStart: (controller, url) async {
               widget.webViewModel.url = url;
               widget.webViewModel.loaded = false;
+              widget.webViewModel.loadedResources.clear();
+              widget.webViewModel.javaScriptConsoleResults.clear();
+
+              browserModel.notify();
             },
             onLoadStop: (controller, url) async {
               widget.webViewModel.url = url;
-              widget.webViewModel.title = await controller.getTitle();
+              widget.webViewModel.title = await _webViewController?.getTitle();
               widget.webViewModel.favicon = null;
               widget.webViewModel.loaded = true;
 
-              List<Favicon> favicons = await controller.getFavicons();
+              List<Favicon> favicons = await _webViewController?.getFavicons();
               if (favicons != null && favicons.isNotEmpty) {
                 for (var fav in favicons) {
                   if (widget.webViewModel.favicon == null) {
@@ -75,111 +113,45 @@ class _WebViewTabState extends State<WebViewTab> {
                   }
                 }
               }
+
+              browserModel.notify();
             },
             onProgressChanged: (controller, progress) {
               widget.webViewModel.progress = progress / 100;
+              browserModel.notify();
             },
             onUpdateVisitedHistory:
                 (controller, url, androidIsReload) async {
               widget.webViewModel.url = url;
-              widget.webViewModel.title = await controller.getTitle();
+              widget.webViewModel.title = await _webViewController?.getTitle();
+              browserModel.notify();
             },
             onLongPressHitTestResult: (controller, hitTestResult) {
-              var browserModel = Provider.of<BrowserModel>(context, listen: false);
-              var settings = browserModel.getSettings();
-              
-              var uri = Uri.parse(hitTestResult.extra);
-              var faviconUrl = uri.origin + "/favicon.ico";
-
-              showDialog(
+              if (LongPressAlertDialog.HIT_TEST_RESULT_SUPPORTED.contains(hitTestResult.type)) {
+                showDialog(
                   context: context,
                   builder: (context) {
-                    return AlertDialog(
-                      contentPadding: EdgeInsets.all(0.0),
-                      content: SingleChildScrollView(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            ListTile(
-                              leading: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  CachedNetworkImage(
-                                    placeholder: (context, url) =>
-                                        CircularProgressIndicator(),
-                                    imageUrl: faviconUrl,
-                                    height: 30,
-                                  )
-                                ],
-                              ),
-                              title: const Text("Link"),
-                              subtitle: Text(hitTestResult.extra, maxLines: 2, overflow: TextOverflow.ellipsis,),
-                              isThreeLine: true,
-                            ),
-                            ListTile(
-                              title: Center(child: const Text("Preview")),
-                              subtitle: Container(
-                                height: 250,
-                                child: InAppWebView(
-                                  gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-                                    new Factory<OneSequenceGestureRecognizer>(
-                                          () => new EagerGestureRecognizer(),
-                                    ),
-                                  ].toSet(),
-                                  initialUrl: hitTestResult.extra,
-                                  initialOptions: InAppWebViewGroupOptions(
-                                      crossPlatform:
-                                      InAppWebViewOptions(
-                                        debuggingEnabled: settings.debuggingEnabled,
-                                      )),
-                                ),
-                              ),
-                            ),
-                            ListTile(
-                              title: const Text("Open in a new tab"),
-                              onTap: () {
-                                browserModel.addTab(WebViewTab(
-                                  key: GlobalKey(),
-                                  webViewModel: WebViewModel(
-                                      url: hitTestResult.extra
-                                  ),
-                                ));
-                                Navigator.pop(context);
-                              },
-                            ),
-                            ListTile(
-                              title: const Text("Open in a new incognito tab"),
-                              onTap: () {
-                                browserModel.addTab(WebViewTab(
-                                  key: GlobalKey(),
-                                  webViewModel: WebViewModel(
-                                      url: hitTestResult.extra,
-                                      isIncognitoMode: true
-                                  ),
-                                ));
-                                Navigator.pop(context);
-                              },
-                            ),
-                            ListTile(
-                              title: const Text("Copy address link"),
-                              onTap: () {
-                                Clipboard.setData(ClipboardData(text: hitTestResult.extra));
-                                Navigator.pop(context);
-                              },
-                            ),
-                            ListTile(
-                              title: const Text("Share link"),
-                              onTap: () {
-                                Share.share(hitTestResult.extra);
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
+                    return LongPressAlertDialog(webViewModel: widget.webViewModel, hitTestResult: hitTestResult,);
                   },
+                );
+              }
+            },
+            onConsoleMessage: (controller, consoleMessage) {
+              widget.webViewModel.javaScriptConsoleResults.add(
+                RichText(
+                  text: TextSpan(
+                    text: consoleMessage.message,
+                    style: TextStyle(
+                      color: consoleMessage.messageLevel == ConsoleMessageLevel.ERROR ? Colors.red : Colors.black
+                    )
+                  ),
+                )
               );
+              browserModel.notify();
+            },
+            onLoadResource: (controller, resource) {
+              widget.webViewModel.loadedResources.add(resource);
+              browserModel.notify();
             },
           ),
         )
@@ -187,3 +159,4 @@ class _WebViewTabState extends State<WebViewTab> {
     );
   }
 }
+

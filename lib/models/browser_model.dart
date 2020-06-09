@@ -112,4 +112,8 @@ class BrowserModel extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  void notify() {
+    notifyListeners();
+  }
 }

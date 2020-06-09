@@ -7,6 +7,7 @@ class PopupMenuActions {
   static const String FIND_ON_PAGE = "Find on page";
   static const String DESKTOP_MODE = "Desktop mode";
   static const String SETTINGS = "Settings";
+  static const String DEVELOPERS = "Developers";
 
   static const List<String> choices = <String>[
     NEW_TAB,
@@ -16,6 +17,7 @@ class PopupMenuActions {
     SHARE,
     FIND_ON_PAGE,
     DESKTOP_MODE,
-    SETTINGS
+    SETTINGS,
+    DEVELOPERS,
   ];
 }
