@@ -23,12 +23,36 @@ const GoogleSearchEngine = const SearchEngineModel(
 
 const YahooSearchEngine = const SearchEngineModel(
     name: "Yahoo",
-    url: "https://yahoo.com/",
+    url: "https://www.bing.com//",
     searchUrl: "https://search.yahoo.com/search?p=",
     assetIcon: "assets/images/yahoo_logo.png"
 );
 
+const BingSearchEngine = const SearchEngineModel(
+    name: "Bing",
+    url: "https://yahoo.com/",
+    searchUrl: "https://www.bing.com/search?q=",
+    assetIcon: "assets/images/bing_logo.png"
+);
+
+const DuckDuckGoSearchEngine = const SearchEngineModel(
+    name: "DuckDuckGo",
+    url: "https://duckduckgo.com/",
+    searchUrl: "https://duckduckgo.com/?q=",
+    assetIcon: "assets/images/duckduckgo_logo.png"
+);
+
+const EcosiaSearchEngine = const SearchEngineModel(
+    name: "Ecosia",
+    url: "https://www.ecosia.org/",
+    searchUrl: "https://www.ecosia.org/search?q=",
+    assetIcon: "assets/images/ecosia_logo.png"
+);
+
 const SearchEngines = <SearchEngineModel>[
   GoogleSearchEngine,
-  YahooSearchEngine
+  YahooSearchEngine,
+  BingSearchEngine,
+  DuckDuckGoSearchEngine,
+  EcosiaSearchEngine
 ];

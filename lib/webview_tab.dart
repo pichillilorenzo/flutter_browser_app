@@ -7,6 +7,7 @@ import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
+import 'javascript_console_result.dart';
 import 'long_press_alert_dialog.dart';
 import 'models/browser_model.dart';
 
@@ -28,7 +29,8 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     super.initState();
   }
 
-  @override void dispose() {
+  @override
+  void dispose() {
     _webViewController = null;
     widget.webViewModel.webViewController = null;
 
@@ -58,105 +60,155 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
     var settings = browserModel.getSettings();
+    var currentWebViewModel = Provider.of<WebViewModel>(context, listen: true);
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Expanded(
-          child: InAppWebView(
-            initialUrl: widget.webViewModel.url,
-            initialOptions: InAppWebViewGroupOptions(
-                crossPlatform:
-                    InAppWebViewOptions(
-                      debuggingEnabled: settings.debuggingEnabled,
-                      incognito: widget.webViewModel.isIncognitoMode,
-                      useOnDownloadStart: true,
-                      useOnLoadResource: true
-                    )),
-            onWebViewCreated: (controller) async {
-              _webViewController = controller;
-              widget.webViewModel.webViewController = controller;
+    return InAppWebView(
+          initialUrl: widget.webViewModel.url,
+          initialOptions: InAppWebViewGroupOptions(
+              crossPlatform: InAppWebViewOptions(
+                  debuggingEnabled: settings.debuggingEnabled,
+                  incognito: widget.webViewModel.isIncognitoMode,
+                  useOnDownloadStart: true,
+                  useOnLoadResource: true),
+            android: AndroidInAppWebViewOptions(
+              safeBrowsingEnabled: true
+            ),
+            ios: IOSInAppWebViewOptions(
+              allowsLinkPreview: false
+            )
+          ),
+          onWebViewCreated: (controller) async {
+            _webViewController = controller;
+            widget.webViewModel.webViewController = controller;
 
-              widget.webViewModel.options = await controller.getOptions();
+            if (Platform.isAndroid) {
+              controller.android.startSafeBrowsing();
+            }
 
-              browserModel.notify();
-            },
-            onLoadStart: (controller, url) async {
-              widget.webViewModel.url = url;
-              widget.webViewModel.loaded = false;
-              widget.webViewModel.loadedResources.clear();
-              widget.webViewModel.javaScriptConsoleResults.clear();
+            widget.webViewModel.options = await controller.getOptions();
 
-              browserModel.notify();
-            },
-            onLoadStop: (controller, url) async {
-              widget.webViewModel.url = url;
-              widget.webViewModel.title = await _webViewController?.getTitle();
-              widget.webViewModel.favicon = null;
-              widget.webViewModel.loaded = true;
+            if (isCurrentTab(currentWebViewModel)) {
+              currentWebViewModel.updateWithValue(widget.webViewModel);
+            }
+          },
+          onLoadStart: (controller, url) async {
+            widget.webViewModel.url = url;
+            widget.webViewModel.loaded = false;
+            widget.webViewModel.setLoadedResources([]);
+            widget.webViewModel.setJavaScriptConsoleResults([]);
 
-              List<Favicon> favicons = await _webViewController?.getFavicons();
-              if (favicons != null && favicons.isNotEmpty) {
-                for (var fav in favicons) {
-                  if (widget.webViewModel.favicon == null) {
+            if (isCurrentTab(currentWebViewModel)) {
+              currentWebViewModel.updateWithValue(widget.webViewModel);
+            }
+          },
+          onLoadStop: (controller, url) async {
+            var titleFuture = _webViewController?.getTitle();
+            var faviconsFuture = _webViewController?.getFavicons();
+
+            widget.webViewModel.url = url;
+            widget.webViewModel.title = await titleFuture;
+            widget.webViewModel.favicon = null;
+            widget.webViewModel.loaded = true;
+
+            List<Favicon> favicons = await faviconsFuture;
+            if (favicons != null && favicons.isNotEmpty) {
+              for (var fav in favicons) {
+                if (widget.webViewModel.favicon == null) {
+                  widget.webViewModel.favicon = fav;
+                } else {
+                  if ((widget.webViewModel.favicon.width == null &&
+                      !widget.webViewModel.favicon.url
+                          .endsWith("favicon.ico")) ||
+                      (fav.width != null &&
+                          widget.webViewModel.favicon.width != null &&
+                          fav.width > widget.webViewModel.favicon.width)) {
                     widget.webViewModel.favicon = fav;
-                  } else {
-                    if ((widget.webViewModel.favicon.width == null &&
-                        !widget.webViewModel.favicon.url
-                            .endsWith("favicon.ico")) ||
-                        (fav.width != null &&
-                            widget.webViewModel.favicon.width != null &&
-                            fav.width >
-                                widget.webViewModel.favicon.width)) {
-                      widget.webViewModel.favicon = fav;
-                    }
                   }
                 }
               }
+            }
 
-              browserModel.notify();
-            },
-            onProgressChanged: (controller, progress) {
-              widget.webViewModel.progress = progress / 100;
-              browserModel.notify();
-            },
-            onUpdateVisitedHistory:
-                (controller, url, androidIsReload) async {
-              widget.webViewModel.url = url;
-              widget.webViewModel.title = await _webViewController?.getTitle();
-              browserModel.notify();
-            },
-            onLongPressHitTestResult: (controller, hitTestResult) {
-              if (LongPressAlertDialog.HIT_TEST_RESULT_SUPPORTED.contains(hitTestResult.type)) {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return LongPressAlertDialog(webViewModel: widget.webViewModel, hitTestResult: hitTestResult,);
-                  },
-                );
-              }
-            },
-            onConsoleMessage: (controller, consoleMessage) {
-              widget.webViewModel.javaScriptConsoleResults.add(
-                RichText(
-                  text: TextSpan(
-                    text: consoleMessage.message,
-                    style: TextStyle(
-                      color: consoleMessage.messageLevel == ConsoleMessageLevel.ERROR ? Colors.red : Colors.black
-                    )
-                  ),
-                )
+            if (isCurrentTab(currentWebViewModel)) {
+              currentWebViewModel.updateWithValue(widget.webViewModel);
+            }
+          },
+          onProgressChanged: (controller, progress) {
+            widget.webViewModel.progress = progress / 100;
+
+            if (isCurrentTab(currentWebViewModel)) {
+              currentWebViewModel.updateWithValue(widget.webViewModel);
+            }
+          },
+          onUpdateVisitedHistory: (controller, url, androidIsReload) async {
+            widget.webViewModel.url = url;
+            widget.webViewModel.title = await _webViewController?.getTitle();
+
+            if (isCurrentTab(currentWebViewModel)) {
+              currentWebViewModel.updateWithValue(widget.webViewModel);
+            }
+          },
+          onLongPressHitTestResult: (controller, hitTestResult) async {
+            if (LongPressAlertDialog.HIT_TEST_RESULT_SUPPORTED
+                .contains(hitTestResult.type)) {
+
+              var requestFocusNodeHrefResult = await controller.requestFocusNodeHref();
+
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return LongPressAlertDialog(
+                    webViewModel: widget.webViewModel,
+                    hitTestResult: hitTestResult,
+                    requestFocusNodeHrefResult: requestFocusNodeHrefResult,
+                  );
+                },
               );
-              browserModel.notify();
-            },
-            onLoadResource: (controller, resource) {
-              widget.webViewModel.loadedResources.add(resource);
-              browserModel.notify();
-            },
-          ),
-        )
-      ],
+            }
+          },
+          onConsoleMessage: (controller, consoleMessage) {
+            Color consoleTextColor = Colors.black;
+            Color consoleBackgroundColor = Colors.transparent;
+            IconData consoleIconData;
+            Color consoleIconColor;
+            if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
+              consoleTextColor = Colors.red;
+              consoleIconData = Icons.report_problem;
+              consoleIconColor = Colors.red;
+            } else if (consoleMessage.messageLevel == ConsoleMessageLevel.TIP) {
+              consoleTextColor = Colors.blue;
+              consoleIconData = Icons.info;
+              consoleIconColor = Colors.blueAccent;
+            } else if (consoleMessage.messageLevel ==
+                ConsoleMessageLevel.WARNING) {
+              consoleBackgroundColor = Color.fromRGBO(255, 251, 227, 1);
+              consoleIconData = Icons.report_problem;
+              consoleIconColor = Colors.orangeAccent;
+            }
+
+            widget.webViewModel
+                .addJavaScriptConsoleResults(JavaScriptConsoleResult(
+              data: consoleMessage.message,
+              textColor: consoleTextColor,
+              backgroundColor: consoleBackgroundColor,
+              iconData: consoleIconData,
+              iconColor: consoleIconColor,
+            ));
+
+            if (isCurrentTab(currentWebViewModel)) {
+              currentWebViewModel.updateWithValue(widget.webViewModel);
+            }
+          },
+          onLoadResource: (controller, resource) {
+            widget.webViewModel.addLoadedResources(resource);
+
+            if (isCurrentTab(currentWebViewModel)) {
+              currentWebViewModel.updateWithValue(widget.webViewModel);
+            }
+          },
     );
   }
-}
 
+  bool isCurrentTab(WebViewModel currentWebViewModel) {
+    return currentWebViewModel.tabIndex == widget.webViewModel.tabIndex;
+  }
+}

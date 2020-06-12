@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_browser/models/favorite_model.dart';
+import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/webview_tab.dart';
 
 import 'search_engine_model.dart';
@@ -35,6 +36,11 @@ class BrowserModel extends ChangeNotifier {
   final List<WebViewTab> _webViewTabs = [];
   int _currentTabIndex = -1;
   BrowserSettings _settings = BrowserSettings();
+  WebViewModel _currentWebViewModel;
+
+  BrowserModel(currentWebViewModel) {
+    this._currentWebViewModel = currentWebViewModel;
+  }
 
   UnmodifiableListView<WebViewTab> get webViewTabs =>
       UnmodifiableListView(_webViewTabs);
@@ -47,6 +53,8 @@ class BrowserModel extends ChangeNotifier {
     _currentTabIndex = _webViewTabs.length - 1;
     webViewTab.webViewModel.tabIndex = _currentTabIndex;
 
+    _currentWebViewModel.updateWithValue(webViewTab.webViewModel);
+
     notifyListeners();
   }
 
@@ -58,11 +66,18 @@ class BrowserModel extends ChangeNotifier {
       _webViewTabs[i].webViewModel.tabIndex = i;
     }
 
+    if (_currentTabIndex >= 0) {
+      _currentWebViewModel.updateWithValue(_webViewTabs[_currentTabIndex].webViewModel);
+    } else {
+      _currentWebViewModel.updateWithValue(WebViewModel());
+    }
+
     notifyListeners();
   }
 
   void showTab(int index) {
     _currentTabIndex = index;
+    _currentWebViewModel.updateWithValue(_webViewTabs[_currentTabIndex].webViewModel);
 
     notifyListeners();
   }
@@ -70,6 +85,7 @@ class BrowserModel extends ChangeNotifier {
   void closeAllTabs() {
     _webViewTabs.clear();
     _currentTabIndex = -1;
+    _currentWebViewModel.updateWithValue(WebViewModel());
 
     notifyListeners();
   }
@@ -113,7 +129,7 @@ class BrowserModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void notify() {
-    notifyListeners();
+  void setCurrentWebViewModel(WebViewModel webViewModel) {
+    _currentWebViewModel = webViewModel;
   }
 }
