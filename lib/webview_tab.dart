@@ -74,7 +74,8 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
               safeBrowsingEnabled: true
             ),
             ios: IOSInAppWebViewOptions(
-              allowsLinkPreview: false
+              allowsLinkPreview: false,
+              isFraudulentWebsiteWarningEnabled: true
             )
           ),
           onWebViewCreated: (controller) async {
@@ -102,6 +103,8 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
             }
           },
           onLoadStop: (controller, url) async {
+            print(await controller.android.getCertificate());
+
             var titleFuture = _webViewController?.getTitle();
             var faviconsFuture = _webViewController?.getFavicons();
 
@@ -204,6 +207,48 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
             if (isCurrentTab(currentWebViewModel)) {
               currentWebViewModel.updateWithValue(widget.webViewModel);
             }
+          },
+          onReceivedServerTrustAuthRequest: (controller, challenge) async {
+            if (challenge.iosError != null || challenge.androidError != null) {
+              if (Platform.isIOS && challenge.iosError == IOSSslError.UNSPECIFIED) {
+                return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
+              }
+              // TODO:
+              return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.CANCEL);
+            }
+            return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
+          },
+          onLoadError: (controller, url, code, message) async {
+            controller.loadData(data: """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+    ${await controller.getTRexRunnerCss()}
+    </style>
+    <style>
+    .interstitial-wrapper {
+        box-sizing: border-box;
+        font-size: 1em;
+        line-height: 1.6em;
+        margin: 0 auto 0;
+        max-width: 600px;
+        width: 100%;
+    }
+    </style>
+</head>
+<body>
+    ${await controller.getTRexRunnerHtml()}
+    <div class="interstitial-wrapper">
+      <h1>Website not available</h1>
+      <p>Could not load web pages at <strong>$url</strong> because:</p>
+      <p>$message</p>
+    </div>
+</body>
+            """, baseUrl: url);
           },
     );
   }

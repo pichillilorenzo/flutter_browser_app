@@ -32,8 +32,9 @@ class BrowserSettings {
 }
 
 class BrowserModel extends ChangeNotifier {
-  List<FavoriteModel> _favorites = [];
+  final List<FavoriteModel> _favorites = [];
   final List<WebViewTab> _webViewTabs = [];
+  final Map<String, String> _webArchives = {};
   int _currentTabIndex = -1;
   BrowserSettings _settings = BrowserSettings();
   WebViewModel _currentWebViewModel;
@@ -47,6 +48,9 @@ class BrowserModel extends ChangeNotifier {
 
   UnmodifiableListView<FavoriteModel> get favorites =>
       UnmodifiableListView(_favorites);
+
+  UnmodifiableMapView<String, String> get webArchives =>
+      UnmodifiableMapView(_webArchives);
 
   void addTab(WebViewTab webViewTab) {
     _webViewTabs.add(webViewTab);
@@ -119,13 +123,27 @@ class BrowserModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void addWebArchive(String url, String path) {
+    _webArchives.putIfAbsent(url, () => path);
+    notifyListeners();
+  }
+
+  void removeWebArchive(String url) {
+    _webArchives.remove(url);
+    notifyListeners();
+  }
+
+  void clearWebArchives() {
+    _webArchives.clear();
+    notifyListeners();
+  }
+
   BrowserSettings getSettings() {
     return _settings.copy();
   }
 
   void updateSettings(BrowserSettings settings) {
     _settings = settings;
-
     notifyListeners();
   }
 

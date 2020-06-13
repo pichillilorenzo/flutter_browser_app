@@ -10,6 +10,7 @@ import 'package:flutter_browser/pages/developers_page.dart';
 import 'package:flutter_browser/pages/settings_page.dart';
 import 'package:flutter_browser/tab_popup_menu_actions.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 
@@ -106,7 +107,8 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
   Widget _buildAppBarHomePageWidget() {
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
     var settings = browserModel.getSettings();
-    var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+
+    var webViewModel = Provider.of<WebViewModel>(context, listen: true);
     var _webViewController = webViewModel?.webViewController;
 
     if (!settings.homePageEnabled) {
@@ -131,9 +133,12 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
   Widget _buildSearchTextField() {
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
     var settings = browserModel.getSettings();
-    var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+
+    var webViewModel = Provider.of<WebViewModel>(context, listen: true);
     var _webViewController = webViewModel?.webViewController;
-    var isHttps = webViewModel?.url?.startsWith("https://") ?? false;
+
+    var url = webViewModel?.url ?? "";
+    var isSecure = (url.startsWith("https://") || url.startsWith("file://") || url.trim() == "about:blank") ?? false;
 
     return Container(
       height: 40.0,
@@ -142,7 +147,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
           TextField(
             onSubmitted: (value) {
               var url = value;
-              if (!value.startsWith("http")) {
+              if (!value.startsWith("http") && !value.startsWith("file://") && value.trim() != "about:blank") {
                 url = settings.searchEngine.searchUrl + value;
               }
 
@@ -173,8 +178,8 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
           ),
           IconButton(
             icon: Icon(
-              isHttps ? Icons.lock : Icons.info_outline,
-              color: isHttps ? Colors.green : Colors.grey,
+              isSecure ? Icons.lock : Icons.info_outline,
+              color: isSecure ? Colors.green : Colors.grey,
             ),
             onPressed: () {
               showUrlInfo();
@@ -258,7 +263,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
                       var uri = Uri.parse(webViewTab.webViewModel.url);
                       var faviconUrl = webViewTab.webViewModel.favicon != null
                           ? webViewTab.webViewModel.favicon.url
-                          : uri.origin + "/favicon.ico";
+                          : (["http", "https"].contains(uri.scheme) ? uri.origin + "/favicon.ico" : "");
 
                       return Material(
                         color: webViewTab.webViewModel.isIncognitoMode
@@ -270,7 +275,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
                             children: <Widget>[
                               CachedNetworkImage(
                                 placeholder: (context, url) =>
-                                    CircularProgressIndicator(),
+                                    url == "about:blank" ? Container() : CircularProgressIndicator(),
                                 imageUrl: faviconUrl,
                                 height: 30,
                               )
@@ -377,10 +382,12 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
               enabled: true,
               isIconButtonRow: true,
               child: StatefulBuilder(
-                builder: (context, setState) {
+                builder: (statefulContext, setState) {
                   var browserModel =
-                      Provider.of<BrowserModel>(context, listen: true);
-                  var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+                      Provider.of<BrowserModel>(statefulContext, listen: true);
+                  var webViewModel = Provider.of<WebViewModel>(statefulContext, listen: true);
+                  var _webViewController = webViewModel?.webViewController;
+
                   var isFavorite = false;
                   FavoriteModel favorite;
 
@@ -405,8 +412,6 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
                                 color: Colors.black,
                               ),
                               onPressed: () {
-                                var _webViewController =
-                                    webViewModel?.webViewController;
                                 _webViewController?.goBack();
                                 Navigator.pop(popupMenuContext);
                               })),
@@ -423,8 +428,6 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
                               color: Colors.black,
                             ),
                             onPressed: () {
-                              var _webViewController =
-                                  webViewModel?.webViewController;
                               _webViewController?.goForward();
                               Navigator.pop(popupMenuContext);
                             })),
@@ -457,8 +460,29 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
                               Icons.file_download,
                               color: Colors.black,
                             ),
-                            onPressed: () {
+                            onPressed: () async {
                               Navigator.pop(popupMenuContext);
+                              if (webViewModel.url.startsWith("http")) {
+                                if (Platform.isAndroid) {
+                                  var uri = Uri.parse(webViewModel.url);
+
+                                  var webArchiveDirectoryPath = (await getApplicationSupportDirectory()).path;
+                                  var webArchivePath = (await _webViewController?.android?.saveWebArchive(
+                                      basename: webArchiveDirectoryPath + Platform.pathSeparator + uri.host + uri.path.replaceAll("/", "-") + uri.query + ".mht",
+                                      autoname: false)
+                                  );
+                                  if (webArchivePath != null) {
+                                    browserModel.addWebArchive(webViewModel.url, webArchivePath);
+                                    Scaffold.of(context).showSnackBar(SnackBar(
+                                      content: Text("Saved to " + webArchivePath),
+                                    ));
+                                  } else {
+                                    Scaffold.of(context).showSnackBar(SnackBar(
+                                      content: Text("Unable to save!"),
+                                    ));
+                                  }
+                                }
+                              }
                             })),
                     Container(
                         width: 30.0,
@@ -483,8 +507,6 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
                               color: Colors.black,
                             ),
                             onPressed: () {
-                              var _webViewController =
-                                  webViewModel?.webViewController;
                               _webViewController?.reload();
                               Navigator.pop(popupMenuContext);
                             })),
@@ -778,14 +800,16 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
   void showUrlInfo() {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var webViewModel = browserModel.getCurrentTab()?.webViewModel;
-    var isHttps = webViewModel?.url?.startsWith("https://") ?? false;
+
+    var url = webViewModel?.url ?? "";
+    var isSecure = (url.startsWith("https://") || url.startsWith("file://") || url.trim() == "about:blank") ?? false;
 
     if (webViewModel == null) {
       return;
     }
 
     var text = "Your connection to this website is not protected";
-    if (isHttps) {
+    if (isSecure) {
       text = "Your connection is protected";
     }
 
@@ -826,9 +850,9 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
                                 text: uri.scheme,
                                 style: defaultTextSpanStyle.copyWith(
                                   color:
-                                      isHttps ? Colors.green : Colors.black54,
+                                      isSecure ? Colors.green : Colors.black54,
                                 )),
-                            TextSpan(text: '://', style: defaultTextSpanStyle),
+                            TextSpan(text: url.trim() == "about:blank" ? ':' : '://', style: defaultTextSpanStyle),
                             TextSpan(
                                 text: uri.host,
                                 style: defaultTextSpanStyle.copyWith(
