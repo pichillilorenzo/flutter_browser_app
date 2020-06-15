@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_browser/app_bar/show_url_info_popup.dart';
 import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/favorite_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
@@ -137,9 +139,6 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
     var webViewModel = Provider.of<WebViewModel>(context, listen: true);
     var _webViewController = webViewModel?.webViewController;
 
-    var url = webViewModel?.url ?? "";
-    var isSecure = (url.startsWith("https://") || url.startsWith("file://") || url.trim() == "about:blank") ?? false;
-
     return Container(
       height: 40.0,
       child: Stack(
@@ -177,9 +176,14 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
             style: TextStyle(color: Colors.black, fontSize: 16.0),
           ),
           IconButton(
-            icon: Icon(
-              isSecure ? Icons.lock : Icons.info_outline,
-              color: isSecure ? Colors.green : Colors.grey,
+            icon: Selector<WebViewModel, bool>(
+              selector: (context, webViewModel) => webViewModel.isSecure,
+              builder: (context, isSecure, child) {
+                return Icon(
+                  isSecure ? Icons.lock : Icons.info_outline,
+                  color: isSecure ? Colors.green : Colors.grey,
+                );
+              },
             ),
             onPressed: () {
               showUrlInfo();
@@ -481,6 +485,10 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
                                       content: Text("Unable to save!"),
                                     ));
                                   }
+                                } else {
+                                  Scaffold.of(context).showSnackBar(SnackBar(
+                                    content: Text("Unsupported for this platform!"),
+                                  ));
                                 }
                               }
                             })),
@@ -798,109 +806,22 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
   }
 
   void showUrlInfo() {
-    var browserModel = Provider.of<BrowserModel>(context, listen: false);
-    var webViewModel = browserModel.getCurrentTab()?.webViewModel;
-
-    var url = webViewModel?.url ?? "";
-    var isSecure = (url.startsWith("https://") || url.startsWith("file://") || url.trim() == "about:blank") ?? false;
+    var webViewModel = Provider.of<WebViewModel>(context, listen: false);
 
     if (webViewModel == null) {
       return;
     }
 
-    var text = "Your connection to this website is not protected";
-    if (isSecure) {
-      text = "Your connection is protected";
-    }
-
-    var showFullInfoUrl = false;
-    var uri = Uri.parse(webViewModel.url);
-    var defaultTextSpanStyle = TextStyle(
-      color: Colors.black54,
-      fontSize: 12.5,
-    );
-
     route = CustomPopupDialog.show(
       context: context,
       transitionDuration: customPopupDialogTransitionDuration,
       builder: (context) {
-        return SafeArea(
-            child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            StatefulBuilder(
-              builder: (context, setState) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      showFullInfoUrl = !showFullInfoUrl;
-                    });
-                  },
-                  child: Container(
-                      padding: EdgeInsets.only(bottom: 15.0),
-                      constraints: BoxConstraints(maxHeight: 100.0),
-                      child: RichText(
-                        maxLines: showFullInfoUrl ? null : 2,
-                        overflow: showFullInfoUrl
-                            ? TextOverflow.clip
-                            : TextOverflow.ellipsis,
-                        text: TextSpan(
-                          children: <TextSpan>[
-                            TextSpan(
-                                text: uri.scheme,
-                                style: defaultTextSpanStyle.copyWith(
-                                  color:
-                                      isSecure ? Colors.green : Colors.black54,
-                                )),
-                            TextSpan(text: url.trim() == "about:blank" ? ':' : '://', style: defaultTextSpanStyle),
-                            TextSpan(
-                                text: uri.host,
-                                style: defaultTextSpanStyle.copyWith(
-                                    color: Colors.black)),
-                            TextSpan(
-                                text: uri.path, style: defaultTextSpanStyle),
-                            TextSpan(
-                                text:
-                                    uri.query.isNotEmpty ? "?" + uri.query : "",
-                                style: defaultTextSpanStyle),
-                          ],
-                        ),
-                      )),
-                );
-              },
-            ),
-            Container(
-              padding: EdgeInsets.only(bottom: 15.0),
-              child: Text(text,
-                  style: TextStyle(
-                    fontSize: 18.0,
-                  )),
-            ),
-            SizedBox(
-              height: 50.0,
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: FlatButton(
-                child: Text(
-                  "WebView Tab Settings",
-                  style: TextStyle(
-                    color: Colors.blue,
-                  ),
-                ),
-                onPressed: () async {
-                  Navigator.maybePop(context);
-
-                  await route?.popped;
-
-                  Future.delayed(customPopupDialogTransitionDuration, () {
-                    goToSettingsPage();
-                  });
-                },
-              ),
-            ),
-          ],
-        ));
+        return ShowUrlInfoPopup(
+            route: route,
+            transitionDuration: customPopupDialogTransitionDuration,
+            onWebViewTabSettingsClicked: () {
+              goToSettingsPage();
+            },);
       },
     );
   }

@@ -130,7 +130,7 @@ class _CustomPopupDialogState extends State<CustomPopupDialog>
           SlideTransition(
             position: _offsetSlideAnimation,
             child: Container(
-                padding: EdgeInsets.all(10.0),
+                padding: EdgeInsets.all(15.0),
                 width: MediaQuery.of(context).size.width,
                 color: Colors.white,
                 child: widget.child

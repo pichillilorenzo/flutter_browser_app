@@ -33,7 +33,8 @@ dependencies:
   share: ^0.6.4+3
   charts_flutter: ^0.9.0
   flutter_datetime_picker: ^1.3.8
-
+  intl: ^0.16.1
+  crypto: 2.1.4
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

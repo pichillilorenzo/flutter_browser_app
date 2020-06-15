@@ -58,7 +58,7 @@ class _SettingsPageState extends State<SettingsPage> {
         title: const Text("Search Engine"),
         subtitle: Text(settings.searchEngine.name),
         trailing: DropdownButton<SearchEngineModel>(
-          hint: Text("Choose your Search Engine"),
+          hint: Text("Search Engine"),
           onChanged: (value) {
             setState(() {
               settings.searchEngine = value;

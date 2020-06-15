@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/models/webview_model.dart';
+import 'package:flutter_browser/util.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
@@ -93,6 +94,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
             }
           },
           onLoadStart: (controller, url) async {
+            widget.webViewModel.isSecure = Util.urlIsSecure(url);
             widget.webViewModel.url = url;
             widget.webViewModel.loaded = false;
             widget.webViewModel.setLoadedResources([]);
@@ -103,10 +105,14 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
             }
           },
           onLoadStop: (controller, url) async {
-            print(await controller.android.getCertificate());
-
+            var sslCertificateFuture = controller.getCertificate();
             var titleFuture = _webViewController?.getTitle();
             var faviconsFuture = _webViewController?.getFavicons();
+
+            var sslCertificate = await sslCertificateFuture;
+            if (sslCertificate == null && !Util.isLocalizedContent(url)) {
+              widget.webViewModel.isSecure = false;
+            }
 
             widget.webViewModel.url = url;
             widget.webViewModel.title = await titleFuture;
@@ -213,7 +219,10 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
               if (Platform.isIOS && challenge.iosError == IOSSslError.UNSPECIFIED) {
                 return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
               }
-              // TODO:
+              widget.webViewModel.isSecure = false;
+              if (isCurrentTab(currentWebViewModel)) {
+                currentWebViewModel.updateWithValue(widget.webViewModel);
+              }
               return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.CANCEL);
             }
             return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);

@@ -18,6 +18,7 @@ class WebViewModel extends ChangeNotifier {
   List<Widget> _javaScriptConsoleResults;
   List<String> _javaScriptConsoleHistory;
   List<LoadedResource> _loadedResources;
+  bool _isSecure;
   InAppWebViewGroupOptions options;
   InAppWebViewController webViewController;
 
@@ -33,18 +34,20 @@ class WebViewModel extends ChangeNotifier {
     javaScriptConsoleResults,
     javaScriptConsoleHistory,
     loadedResources,
+    isSecure = false,
     this.options,
     this.webViewController,
   }) {
     _url = url;
     _favicon = favicon;
-    _progress = progress;
-    _loaded = loaded;
-    _isDesktopMode = isDesktopMode;
-    _isIncognitoMode = isIncognitoMode;
+    _progress = progress ?? 0.0;
+    _loaded = loaded ?? false;
+    _isDesktopMode = isDesktopMode ?? false;
+    _isIncognitoMode = isIncognitoMode ?? false;
     _javaScriptConsoleResults = javaScriptConsoleResults ?? [];
     _javaScriptConsoleHistory = javaScriptConsoleHistory ?? [];
     _loadedResources = loadedResources ?? [];
+    _isSecure = isSecure ?? false;
     options = options ?? InAppWebViewGroupOptions();
   }
 
@@ -165,6 +168,15 @@ class WebViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool get isSecure => _isSecure;
+
+  set isSecure(bool value) {
+    if (value != _isSecure) {
+      _isSecure = value;
+      notifyListeners();
+    }
+  }
+
   void updateWithValue(WebViewModel webViewModel) {
     tabIndex = webViewModel.tabIndex;
     url = webViewModel.url;
@@ -177,6 +189,7 @@ class WebViewModel extends ChangeNotifier {
     setJavaScriptConsoleResults(webViewModel._javaScriptConsoleResults.toList());
     setJavaScriptConsoleHistory(webViewModel._javaScriptConsoleHistory.toList());
     setLoadedResources(webViewModel._loadedResources.toList());
+    isSecure = webViewModel.isSecure;
     options = webViewModel.options;
     webViewController = webViewModel.webViewController;
   }
