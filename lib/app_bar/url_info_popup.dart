@@ -1,24 +1,24 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_browser/app_bar/show_certificates_info_popup.dart';
+import 'package:flutter_browser/app_bar/certificates_info_popup.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:provider/provider.dart';
 
 import '../custom_popup_dialog.dart';
 
-class ShowUrlInfoPopup extends StatefulWidget {
+class UrlInfoPopup extends StatefulWidget {
   final CustomPopupDialogPageRoute route;
   final Duration transitionDuration;
   final Function() onWebViewTabSettingsClicked;
 
-  ShowUrlInfoPopup({Key key, this.route, this.transitionDuration, this.onWebViewTabSettingsClicked}) : super(key: key);
+  UrlInfoPopup({Key key, this.route, this.transitionDuration, this.onWebViewTabSettingsClicked}) : super(key: key);
 
   @override
-  _ShowUrlInfoPopupState createState() => _ShowUrlInfoPopupState();
+  _UrlInfoPopupState createState() => _UrlInfoPopupState();
 }
 
-class _ShowUrlInfoPopupState extends State<ShowUrlInfoPopup> {
+class _UrlInfoPopupState extends State<UrlInfoPopup> {
   var text1 = "Your connection to this website is not protected";
   var text2 = "You should not enter sensitive data on this site (e.g. passwords or credit cards) because they could be intercepted by malicious users.";
 
@@ -64,6 +64,7 @@ class _ShowUrlInfoPopupState extends State<ShowUrlInfoPopup> {
                                 style: defaultTextSpanStyle.copyWith(
                                   color:
                                   webViewModel.isSecure ? Colors.green : Colors.black54,
+                                  fontWeight: FontWeight.bold
                                 )),
                             TextSpan(text: webViewModel.url.trim() == "about:blank" ? ':' : '://', style: defaultTextSpanStyle),
                             TextSpan(
@@ -111,7 +112,7 @@ class _ShowUrlInfoPopupState extends State<ShowUrlInfoPopup> {
                             showDialog(
                               context: context,
                               builder: (context) {
-                                return ShowCertificateInfoPopup();
+                                return CertificateInfoPopup();
                               },
                             );
                           },

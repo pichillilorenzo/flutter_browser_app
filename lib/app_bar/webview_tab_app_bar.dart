@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_browser/app_bar/show_url_info_popup.dart';
+import 'package:flutter_browser/app_bar/url_info_popup.dart';
 import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/favorite_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
@@ -808,7 +808,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
   void showUrlInfo() {
     var webViewModel = Provider.of<WebViewModel>(context, listen: false);
 
-    if (webViewModel == null) {
+    if (webViewModel == null || webViewModel.url.isEmpty) {
       return;
     }
 
@@ -816,7 +816,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar> {
       context: context,
       transitionDuration: customPopupDialogTransitionDuration,
       builder: (context) {
-        return ShowUrlInfoPopup(
+        return UrlInfoPopup(
             route: route,
             transitionDuration: customPopupDialogTransitionDuration,
             onWebViewTabSettingsClicked: () {

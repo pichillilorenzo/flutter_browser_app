@@ -5,7 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/util.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 import 'javascript_console_result.dart';
@@ -213,6 +215,19 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
             if (isCurrentTab(currentWebViewModel)) {
               currentWebViewModel.updateWithValue(widget.webViewModel);
             }
+          },
+          onDownloadStart: (controller, url) async {
+            var uri = Uri.parse(url);
+            String path = uri.path;
+            String fileName = path.substring(path.lastIndexOf('/') + 1);
+
+            final taskId = await FlutterDownloader.enqueue(
+              url: url,
+              fileName: fileName,
+              savedDir: (await getExternalStorageDirectory()).path,
+              showNotification: true,
+              openFileFromNotification: true,
+            );
           },
           onReceivedServerTrustAuthRequest: (controller, challenge) async {
             if (challenge.iosError != null || challenge.androidError != null) {

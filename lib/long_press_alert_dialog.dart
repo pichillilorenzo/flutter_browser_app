@@ -57,6 +57,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
             InAppWebViewHitTestResultType.SRC_IMAGE_ANCHOR_TYPE || (
         widget.hitTestResult.type ==
             InAppWebViewHitTestResultType.IMAGE_TYPE && widget.requestFocusNodeHrefResult != null
+            && widget.requestFocusNodeHrefResult.url != null
     )) {
       return <Widget>[
         _buildLinkTile(),
@@ -87,7 +88,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
     var uri = Uri.parse(widget.requestFocusNodeHrefResult.url);
     var faviconUrl = uri.origin + "/favicon.ico";
 
-    var title = widget.requestFocusNodeHrefResult.title;
+    var title = widget.requestFocusNodeHrefResult.title ?? "";
     if (title.isEmpty) {
       title = "Link";
     }
