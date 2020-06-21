@@ -9,6 +9,7 @@ class Util {
     return (url.startsWith("file://") ||
         url.startsWith("chrome://") ||
         url.startsWith("data:") ||
+        url.startsWith("javascript:") ||
         url == "about:blank") ?? false;
   }
 

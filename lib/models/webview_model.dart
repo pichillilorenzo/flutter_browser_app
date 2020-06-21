@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:typed_data';
 import 'package:collection/collection.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -38,6 +39,7 @@ class WebViewModel extends ChangeNotifier {
     this.options,
     this.webViewController,
   }) {
+    _tabIndex = tabIndex;
     _url = url;
     _favicon = favicon;
     _progress = progress ?? 0.0;
@@ -48,7 +50,11 @@ class WebViewModel extends ChangeNotifier {
     _javaScriptConsoleHistory = javaScriptConsoleHistory ?? [];
     _loadedResources = loadedResources ?? [];
     _isSecure = isSecure ?? false;
-    options = options ?? InAppWebViewGroupOptions();
+    options = options ?? InAppWebViewGroupOptions(
+      crossPlatform: InAppWebViewOptions(),
+      android: AndroidInAppWebViewOptions(),
+      ios: IOSInAppWebViewOptions()
+    );
   }
 
   int get tabIndex => _tabIndex;
@@ -192,5 +198,49 @@ class WebViewModel extends ChangeNotifier {
     isSecure = webViewModel.isSecure;
     options = webViewModel.options;
     webViewController = webViewModel.webViewController;
+  }
+
+  static WebViewModel fromMap(Map<String, dynamic> map) {
+    return map != null ? WebViewModel(
+        tabIndex: map["tabIndex"],
+        url: map["url"],
+        title: map["title"],
+        favicon: map["favicon"] != null ? Favicon(
+          url: map["favicon"]["url"],
+          rel: map["favicon"]["rel"],
+          width: map["favicon"]["width"],
+          height: map["favicon"]["height"],
+        ) : null,
+        progress: map["progress"],
+        isDesktopMode: map["isDesktopMode"],
+        isIncognitoMode: map["isIncognitoMode"],
+        javaScriptConsoleHistory: map["javaScriptConsoleHistory"]?.cast<String>(),
+        isSecure: map["isSecure"],
+        options: InAppWebViewGroupOptions.fromMap(map["options"]),
+    ) : null;
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "tabIndex": _tabIndex,
+      "url": _url,
+      "title": _title,
+      "favicon": _favicon?.toMap(),
+      "progress": _progress,
+      "isDesktopMode": _isDesktopMode,
+      "isIncognitoMode": _isIncognitoMode,
+      "javaScriptConsoleHistory": _javaScriptConsoleHistory,
+      "isSecure": _isSecure,
+      "options": options?.toMap(),
+    };
+  }
+
+  Map<String, dynamic> toJson() {
+    return toMap();
+  }
+
+  @override
+  String toString() {
+    return toMap().toString();
   }
 }

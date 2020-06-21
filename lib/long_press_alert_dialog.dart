@@ -57,7 +57,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
             InAppWebViewHitTestResultType.SRC_IMAGE_ANCHOR_TYPE || (
         widget.hitTestResult.type ==
             InAppWebViewHitTestResultType.IMAGE_TYPE && widget.requestFocusNodeHrefResult != null
-            && widget.requestFocusNodeHrefResult.url != null
+            && widget.requestFocusNodeHrefResult.url != null && widget.requestFocusNodeHrefResult.url.isNotEmpty
     )) {
       return <Widget>[
         _buildLinkTile(),
@@ -162,7 +162,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
       onTap: () {
         browserModel.addTab(WebViewTab(
           key: GlobalKey(),
-          webViewModel: WebViewModel(url: widget.hitTestResult.extra),
+          webViewModel: WebViewModel(url: widget.requestFocusNodeHrefResult.url),
         ));
         Navigator.pop(context);
       },
@@ -178,7 +178,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
         browserModel.addTab(WebViewTab(
           key: GlobalKey(),
           webViewModel: WebViewModel(
-              url: widget.hitTestResult.extra, isIncognitoMode: true),
+              url: widget.requestFocusNodeHrefResult.url, isIncognitoMode: true),
         ));
         Navigator.pop(context);
       },

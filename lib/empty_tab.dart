@@ -39,7 +39,7 @@ class _EmptyTabState extends State<EmptyTab> {
                   },
                   textInputAction: TextInputAction.go,
                   decoration: InputDecoration(
-                    hintText: "Search for or type in a web address",
+                    hintText: "Search for or type a web address",
                     hintStyle: TextStyle(color: Colors.black54, fontSize: 25.0),
                   ),
                   style: TextStyle(color: Colors.black, fontSize: 25.0,),

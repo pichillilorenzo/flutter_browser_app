@@ -18,7 +18,7 @@ class CustomPopupDialogPageRoute<T> extends MaterialTransparentPageRoute<T> {
         super(builder: builder, settings: settings);
 
   @override
-  Duration get transitionDuration => customTransitionDuration != null ? customTransitionDuration : Duration(milliseconds: 300);
+  Duration get transitionDuration => customTransitionDuration != null ? customTransitionDuration : const Duration(milliseconds: 300);
 
   @override
   bool didPop(T result) {

@@ -12,6 +12,33 @@ class SearchEngineModel {
     @required this.searchUrl,
     @required this.assetIcon
   });
+
+  static SearchEngineModel fromMap(Map<String, dynamic> map) {
+    return map != null ? SearchEngineModel(
+        name: map["name"],
+        assetIcon: map["assetIcon"],
+        url: map["url"],
+        searchUrl: map["searchUrl"]
+    ) : null;
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "name": name,
+      "assetIcon": assetIcon,
+      "url": url,
+      "searchUrl": searchUrl
+    };
+  }
+
+  Map<String, dynamic> toJson() {
+    return toMap();
+  }
+
+  @override
+  String toString() {
+    return toMap().toString();
+  }
 }
 
 const GoogleSearchEngine = const SearchEngineModel(

@@ -1,12 +1,9 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
-import 'package:flutter_browser/webview_tab.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:intl/intl.dart';
@@ -155,7 +152,7 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
 
                                   return AlertDialog(
                                     content: Container(
-                                        constraints: BoxConstraints(maxWidth: 250.0),
+                                        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 2.5),
                                         child: StatefulBuilder(
                                           builder: (context, setState) {
                                             List<DropdownMenuItem<X509Certificate>> dropdownMenuItems = [];
@@ -488,11 +485,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                   children: [
                     TextSpan(
                         text: "Critical ",
-                        style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                        style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                     ),
                     TextSpan(
                         text: keyUsageIsCritical,
-                        style: TextStyle(fontSize: 10.0, color: Colors.black)
+                        style: TextStyle(fontSize: 12.0, color: Colors.black)
                     )
                   ]
               ),
@@ -502,11 +499,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                   children: [
                     TextSpan(
                         text: "Usage ",
-                        style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                        style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                     ),
                     TextSpan(
                         text: KeyUsage.fromIndex(i).name(),
-                        style: TextStyle(fontSize: 10.0, color: Colors.black)
+                        style: TextStyle(fontSize: 12.0, color: Colors.black)
                     )
                   ]
               ),
@@ -526,8 +523,6 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
 
   List<Widget> _buildBasicConstraints(X509Certificate x509certificate) {
     var criticalExtensionOIDs = x509certificate.criticalExtensionOIDs;
-    print(x509certificate.extensionObject(oid: OID.basicConstraints)?.block);
-
     var basicConstraints = x509certificate.basicConstraints;
 
     var basicConstraintsSection = <Widget>[
@@ -543,11 +538,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
               children: [
                 TextSpan(
                     text: "Critical ",
-                    style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                 ),
                 TextSpan(
                     text: basicConstraintsIsCritical,
-                    style: TextStyle(fontSize: 10.0, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, color: Colors.black)
                 )
               ]
           ),
@@ -557,11 +552,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
               children: [
                 TextSpan(
                     text: "Certificate Authority ",
-                    style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                 ),
                 TextSpan(
                     text: "NO",
-                    style: TextStyle(fontSize: 10.0, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, color: Colors.black)
                 )
               ]
           ),
@@ -575,11 +570,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
               children: [
                 TextSpan(
                     text: "Critical ",
-                    style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                 ),
                 TextSpan(
                     text: basicConstraintsIsCritical,
-                    style: TextStyle(fontSize: 10.0, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, color: Colors.black)
                 )
               ]
           ),
@@ -589,11 +584,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
               children: [
                 TextSpan(
                     text: "Certificate Authority ",
-                    style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                 ),
                 TextSpan(
                     text: "YES",
-                    style: TextStyle(fontSize: 10.0, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, color: Colors.black)
                 )
               ]
           ),
@@ -603,11 +598,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
               children: [
                 TextSpan(
                     text: "Path Length Constraints ",
-                    style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                 ),
                 TextSpan(
                     text: basicConstraints.toString(),
-                    style: TextStyle(fontSize: 10.0, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, color: Colors.black)
                 )
               ]
           ),
@@ -638,11 +633,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                 children: [
                   TextSpan(
                       text: "Critical ",
-                      style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                      style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                   ),
                   TextSpan(
                       text: extendedKeyUsageIsCritical,
-                      style: TextStyle(fontSize: 10.0, color: Colors.black)
+                      style: TextStyle(fontSize: 12.0, color: Colors.black)
                   )
                 ]
             ),
@@ -652,11 +647,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                 children: [
                   TextSpan(
                       text: "Purpose #${i + 1} ",
-                      style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                      style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                   ),
                   TextSpan(
                       text: "${oid.name()} ( ${oid.toValue()} )",
-                      style: TextStyle(fontSize: 10.0, color: Colors.black)
+                      style: TextStyle(fontSize: 12.0, color: Colors.black)
                   )
                 ]
             ),
@@ -700,11 +695,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
               children: [
                 TextSpan(
                     text: "Critical ",
-                    style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                 ),
                 TextSpan(
                     text: subjectKeyIdentifierIsCritical,
-                    style: TextStyle(fontSize: 10.0, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, color: Colors.black)
                 )
               ]
           ),
@@ -714,11 +709,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
               children: [
                 TextSpan(
                     text: "Key ID ",
-                    style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                 ),
                 TextSpan(
                     text: subjectKeyIdentifierToHexValue,
-                    style: TextStyle(fontSize: 10.0, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, color: Colors.black)
                 )
               ]
           ),
@@ -761,11 +756,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
               children: [
                 TextSpan(
                     text: "Critical ",
-                    style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                 ),
                 TextSpan(
                     text: authorityKeyIdentifierIsCritical,
-                    style: TextStyle(fontSize: 10.0, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, color: Colors.black)
                 )
               ]
           ),
@@ -775,11 +770,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
               children: [
                 TextSpan(
                     text: "Key ID ",
-                    style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                 ),
                 TextSpan(
                     text: authorityKeyIdentifierToHexValue,
-                    style: TextStyle(fontSize: 10.0, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, color: Colors.black)
                 )
               ]
           ),
@@ -810,11 +805,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
             children: [
               TextSpan(
                   text: "Critical ",
-                  style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                  style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
               ),
               TextSpan(
                   text: certificatePoliciesIsCritical,
-                  style: TextStyle(fontSize: 10.0, color: Colors.black)
+                  style: TextStyle(fontSize: 12.0, color: Colors.black)
               )
             ]
         ),
@@ -831,11 +826,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                 children: [
                   TextSpan(
                       text: "ID policy num. ${i + 1} ",
-                      style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                      style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                   ),
                   TextSpan(
                       text: (oid != null) ? "${oid.name()} ( ${oid.toValue()} )" : "( ${certificatePolicies[i]} )",
-                      style: TextStyle(fontSize: 10.0, color: Colors.black)
+                      style: TextStyle(fontSize: 12.0, color: Colors.black)
                   )
                 ]
             ),
@@ -868,11 +863,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
             children: [
               TextSpan(
                   text: "Critical ",
-                  style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                  style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
               ),
               TextSpan(
                   text: cRLDistributionPointsIsCritical,
-                  style: TextStyle(fontSize: 10.0, color: Colors.black)
+                  style: TextStyle(fontSize: 12.0, color: Colors.black)
               )
             ]
         ),
@@ -887,11 +882,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                 children: [
                   TextSpan(
                       text: "URI ",
-                      style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                      style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                   ),
                   TextSpan(
                       text: cRLDistributionPoints[i],
-                      style: TextStyle(fontSize: 10.0, color: Colors.blue),
+                      style: TextStyle(fontSize: 12.0, color: Colors.blue),
                       recognizer: TapGestureRecognizer()..onTap = () async {
                         final taskId = await FlutterDownloader.enqueue(
                           url: cRLDistributionPoints[i],
@@ -932,11 +927,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
             children: [
               TextSpan(
                   text: "Critical ",
-                  style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                  style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
               ),
               TextSpan(
                   text: authorityInfoAccessIsCritical,
-                  style: TextStyle(fontSize: 10.0, color: Colors.black)
+                  style: TextStyle(fontSize: 12.0, color: Colors.black)
               )
             ]
         ),
@@ -956,11 +951,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                 children: [
                   TextSpan(
                       text: "Method #${i + 1} ",
-                      style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                      style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                   ),
                   TextSpan(
                     text: oid != null ? "${oid.name()} ( ${oid.toValue()} )" : key,
-                    style: TextStyle(fontSize: 10.0, color: Colors.black),
+                    style: TextStyle(fontSize: 12.0, color: Colors.black),
                   )
                 ]
             ),
@@ -970,11 +965,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                 children: [
                   TextSpan(
                       text: "URI ",
-                      style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                      style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                   ),
                   TextSpan(
                       text: value,
-                      style: TextStyle(fontSize: 10.0, color: Colors.blue),
+                      style: TextStyle(fontSize: 12.0, color: Colors.blue),
                       recognizer: TapGestureRecognizer()..onTap = () async {
                         final taskId = await FlutterDownloader.enqueue(
                           url: value,
@@ -1016,11 +1011,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
               children: [
                 TextSpan(
                     text: "Critical ",
-                    style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                 ),
                 TextSpan(
                     text: subjectAlternativeNamesIsCritical,
-                    style: TextStyle(fontSize: 10.0, color: Colors.black)
+                    style: TextStyle(fontSize: 12.0, color: Colors.black)
                 )
               ]
           ),
@@ -1034,11 +1029,11 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                 children: [
                   TextSpan(
                       text: "DNS Name ",
-                      style: TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold, color: Colors.black)
+                      style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.black)
                   ),
                   TextSpan(
                       text: subjectAlternativeName,
-                      style: TextStyle(fontSize: 10.0, color: Colors.black)
+                      style: TextStyle(fontSize: 12.0, color: Colors.black)
                   )
                 ]
             ),

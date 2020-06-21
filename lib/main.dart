@@ -33,12 +33,12 @@ void main() async {
           create: (BuildContext context) => BrowserModel(null),
         ),
       ],
-      child: MyApp(),
+      child: FlutterBrowserApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
+class FlutterBrowserApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
