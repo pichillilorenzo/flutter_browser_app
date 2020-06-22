@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -57,9 +56,14 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
       if (state == AppLifecycleState.paused) {
         pause();
       } else {
+        if (Platform.isAndroid) {
+          _webViewController?.android?.resume();
+        }
         var currentWebViewModel = Provider.of<WebViewModel>(context, listen: false);
         if (widget.webViewModel.tabIndex == currentWebViewModel.tabIndex) {
-          resume();
+          resumeTimers();
+        } else {
+          pauseTimers();
         }
       }
     }
@@ -148,6 +152,10 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           }
         },
         onLoadStop: (controller, url) async {
+          widget.webViewModel.url = url;
+          widget.webViewModel.favicon = null;
+          widget.webViewModel.loaded = true;
+
           var sslCertificateFuture = _webViewController?.getCertificate();
           var titleFuture = _webViewController?.getTitle();
           var faviconsFuture = _webViewController?.getFavicons();
@@ -157,10 +165,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
             widget.webViewModel.isSecure = false;
           }
 
-          widget.webViewModel.url = url;
           widget.webViewModel.title = await titleFuture;
-          widget.webViewModel.favicon = null;
-          widget.webViewModel.loaded = true;
 
           List<Favicon> favicons = await faviconsFuture;
           if (favicons != null && favicons.isNotEmpty) {
@@ -192,7 +197,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           }
         },
         onUpdateVisitedHistory: (controller, url, androidIsReload) async {
-          widget.webViewModel.url = url;
+          widget.webViewModel.url = await _webViewController?.getUrl();
           widget.webViewModel.title = await _webViewController?.getTitle();
 
           if (isCurrentTab(currentWebViewModel)) {
@@ -203,7 +208,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           if (LongPressAlertDialog.HIT_TEST_RESULT_SUPPORTED
               .contains(hitTestResult.type)) {
 
-            var requestFocusNodeHrefResult = await controller.requestFocusNodeHref();
+            var requestFocusNodeHrefResult = await _webViewController?.requestFocusNodeHref();
 
             showDialog(
               context: context,
@@ -289,10 +294,10 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
             return;
           }
 
-          await controller.stopLoading();
-          await controller.loadUrl(url: "about:blank");
+          await _webViewController?.stopLoading();
+          await _webViewController?.loadUrl(url: "about:blank");
 
-          controller.loadData(data: """
+          _webViewController?.loadData(data: """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -300,7 +305,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <style>
-    ${await controller.getTRexRunnerCss()}
+    ${await _webViewController?.getTRexRunnerCss()}
     </style>
     <style>
     .interstitial-wrapper {
@@ -314,7 +319,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     </style>
 </head>
 <body>
-    ${await controller.getTRexRunnerHtml()}
+    ${await _webViewController?.getTRexRunnerHtml()}
     <div class="interstitial-wrapper">
       <h1>Website not available</h1>
       <p>Could not load web pages at <strong>$url</strong> because:</p>
@@ -342,7 +347,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
   }
 
   void onShowTab() {
-    resumeTimers();
+    resume();
   }
 
   void onHideTab() {
