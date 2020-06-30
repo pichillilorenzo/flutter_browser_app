@@ -10,7 +10,7 @@ class Util {
         url.startsWith("chrome://") ||
         url.startsWith("data:") ||
         url.startsWith("javascript:") ||
-        url == "about:blank") ?? false;
+        url.startsWith("about:")) ?? false;
   }
 
 }

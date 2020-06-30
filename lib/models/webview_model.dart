@@ -20,6 +20,7 @@ class WebViewModel extends ChangeNotifier {
   List<String> _javaScriptConsoleHistory;
   List<LoadedResource> _loadedResources;
   bool _isSecure;
+  int windowId;
   InAppWebViewGroupOptions options;
   InAppWebViewController webViewController;
 
@@ -36,6 +37,7 @@ class WebViewModel extends ChangeNotifier {
     javaScriptConsoleHistory,
     loadedResources,
     isSecure = false,
+    this.windowId,
     this.options,
     this.webViewController,
   }) {

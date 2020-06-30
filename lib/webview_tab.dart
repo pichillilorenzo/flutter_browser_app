@@ -57,30 +57,31 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         pause();
       } else {
         if (Platform.isAndroid) {
-          _webViewController?.android?.resume();
-        }
-        var currentWebViewModel = Provider.of<WebViewModel>(context, listen: false);
-        if (widget.webViewModel.tabIndex == currentWebViewModel.tabIndex) {
-          resumeTimers();
-        } else {
-          pauseTimers();
+          resume();
+        } else if (Platform.isIOS) {
+          var currentWebViewModel = Provider.of<WebViewModel>(context, listen: false);
+          if (widget.webViewModel.tabIndex == currentWebViewModel.tabIndex) {
+            resumeTimers();
+          } else {
+            pauseTimers();
+          }
         }
       }
     }
   }
 
   void pause() {
-    pauseTimers();
     if (Platform.isAndroid) {
       _webViewController?.android?.pause();
     }
+    pauseTimers();
   }
 
   void resume() {
-    resumeTimers();
     if (Platform.isAndroid) {
       _webViewController?.android?.resume();
     }
+    resumeTimers();
   }
 
   void pauseTimers() {
@@ -102,7 +103,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildWebView() {
+  InAppWebView _buildWebView() {
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
     var settings = browserModel.getSettings();
     var currentWebViewModel = Provider.of<WebViewModel>(context, listen: true);
@@ -111,8 +112,11 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     initialOptions.crossPlatform.debuggingEnabled = settings.debuggingEnabled;
     initialOptions.crossPlatform.useOnDownloadStart = true;
     initialOptions.crossPlatform.useOnLoadResource = true;
+    initialOptions.crossPlatform.javaScriptCanOpenWindowsAutomatically = true;
 
     initialOptions.android.safeBrowsingEnabled = true;
+    initialOptions.android.disableDefaultErrorPage = true;
+    initialOptions.android.supportMultipleWindows = true;
 
     initialOptions.ios.allowsLinkPreview = false;
     initialOptions.ios.isFraudulentWebsiteWarningEnabled = true;
@@ -120,6 +124,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     return InAppWebView(
         initialUrl: widget.webViewModel.url,
         initialOptions: initialOptions,
+        windowId: widget.webViewModel.windowId,
         onWebViewCreated: (controller) async {
           Future.delayed(const Duration(milliseconds: 150), () {
             setState(() {
@@ -197,7 +202,8 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           }
         },
         onUpdateVisitedHistory: (controller, url, androidIsReload) async {
-          widget.webViewModel.url = await _webViewController?.getUrl();
+          var currentUrl = await _webViewController?.getUrl();
+          widget.webViewModel.url = currentUrl.startsWith("data:") ? url : currentUrl;
           widget.webViewModel.title = await _webViewController?.getTitle();
 
           if (isCurrentTab(currentWebViewModel)) {
@@ -294,8 +300,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
             return;
           }
 
-          await _webViewController?.stopLoading();
-          await _webViewController?.loadUrl(url: "about:blank");
+          url = url ?? widget.webViewModel.url ?? 'about:blank';
 
           _webViewController?.loadData(data: """
 <!DOCTYPE html>
@@ -326,7 +331,39 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
       <p>$message</p>
     </div>
 </body>
-            """, baseUrl: url);
+    """, baseUrl: url, androidHistoryUrl: url);
+
+          widget.webViewModel.url = url;
+          widget.webViewModel.isSecure = false;
+
+          if (isCurrentTab(currentWebViewModel)) {
+            currentWebViewModel.updateWithValue(widget.webViewModel);
+          }
+        },
+        onTitleChanged: (controller, title) async {
+          widget.webViewModel.title = title;
+
+          if (isCurrentTab(currentWebViewModel)) {
+            currentWebViewModel.updateWithValue(widget.webViewModel);
+          }
+        },
+        onCreateWindow: (controller, createWindowRequest) async {
+          var webViewTab = WebViewTab(
+            key: GlobalKey(),
+            webViewModel: WebViewModel(
+              url: "about:blank",
+              windowId: createWindowRequest.windowId
+            ),
+          );
+
+          browserModel.addTab(
+              webViewTab
+          );
+
+          return true;
+        },
+        onCloseWindow: (controller) {
+          browserModel.closeTab(widget.webViewModel.tabIndex);
         },
         androidOnPermissionRequest: (InAppWebViewController controller, String origin, List<String> resources) async {
           return PermissionRequestResponse(resources: resources, action: PermissionRequestResponseAction.GRANT);
@@ -344,14 +381,6 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
   bool isCurrentTab(WebViewModel currentWebViewModel) {
     return currentWebViewModel.tabIndex == widget.webViewModel.tabIndex;
-  }
-
-  void onShowTab() {
-    resume();
-  }
-
-  void onHideTab() {
-    pauseTimers();
   }
 
   Future<HttpAuthResponseAction> createHttpAuthDialog(HttpAuthChallenge challenge) async {
@@ -403,5 +432,13 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     );
 
     return action;
+  }
+
+  void onShowTab() {
+
+  }
+
+  void onHideTab() {
+
   }
 }

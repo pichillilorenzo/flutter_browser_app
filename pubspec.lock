@@ -135,10 +135,10 @@ packages:
   flutter_inappwebview:
     dependency: "direct main"
     description:
-      name: flutter_inappwebview
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.4.0+1"
+      path: "/Users/lorenzopichilli/Desktop/flutter_inappwebview"
+      relative: false
+    source: path
+    version: "4.0.0"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:
