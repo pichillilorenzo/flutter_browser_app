@@ -8,6 +8,7 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'javascript_console_result.dart';
 import 'long_press_alert_dialog.dart';
@@ -27,6 +28,7 @@ class WebViewTab extends StatefulWidget {
 class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
   InAppWebViewController _webViewController;
   double _opacityLevel = 0.0;
+  bool _isWindowClosed = false;
 
   TextEditingController _httpAuthUsernameController = TextEditingController();
   TextEditingController _httpAuthPasswordController = TextEditingController();
@@ -112,6 +114,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     initialOptions.crossPlatform.debuggingEnabled = settings.debuggingEnabled;
     initialOptions.crossPlatform.useOnDownloadStart = true;
     initialOptions.crossPlatform.useOnLoadResource = true;
+    initialOptions.crossPlatform.useShouldOverrideUrlLoading = true;
     initialOptions.crossPlatform.javaScriptCanOpenWindowsAutomatically = true;
 
     initialOptions.android.safeBrowsingEnabled = true;
@@ -268,6 +271,25 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
             currentWebViewModel.updateWithValue(widget.webViewModel);
           }
         },
+        shouldOverrideUrlLoading: (controller, shouldOverrideUrlLoadingRequest) async {
+          var url = shouldOverrideUrlLoadingRequest.url;
+          var uri = Uri.parse(url);
+
+          if (!["http", "https", "file",
+            "chrome", "data", "javascript",
+            "about"].contains(uri.scheme)) {
+            if (await canLaunch(url)) {
+              // Launch the App
+              await launch(
+                url,
+              );
+              // and cancel the request
+              return ShouldOverrideUrlLoadingAction.CANCEL;
+            }
+          }
+
+          return ShouldOverrideUrlLoadingAction.ALLOW;
+        },
         onDownloadStart: (controller, url) async {
           var uri = Uri.parse(url);
           String path = uri.path;
@@ -363,6 +385,10 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           return true;
         },
         onCloseWindow: (controller) {
+          if (_isWindowClosed) {
+            return;
+          }
+          _isWindowClosed = true;
           browserModel.closeTab(widget.webViewModel.tabIndex);
         },
         androidOnPermissionRequest: (InAppWebViewController controller, String origin, List<String> resources) async {
