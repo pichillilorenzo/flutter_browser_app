@@ -118,8 +118,9 @@ class _TabViewerState extends State<TabViewer> with SingleTickerProviderStateMix
     super.didUpdateWidget(oldWidget);
     var diffLength = oldWidget.children.length - widget.children.length;
     if (diffLength > 0) {
+      _timer?.cancel();
       positions.removeRange(positions.length - diffLength - 1, positions.length - 1);
-      focusedIndex--;
+      focusedIndex = focusedIndex - 1 < 0 ? 0 : focusedIndex - 1;
       if (positions.length == 1) {
         positions[0] = 0.0;
       }

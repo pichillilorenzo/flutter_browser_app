@@ -116,6 +116,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     initialOptions.crossPlatform.useOnLoadResource = true;
     initialOptions.crossPlatform.useShouldOverrideUrlLoading = true;
     initialOptions.crossPlatform.javaScriptCanOpenWindowsAutomatically = true;
+    initialOptions.crossPlatform.userAgent = "Mozilla/5.0 (Linux; Android 9; LG-H870 Build/PKQ1.190522.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36";
 
     initialOptions.android.safeBrowsingEnabled = true;
     initialOptions.android.disableDefaultErrorPage = true;
