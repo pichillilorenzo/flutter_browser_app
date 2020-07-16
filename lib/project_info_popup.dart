@@ -86,32 +86,19 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
         },
       ),
       SizedBox(height: 20.0,),
-      RichText(
-        text: TextSpan(
-            children: [
-              TextSpan(
-                text: "Support these projects with a donation",
-                style: TextStyle(color: Colors.black),
-
-              ),
-            ]
-        ),
-      ),
-      FlatButton.icon(
-        icon: Icon(FlutterIcons.paypal_ent, size: 30.0,),
-        label: RichText(
+      Container(
+        width: 250.0,
+        child: RichText(
+          textAlign: TextAlign.center,
           text: TextSpan(
               children: [
                 TextSpan(
-                    text: "paypal.me/LorenzoPichilli",
-                    style: TextStyle(color: Colors.blue)
-                )
+                  text: "Also, if you want, you can support these projects with a donation. Thanks!",
+                  style: TextStyle(color: Colors.black),
+                ),
               ]
           ),
         ),
-        onPressed: () {
-          InAppBrowser.openWithSystemBrowser(url: "https://www.paypal.me/LorenzoPichilli");
-        },
       ),
     ];
 
