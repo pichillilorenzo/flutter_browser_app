@@ -7,7 +7,7 @@ A Full-Featured Mobile Browser App (such as the Google Chrome mobile browser) cr
 It is available on the **Google Play Store** at [https://play.google.com/store/apps/details?id=com.pichillilorenzo.flutter_browser](https://play.google.com/store/apps/details?id=com.pichillilorenzo.flutter_browser)
 
 ## Introduction
-Article: [Creating a Full-Featured Browser using WebViews in Flutter]().
+Article: [Creating a Full-Featured Browser using WebViews in Flutter](https://medium.com/flutter-community/creating-a-full-featured-browser-using-webviews-in-flutter-9c8f2923c574?source=friends_link&sk=55fc8267f351082aa9e73ced546f6bcb).
 
 Check out also the article that introduces the [flutter_inappwebview](https://github.com/pichillilorenzo/flutter_inappwebview) plugin here: [InAppWebView: The Real Power of WebViews in Flutter](https://medium.com/flutter-community/inappwebview-the-real-power-of-webviews-in-flutter-c6d52374209d?source=friends_link&sk=cb74487219bcd85e610a670ee0b447d0).
 
