@@ -3,9 +3,9 @@ import 'package:flutter_browser/models/browser_model.dart';
 import 'package:provider/provider.dart';
 
 class FindOnPageAppBar extends StatefulWidget {
-  final void Function() hideFindOnPage;
+  final void Function()? hideFindOnPage;
 
-  FindOnPageAppBar({Key key, this.hideFindOnPage}): super(key: key);
+  FindOnPageAppBar({Key? key, this.hideFindOnPage}): super(key: key);
 
   @override
   _FindOnPageAppBarState createState() => _FindOnPageAppBarState();
@@ -75,7 +75,9 @@ class _FindOnPageAppBarState extends State<FindOnPageAppBar> {
             _webViewController?.clearMatches();
             _finOnPageController.text = "";
 
-            widget?.hideFindOnPage();
+            if (widget.hideFindOnPage != null) {
+              widget.hideFindOnPage!();
+            }
           },
         ),
       ],

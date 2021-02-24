@@ -10,9 +10,9 @@ import '../custom_popup_dialog.dart';
 class UrlInfoPopup extends StatefulWidget {
   final CustomPopupDialogPageRoute route;
   final Duration transitionDuration;
-  final Function() onWebViewTabSettingsClicked;
+  final Function()? onWebViewTabSettingsClicked;
 
-  UrlInfoPopup({Key key, this.route, this.transitionDuration, this.onWebViewTabSettingsClicked}) : super(key: key);
+  UrlInfoPopup({Key? key, required this.route, required this.transitionDuration, this.onWebViewTabSettingsClicked}) : super(key: key);
 
   @override
   _UrlInfoPopupState createState() => _UrlInfoPopupState();
@@ -35,7 +35,7 @@ class _UrlInfoPopupState extends State<UrlInfoPopup> {
       text1 = "Your connection is protected";
       text2 = "Your sensitive data (e.g. passwords or credit card numbers) remains private when it is sent to this site.";
     }
-    var uri = Uri.parse(webViewModel.url);
+    var url = webViewModel.url;
 
     return SafeArea(
         child: Column(
@@ -60,22 +60,21 @@ class _UrlInfoPopupState extends State<UrlInfoPopup> {
                         text: TextSpan(
                           children: <TextSpan>[
                             TextSpan(
-                                text: uri.scheme,
+                                text: url?.scheme,
                                 style: defaultTextSpanStyle.copyWith(
                                   color:
                                   webViewModel.isSecure ? Colors.green : Colors.black54,
                                   fontWeight: FontWeight.bold
                                 )),
-                            TextSpan(text: webViewModel.url.trim() == "about:blank" ? ':' : '://', style: defaultTextSpanStyle),
+                            TextSpan(text: webViewModel.url?.toString() == "about:blank" ? ':' : '://', style: defaultTextSpanStyle),
                             TextSpan(
-                                text: uri.host,
+                                text: url?.host,
                                 style: defaultTextSpanStyle.copyWith(
                                     color: Colors.black)),
                             TextSpan(
-                                text: uri.path, style: defaultTextSpanStyle),
+                                text: url?.path, style: defaultTextSpanStyle),
                             TextSpan(
-                                text:
-                                uri.query.isNotEmpty ? "?" + uri.query : "",
+                                text: url?.query,
                                 style: defaultTextSpanStyle),
                           ],
                         ),
@@ -126,12 +125,9 @@ class _UrlInfoPopupState extends State<UrlInfoPopup> {
             ),
             Align(
               alignment: Alignment.centerRight,
-              child: FlatButton(
+              child: ElevatedButton(
                 child: Text(
                   "WebView Tab Settings",
-                  style: TextStyle(
-                    color: Colors.blue,
-                  ),
                 ),
                 onPressed: () async {
                   Navigator.maybePop(context);
@@ -139,7 +135,9 @@ class _UrlInfoPopupState extends State<UrlInfoPopup> {
                   await widget.route.popped;
 
                   Future.delayed(widget.transitionDuration, () {
-                    widget.onWebViewTabSettingsClicked();
+                    if (widget.onWebViewTabSettingsClicked != null) {
+                      widget.onWebViewTabSettingsClicked!();
+                    }
                   });
                 },
               ),

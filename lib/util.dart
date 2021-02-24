@@ -1,16 +1,15 @@
 class Util {
 
-  static bool urlIsSecure(String url) {
-    return (url.startsWith("https://") ||
-        Util.isLocalizedContent(url)) ?? false;
+  static bool urlIsSecure(Uri url) {
+    return (url.scheme == "https") || Util.isLocalizedContent(url);
   }
 
-  static bool isLocalizedContent(String url) {
-    return (url.startsWith("file://") ||
-        url.startsWith("chrome://") ||
-        url.startsWith("data:") ||
-        url.startsWith("javascript:") ||
-        url.startsWith("about:")) ?? false;
+  static bool isLocalizedContent(Uri url) {
+    return (url.scheme == "file" ||
+        url.scheme == "chrome" ||
+        url.scheme == "data" ||
+        url.scheme == "javascript" ||
+        url.scheme == "about");
   }
 
 }

@@ -1,10 +1,10 @@
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 class WebArchiveModel {
-  String url;
-  String title;
-  Favicon favicon;
-  String path;
+  Uri? url;
+  String? title;
+  Favicon? favicon;
+  String? path;
   DateTime timestamp;
 
   WebArchiveModel({
@@ -12,17 +12,17 @@ class WebArchiveModel {
     this.title,
     this.favicon,
     this.path,
-    this.timestamp
+    required this.timestamp
   });
 
-  static WebArchiveModel fromMap(Map<String, dynamic> map) {
+  static WebArchiveModel? fromMap(Map<String, dynamic>? map) {
     return map != null ? WebArchiveModel(
-        url: map["url"],
+        url: map["url"] != null ? Uri.parse(map["url"]) : null,
         title: map["title"],
         path: map["path"],
         timestamp: DateTime.fromMicrosecondsSinceEpoch(map["timestamp"]),
         favicon: map["favicon"] != null ? Favicon(
-          url: map["favicon"]["url"],
+          url: Uri.parse(map["favicon"]["url"]),
           rel: map["favicon"]["rel"],
           width: map["favicon"]["width"],
           height: map["favicon"]["height"],
@@ -32,7 +32,7 @@ class WebArchiveModel {
 
   Map<String, dynamic> toMap() {
     return {
-      "url": url,
+      "url": url?.toString(),
       "title": title,
       "favicon": favicon?.toMap(),
       "path": path,

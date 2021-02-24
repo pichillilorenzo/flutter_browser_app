@@ -5,10 +5,10 @@ class JavaScriptConsoleResult extends StatefulWidget {
   final String data;
   final Color textColor;
   final Color backgroundColor;
-  final IconData iconData;
-  final Color iconColor;
+  final IconData? iconData;
+  final Color? iconColor;
 
-  JavaScriptConsoleResult({Key key, this.data = "",
+  JavaScriptConsoleResult({Key? key, this.data = "",
     this.textColor = Colors.black,
     this.backgroundColor = Colors.transparent,
     this.iconData,

@@ -8,35 +8,35 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 class WebViewModel extends ChangeNotifier {
 
-  int _tabIndex;
-  String _url;
-  String _title;
-  Favicon _favicon;
-  double _progress;
-  bool _loaded;
-  bool _isDesktopMode;
-  bool _isIncognitoMode;
-  List<Widget> _javaScriptConsoleResults;
-  List<String> _javaScriptConsoleHistory;
-  List<LoadedResource> _loadedResources;
-  bool _isSecure;
-  int windowId;
-  InAppWebViewGroupOptions options;
-  InAppWebViewController webViewController;
+  int? _tabIndex;
+  Uri? _url;
+  String? _title;
+  Favicon? _favicon;
+  late double _progress;
+  late bool _loaded;
+  late bool _isDesktopMode;
+  late bool _isIncognitoMode;
+  late List<Widget> _javaScriptConsoleResults;
+  late List<String> _javaScriptConsoleHistory;
+  late List<LoadedResource> _loadedResources;
+  late bool _isSecure;
+  int? windowId;
+  InAppWebViewGroupOptions? options;
+  InAppWebViewController? webViewController;
 
   WebViewModel({
-    tabIndex,
-    url,
-    title,
-    favicon,
-    progress = 0.0,
-    loaded = false,
-    isDesktopMode = false,
-    isIncognitoMode = false,
-    javaScriptConsoleResults,
-    javaScriptConsoleHistory,
-    loadedResources,
-    isSecure = false,
+    int? tabIndex,
+    Uri? url,
+    String? title,
+    Favicon? favicon,
+    double progress = 0.0,
+    bool loaded = false,
+    bool isDesktopMode = false,
+    bool isIncognitoMode = false,
+    List<Widget>? javaScriptConsoleResults,
+    List<String>? javaScriptConsoleHistory,
+    List<LoadedResource>? loadedResources,
+    bool isSecure = false,
     this.windowId,
     this.options,
     this.webViewController,
@@ -44,51 +44,47 @@ class WebViewModel extends ChangeNotifier {
     _tabIndex = tabIndex;
     _url = url;
     _favicon = favicon;
-    _progress = progress ?? 0.0;
-    _loaded = loaded ?? false;
-    _isDesktopMode = isDesktopMode ?? false;
-    _isIncognitoMode = isIncognitoMode ?? false;
-    _javaScriptConsoleResults = javaScriptConsoleResults ?? [];
-    _javaScriptConsoleHistory = javaScriptConsoleHistory ?? [];
-    _loadedResources = loadedResources ?? [];
-    _isSecure = isSecure ?? false;
-    options = options ?? InAppWebViewGroupOptions(
-      crossPlatform: InAppWebViewOptions(),
-      android: AndroidInAppWebViewOptions(),
-      ios: IOSInAppWebViewOptions()
-    );
+    _progress = progress;
+    _loaded = loaded;
+    _isDesktopMode = isDesktopMode;
+    _isIncognitoMode = isIncognitoMode;
+    _javaScriptConsoleResults = javaScriptConsoleResults ?? <Widget>[];
+    _javaScriptConsoleHistory = javaScriptConsoleHistory ?? <String>[];
+    _loadedResources = loadedResources ?? <LoadedResource>[];
+    _isSecure = isSecure;
+    options = options ?? InAppWebViewGroupOptions();
   }
 
-  int get tabIndex => _tabIndex;
+  int? get tabIndex => _tabIndex;
 
-  set tabIndex(int value) {
+  set tabIndex(int? value) {
     if (value != _tabIndex) {
       _tabIndex = value;
       notifyListeners();
     }
   }
 
-  String get url => _url;
+  Uri? get url => _url;
 
-  set url(String value) {
+  set url(Uri? value) {
     if (value != _url) {
       _url = value;
       notifyListeners();
     }
   }
 
-  String get title => _title;
+  String? get title => _title;
 
-  set title(String value) {
+  set title(String? value) {
     if (value != _title) {
       _title = value;
       notifyListeners();
     }
   }
 
-  Favicon get favicon => _favicon;
+  Favicon? get favicon => _favicon;
 
-  set favicon(Favicon value) {
+  set favicon(Favicon? value) {
     if (value != _favicon) {
       _favicon = value;
       notifyListeners();
@@ -202,13 +198,13 @@ class WebViewModel extends ChangeNotifier {
     webViewController = webViewModel.webViewController;
   }
 
-  static WebViewModel fromMap(Map<String, dynamic> map) {
+  static WebViewModel? fromMap(Map<String, dynamic>? map) {
     return map != null ? WebViewModel(
         tabIndex: map["tabIndex"],
-        url: map["url"],
+        url: map["url"] != null ? Uri.parse(map["url"]) : null,
         title: map["title"],
         favicon: map["favicon"] != null ? Favicon(
-          url: map["favicon"]["url"],
+          url: Uri.parse(map["favicon"]["url"]),
           rel: map["favicon"]["rel"],
           width: map["favicon"]["width"],
           height: map["favicon"]["height"],
@@ -225,7 +221,7 @@ class WebViewModel extends ChangeNotifier {
   Map<String, dynamic> toMap() {
     return {
       "tabIndex": _tabIndex,
-      "url": _url,
+      "url": _url?.toString(),
       "title": _title,
       "favicon": _favicon?.toMap(),
       "progress": _progress,

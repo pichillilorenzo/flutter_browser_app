@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_browser/main.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/util.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
@@ -17,7 +18,7 @@ import 'models/browser_model.dart';
 class WebViewTab extends StatefulWidget {
   final GlobalKey<WebViewTabState> key;
 
-  WebViewTab({@required this.key, @required this.webViewModel}) : super(key: key);
+  WebViewTab({required this.key, required this.webViewModel}) : super(key: key);
 
   final WebViewModel webViewModel;
 
@@ -26,7 +27,7 @@ class WebViewTab extends StatefulWidget {
 }
 
 class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
-  InAppWebViewController _webViewController;
+  InAppWebViewController? _webViewController;
   double _opacityLevel = 0.0;
   bool _isWindowClosed = false;
 
@@ -35,7 +36,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
     super.initState();
   }
 
@@ -44,10 +45,10 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     _webViewController = null;
     widget.webViewModel.webViewController = null;
 
-    _httpAuthUsernameController?.dispose();
-    _httpAuthPasswordController?.dispose();
+    _httpAuthUsernameController.dispose();
+    _httpAuthPasswordController.dispose();
 
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
 
     super.dispose();
   }
@@ -74,14 +75,14 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
   void pause() {
     if (Platform.isAndroid) {
-      _webViewController?.android?.pause();
+      _webViewController?.android.pause();
     }
     pauseTimers();
   }
 
   void resume() {
     if (Platform.isAndroid) {
-      _webViewController?.android?.resume();
+      _webViewController?.android.resume();
     }
     resumeTimers();
   }
@@ -110,8 +111,11 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     var settings = browserModel.getSettings();
     var currentWebViewModel = Provider.of<WebViewModel>(context, listen: true);
 
-    var initialOptions = widget.webViewModel.options;
-    initialOptions.crossPlatform.debuggingEnabled = settings.debuggingEnabled;
+    if (Platform.isAndroid) {
+      AndroidInAppWebViewController.setWebContentsDebuggingEnabled(settings.debuggingEnabled);
+    }
+
+    var initialOptions = widget.webViewModel.options!;
     initialOptions.crossPlatform.useOnDownloadStart = true;
     initialOptions.crossPlatform.useOnLoadResource = true;
     initialOptions.crossPlatform.useShouldOverrideUrlLoading = true;
@@ -121,12 +125,19 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     initialOptions.android.safeBrowsingEnabled = true;
     initialOptions.android.disableDefaultErrorPage = true;
     initialOptions.android.supportMultipleWindows = true;
+    initialOptions.android.useHybridComposition = true;
+    initialOptions.android.verticalScrollbarThumbColor = Color.fromRGBO(0, 0, 0, 0.5);
+    initialOptions.android.horizontalScrollbarThumbColor = Color.fromRGBO(0, 0, 0, 0.5);
 
     initialOptions.ios.allowsLinkPreview = false;
     initialOptions.ios.isFraudulentWebsiteWarningEnabled = true;
+    initialOptions.ios.disableLongPressContextMenuOnLinks = true;
+    initialOptions.ios.allowingReadAccessTo = Uri.parse('file://$WEB_ARCHIVE_DIR/');
 
     return InAppWebView(
-        initialUrl: widget.webViewModel.url,
+        initialUrlRequest: URLRequest(
+          url: widget.webViewModel.url
+        ),
         initialOptions: initialOptions,
         windowId: widget.webViewModel.windowId,
         onWebViewCreated: (controller) async {
@@ -150,7 +161,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           }
         },
         onLoadStart: (controller, url) async {
-          widget.webViewModel.isSecure = Util.urlIsSecure(url);
+          widget.webViewModel.isSecure = Util.urlIsSecure(url!);
           widget.webViewModel.url = url;
           widget.webViewModel.loaded = false;
           widget.webViewModel.setLoadedResources([]);
@@ -170,24 +181,24 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           var faviconsFuture = _webViewController?.getFavicons();
 
           var sslCertificate = await sslCertificateFuture;
-          if (sslCertificate == null && !Util.isLocalizedContent(url)) {
+          if (sslCertificate == null && !Util.isLocalizedContent(url!)) {
             widget.webViewModel.isSecure = false;
           }
 
           widget.webViewModel.title = await titleFuture;
 
-          List<Favicon> favicons = await faviconsFuture;
+          List<Favicon>? favicons = await faviconsFuture;
           if (favicons != null && favicons.isNotEmpty) {
             for (var fav in favicons) {
               if (widget.webViewModel.favicon == null) {
                 widget.webViewModel.favicon = fav;
               } else {
-                if ((widget.webViewModel.favicon.width == null &&
-                    !widget.webViewModel.favicon.url
+                if ((widget.webViewModel.favicon!.width == null &&
+                    !widget.webViewModel.favicon!.url.toString()
                         .endsWith("favicon.ico")) ||
                     (fav.width != null &&
-                        widget.webViewModel.favicon.width != null &&
-                        fav.width > widget.webViewModel.favicon.width)) {
+                        widget.webViewModel.favicon!.width != null &&
+                        fav.width! > widget.webViewModel.favicon!.width!)) {
                   widget.webViewModel.favicon = fav;
                 }
               }
@@ -207,7 +218,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         },
         onUpdateVisitedHistory: (controller, url, androidIsReload) async {
           var currentUrl = await _webViewController?.getUrl();
-          widget.webViewModel.url = currentUrl.startsWith("data:") ? url : currentUrl;
+          widget.webViewModel.url = currentUrl?.scheme == "data" ? url : currentUrl;
           widget.webViewModel.title = await _webViewController?.getTitle();
 
           if (isCurrentTab(currentWebViewModel)) {
@@ -220,23 +231,25 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
             var requestFocusNodeHrefResult = await _webViewController?.requestFocusNodeHref();
 
-            showDialog(
-              context: context,
-              builder: (context) {
-                return LongPressAlertDialog(
-                  webViewModel: widget.webViewModel,
-                  hitTestResult: hitTestResult,
-                  requestFocusNodeHrefResult: requestFocusNodeHrefResult,
-                );
-              },
-            );
+            if (requestFocusNodeHrefResult != null) {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return LongPressAlertDialog(
+                    webViewModel: widget.webViewModel,
+                    hitTestResult: hitTestResult,
+                    requestFocusNodeHrefResult: requestFocusNodeHrefResult,
+                  );
+                },
+              );
+            }
           }
         },
         onConsoleMessage: (controller, consoleMessage) {
           Color consoleTextColor = Colors.black;
           Color consoleBackgroundColor = Colors.transparent;
-          IconData consoleIconData;
-          Color consoleIconColor;
+          IconData? consoleIconData;
+          Color? consoleIconColor;
           if (consoleMessage.messageLevel == ConsoleMessageLevel.ERROR) {
             consoleTextColor = Colors.red;
             consoleIconData = Icons.report_problem;
@@ -272,41 +285,40 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
             currentWebViewModel.updateWithValue(widget.webViewModel);
           }
         },
-        shouldOverrideUrlLoading: (controller, shouldOverrideUrlLoadingRequest) async {
-          var url = shouldOverrideUrlLoadingRequest.url;
-          var uri = Uri.parse(url);
+        shouldOverrideUrlLoading: (controller, navigationAction) async {
+          var url = navigationAction.request.url;
 
-          if (!["http", "https", "file",
+          if (url != null && !["http", "https", "file",
             "chrome", "data", "javascript",
-            "about"].contains(uri.scheme)) {
-            if (await canLaunch(url)) {
+            "about"].contains(url.scheme)) {
+            if (await canLaunch(url.toString())) {
               // Launch the App
               await launch(
-                url,
+                url.toString(),
               );
               // and cancel the request
-              return ShouldOverrideUrlLoadingAction.CANCEL;
+              return NavigationActionPolicy.CANCEL;
             }
           }
 
-          return ShouldOverrideUrlLoadingAction.ALLOW;
+          return NavigationActionPolicy.ALLOW;
         },
         onDownloadStart: (controller, url) async {
-          var uri = Uri.parse(url);
-          String path = uri.path;
+          String path = url.path;
           String fileName = path.substring(path.lastIndexOf('/') + 1);
 
           final taskId = await FlutterDownloader.enqueue(
-            url: url,
+            url: url.toString(),
             fileName: fileName,
-            savedDir: (await getExternalStorageDirectory()).path,
+            savedDir: (await getTemporaryDirectory()).path,
             showNotification: true,
             openFileFromNotification: true,
           );
         },
         onReceivedServerTrustAuthRequest: (controller, challenge) async {
-          if (challenge.iosError != null || challenge.androidError != null) {
-            if (Platform.isIOS && challenge.iosError == IOSSslError.UNSPECIFIED) {
+          var sslError = challenge.protectionSpace.sslError;
+          if (sslError != null && (sslError.iosError != null || sslError.androidError != null)) {
+            if (Platform.isIOS && sslError.iosError == IOSSslError.UNSPECIFIED) {
               return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
             }
             widget.webViewModel.isSecure = false;
@@ -323,7 +335,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
             return;
           }
 
-          url = url ?? widget.webViewModel.url ?? 'about:blank';
+          var errorUrl = url ?? widget.webViewModel.url ?? Uri.parse('about:blank');
 
           _webViewController?.loadData(data: """
 <!DOCTYPE html>
@@ -350,11 +362,11 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     ${await _webViewController?.getTRexRunnerHtml()}
     <div class="interstitial-wrapper">
       <h1>Website not available</h1>
-      <p>Could not load web pages at <strong>$url</strong> because:</p>
+      <p>Could not load web pages at <strong>$errorUrl</strong> because:</p>
       <p>$message</p>
     </div>
 </body>
-    """, baseUrl: url, androidHistoryUrl: url);
+    """, baseUrl: errorUrl, androidHistoryUrl: errorUrl);
 
           widget.webViewModel.url = url;
           widget.webViewModel.isSecure = false;
@@ -374,7 +386,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           var webViewTab = WebViewTab(
             key: GlobalKey(),
             webViewModel: WebViewModel(
-              url: "about:blank",
+              url: Uri.parse("about:blank"),
               windowId: createWindowRequest.windowId
             ),
           );
@@ -390,12 +402,14 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
             return;
           }
           _isWindowClosed = true;
-          browserModel.closeTab(widget.webViewModel.tabIndex);
+          if (widget.webViewModel.tabIndex != null) {
+            browserModel.closeTab(widget.webViewModel.tabIndex!);
+          }
         },
         androidOnPermissionRequest: (InAppWebViewController controller, String origin, List<String> resources) async {
           return PermissionRequestResponse(resources: resources, action: PermissionRequestResponseAction.GRANT);
         },
-        onReceivedHttpAuthRequest: (InAppWebViewController controller, HttpAuthChallenge challenge) async {
+        onReceivedHttpAuthRequest: (InAppWebViewController controller, URLAuthenticationChallenge challenge) async {
           var action = await createHttpAuthDialog(challenge);
           return HttpAuthResponse(
               username: _httpAuthUsernameController.text.trim(),
@@ -410,7 +424,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     return currentWebViewModel.tabIndex == widget.webViewModel.tabIndex;
   }
 
-  Future<HttpAuthResponseAction> createHttpAuthDialog(HttpAuthChallenge challenge) async {
+  Future<HttpAuthResponseAction> createHttpAuthDialog(URLAuthenticationChallenge challenge) async {
     HttpAuthResponseAction action = HttpAuthResponseAction.CANCEL;
 
     await showDialog(
@@ -439,14 +453,14 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
             ],
           ),
           actions: <Widget>[
-            FlatButton(
+            ElevatedButton(
               child: Text("Cancel"),
               onPressed: () {
                 action = HttpAuthResponseAction.CANCEL;
                 Navigator.of(context).pop();
               },
             ),
-            FlatButton(
+            ElevatedButton(
               child: Text("Ok"),
               onPressed: () {
                 action = HttpAuthResponseAction.PROCEED;

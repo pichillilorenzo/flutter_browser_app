@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 class SearchEngineModel {
   final String name;
   final String assetIcon;
@@ -7,13 +5,13 @@ class SearchEngineModel {
   final String searchUrl;
 
   const SearchEngineModel({
-    @required this.name,
-    @required this.url,
-    @required this.searchUrl,
-    @required this.assetIcon
+    required this.name,
+    required this.url,
+    required this.searchUrl,
+    required this.assetIcon
   });
 
-  static SearchEngineModel fromMap(Map<String, dynamic> map) {
+  static SearchEngineModel? fromMap(Map<String, dynamic>? map) {
     return map != null ? SearchEngineModel(
         name: map["name"],
         assetIcon: map["assetIcon"],

@@ -1,10 +1,13 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_browser/custom_image.dart';
 import 'package:flutter_browser/tab_viewer.dart';
 import 'package:flutter_browser/app_bar/browser_app_bar.dart';
 import 'package:flutter_browser/models/webview_model.dart';
+import 'package:flutter_browser/webview_tab.dart';
 import 'package:provider/provider.dart';
 
 import 'app_bar/tab_viewer_app_bar.dart';
@@ -12,7 +15,7 @@ import 'empty_tab.dart';
 import 'models/browser_model.dart';
 
 class Browser extends StatefulWidget {
-  Browser({Key key}) : super(key: key);
+  Browser({Key? key}) : super(key: key);
 
   @override
   _BrowserState createState() => _BrowserState();
@@ -20,11 +23,25 @@ class Browser extends StatefulWidget {
 
 class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
 
+  static const platform = const MethodChannel('com.pichillilorenzo.flutter_browser.intent_data');
+
   var _isRestored = false;
 
   @override
   void initState() {
     super.initState();
+    getIntentData();
+  }
+
+  getIntentData() async {
+    String? url = await platform.invokeMethod("getIntentData");
+    if (url != null) {
+      var browserModel = Provider.of<BrowserModel>(context, listen: false);
+      browserModel.addTab(WebViewTab(
+        key: GlobalKey(),
+        webViewModel: WebViewModel(url: Uri.parse(url)),
+      ));
+    }
   }
 
   @override
@@ -59,7 +76,7 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
     browserModel.addListener(() {
       browserModel.save();
     });
-    currentWebViewModel?.addListener(() {
+    currentWebViewModel.addListener(() {
       browserModel.save();
     });
 
@@ -84,9 +101,9 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
             }
           }
 
-          if (webViewModel != null) {
+          if (webViewModel != null && webViewModel.tabIndex != null) {
             setState(() {
-              browserModel.closeTab(webViewModel.tabIndex);
+              browserModel.closeTab(webViewModel.tabIndex!);
             });
             FocusScope.of(context).unfocus();
             return false;
@@ -165,12 +182,12 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
             body: TabViewer(
               currentIndex: browserModel.getCurrentTabIndex(),
               children: browserModel.webViewTabs.map((webViewTab) {
-                var uri = Uri.parse(webViewTab.webViewModel.url);
+                var url = webViewTab.webViewModel.url;
                 var faviconUrl = webViewTab.webViewModel.favicon != null
-                    ? webViewTab.webViewModel.favicon.url
-                    : (["http", "https"].contains(uri.scheme)
-                    ? uri.origin + "/favicon.ico"
-                    : "");
+                    ? webViewTab.webViewModel.favicon!.url
+                    : (url != null && ["http", "https"].contains(url.scheme)
+                    ? Uri.parse(url.origin + "/favicon.ico")
+                    : null);
                 var isCurrentTab = browserModel.getCurrentTabIndex() ==
                     webViewTab.webViewModel.tabIndex;
 
@@ -188,19 +205,20 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
                           leading: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
-                              CachedNetworkImage(
-                                placeholder: (context, url) =>
-                                url == "about:blank"
-                                    ? Container()
-                                    : CircularProgressIndicator(),
-                                imageUrl: faviconUrl,
-                                height: 30,
-                              )
+                              // CachedNetworkImage(
+                              //   placeholder: (context, url) =>
+                              //   url == "about:blank"
+                              //       ? Container()
+                              //       : CircularProgressIndicator(),
+                              //   imageUrl: faviconUrl,
+                              //   height: 30,
+                              // )
+                              CustomImage(url: faviconUrl, maxWidth: 30.0, height: 30.0)
                             ],
                           ),
                           title: Text(
                               webViewTab.webViewModel.title ??
-                                  webViewTab.webViewModel.url,
+                                  webViewTab.webViewModel.url?.toString() ?? "",
                               maxLines: 2,
                               style: TextStyle(
                                 color:
@@ -210,7 +228,7 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
                                     : Colors.black,
                               ),
                               overflow: TextOverflow.ellipsis),
-                          subtitle: Text(webViewTab.webViewModel.url,
+                          subtitle: Text(webViewTab.webViewModel.url?.toString() ?? "",
                               style: TextStyle(
                                 color:
                                 webViewTab.webViewModel.isIncognitoMode ||
@@ -236,10 +254,13 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
                                 ),
                                 onPressed: () {
                                   setState(() {
-                                    browserModel.closeTab(
-                                        webViewTab.webViewModel.tabIndex);
-                                    if (browserModel.webViewTabs.length == 0) {
-                                      browserModel.showTabScroller = false;
+                                    if (webViewTab.webViewModel.tabIndex != null) {
+                                      browserModel.closeTab(
+                                          webViewTab.webViewModel.tabIndex!);
+                                      if (browserModel.webViewTabs.length ==
+                                          0) {
+                                        browserModel.showTabScroller = false;
+                                      }
                                     }
                                   });
                                 },

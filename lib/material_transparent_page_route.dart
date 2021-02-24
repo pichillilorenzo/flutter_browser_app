@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 
 class MaterialTransparentPageRoute<T> extends PageRoute<T> {
   MaterialTransparentPageRoute({
-    @required this.builder,
+    required this.builder,
     bool fullscreenDialog = false,
-    RouteSettings settings,
-  })  : assert(builder != null),
-        super(settings: settings, fullscreenDialog: fullscreenDialog);
+    RouteSettings? settings,
+  })  : super(settings: settings, fullscreenDialog: fullscreenDialog);
 
   final WidgetBuilder builder;
 
@@ -15,10 +14,10 @@ class MaterialTransparentPageRoute<T> extends PageRoute<T> {
   bool get opaque => false;
 
   @override
-  Color get barrierColor => null;
+  Color? get barrierColor => null;
 
   @override
-  String get barrierLabel => null;
+  String? get barrierLabel => null;
 
   @override
   bool get maintainState => true;
@@ -40,15 +39,6 @@ class MaterialTransparentPageRoute<T> extends PageRoute<T> {
       Animation<double> secondaryAnimation,
       ) {
     final Widget result = builder(context);
-    assert(() {
-      if (result == null) {
-        throw FlutterError(
-            'The builder for route "${settings.name}" returned null.\n'
-                'Route builders must never return null.'
-        );
-      }
-      return true;
-    }());
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,

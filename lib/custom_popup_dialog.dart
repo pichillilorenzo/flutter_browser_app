@@ -4,24 +4,23 @@ import 'package:flutter_browser/material_transparent_page_route.dart';
 class CustomPopupDialogPageRoute<T> extends MaterialTransparentPageRoute<T> {
 
   final Color overlayColor;
-  final Duration customTransitionDuration;
+  final Duration? customTransitionDuration;
   bool isPopped = false;
 
   CustomPopupDialogPageRoute({
-    @required WidgetBuilder builder,
-    Duration transitionDuration,
-    Color overlayColor,
-    RouteSettings settings,
-  })  : assert(builder != null),
-        this.overlayColor = overlayColor ?? Colors.black.withOpacity(0.5),
+    required WidgetBuilder builder,
+    Duration? transitionDuration,
+    Color? overlayColor,
+    RouteSettings? settings,
+  })  : this.overlayColor = overlayColor ?? Colors.black.withOpacity(0.5),
         customTransitionDuration = transitionDuration,
         super(builder: builder, settings: settings);
 
   @override
-  Duration get transitionDuration => customTransitionDuration != null ? customTransitionDuration : const Duration(milliseconds: 300);
+  Duration get transitionDuration => customTransitionDuration != null ? customTransitionDuration! : const Duration(milliseconds: 300);
 
   @override
-  bool didPop(T result) {
+  bool didPop(T? result) {
     isPopped = true;
     return super.didPop(result);
   }
@@ -62,19 +61,19 @@ class CustomPopupDialog extends StatefulWidget {
   final Widget child;
   final Duration transitionDuration;
 
-  CustomPopupDialog({Key key, this.child, this.transitionDuration = const Duration(milliseconds: 300)}): super(key: key);
+  CustomPopupDialog({Key? key, required this.child, this.transitionDuration = const Duration(milliseconds: 300)}): super(key: key);
 
   @override
   State<StatefulWidget> createState() => _CustomPopupDialogState();
 
-  static CustomPopupDialogPageRoute show({@required BuildContext context, Widget child, WidgetBuilder builder, Color overlayColor, Duration transitionDuration}) {
+  static CustomPopupDialogPageRoute show({required BuildContext context, Widget? child, WidgetBuilder? builder, Color? overlayColor, required Duration transitionDuration}) {
     var route = CustomPopupDialogPageRoute(
       transitionDuration: transitionDuration,
       overlayColor: overlayColor,
       builder: (context) {
         return CustomPopupDialog(
           transitionDuration: transitionDuration,
-          child: builder != null ? builder(context) : child,
+          child: builder != null ? builder(context) : child!,
         );
       },
     );
@@ -87,8 +86,8 @@ class CustomPopupDialog extends StatefulWidget {
 class _CustomPopupDialogState extends State<CustomPopupDialog>
     with SingleTickerProviderStateMixin {
 
-  AnimationController _slideController;
-  Animation<Offset> _offsetSlideAnimation;
+  late AnimationController _slideController;
+  late Animation<Offset> _offsetSlideAnimation;
 
   @override
   void initState() {

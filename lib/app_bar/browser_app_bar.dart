@@ -4,7 +4,7 @@ import 'package:flutter_browser/app_bar/webview_tab_app_bar.dart';
 
 class BrowserAppBar extends StatefulWidget
     implements PreferredSizeWidget {
-  BrowserAppBar({Key key})
+  BrowserAppBar({Key? key})
       : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
 

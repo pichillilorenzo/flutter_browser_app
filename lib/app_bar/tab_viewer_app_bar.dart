@@ -11,7 +11,7 @@ import '../custom_popup_menu_item.dart';
 import '../tab_viewer_popup_menu_actions.dart';
 
 class TabViewerAppBar extends StatefulWidget implements PreferredSizeWidget {
-  TabViewerAppBar({Key key})
+  TabViewerAppBar({Key? key})
       : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -187,14 +187,14 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
     }
   }
 
-  void addNewTab({String url}) {
+  void addNewTab({Uri? url}) {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var settings = browserModel.getSettings();
 
     if (url == null) {
       url = settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
-          ? settings.customUrlHomePage
-          : settings.searchEngine.url;
+          ? Uri.parse(settings.customUrlHomePage)
+          : Uri.parse(settings.searchEngine.url);
     }
 
     browserModel.showTabScroller = false;
@@ -205,14 +205,14 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
     ));
   }
 
-  void addNewIncognitoTab({String url}) {
+  void addNewIncognitoTab({Uri? url}) {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var settings = browserModel.getSettings();
 
     if (url == null) {
       url = settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
-          ? settings.customUrlHomePage
-          : settings.searchEngine.url;
+          ? Uri.parse(settings.customUrlHomePage)
+          : Uri.parse(settings.searchEngine.url);
     }
 
     browserModel.showTabScroller = false;

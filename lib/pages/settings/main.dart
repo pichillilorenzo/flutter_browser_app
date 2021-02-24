@@ -22,7 +22,7 @@ class PopupSettingsMenuActions {
 }
 
 class SettingsPage extends StatefulWidget {
-  SettingsPage({Key key}) : super(key: key);
+  SettingsPage({Key? key}) : super(key: key);
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -129,11 +129,10 @@ class _SettingsPageState extends State<SettingsPage> {
         var browserModel = Provider.of<BrowserModel>(context, listen: false);
         var settings = browserModel.getSettings();
         var currentWebViewModel = Provider.of<WebViewModel>(context, listen: false);
-        var _webViewController = currentWebViewModel?.webViewController;
-        await _webViewController.setOptions(
+        var _webViewController = currentWebViewModel.webViewController;
+        await _webViewController?.setOptions(
             options: InAppWebViewGroupOptions(
                 crossPlatform: InAppWebViewOptions(
-                    debuggingEnabled: settings.debuggingEnabled,
                     incognito: currentWebViewModel.isIncognitoMode,
                     useOnDownloadStart: true,
                     useOnLoadResource: true),
@@ -141,7 +140,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ios: IOSInAppWebViewOptions(
                     allowsLinkPreview: false,
                     isFraudulentWebsiteWarningEnabled: true)));
-        currentWebViewModel.options = await _webViewController.getOptions();
+        currentWebViewModel.options = await _webViewController?.getOptions();
         browserModel.save();
         setState(() { });
         break;

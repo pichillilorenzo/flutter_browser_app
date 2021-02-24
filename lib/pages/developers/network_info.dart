@@ -1,15 +1,16 @@
-import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_browser/custom_image.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mime/mime.dart';
 import 'package:provider/provider.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
+// import 'package:charts_flutter/flutter.dart' as charts;
 
 class NetworkInfo extends StatefulWidget {
-  NetworkInfo({Key key}) : super(key: key);
+  NetworkInfo({Key? key}) : super(key: key);
 
   @override
   _NetworkInfoState createState() => _NetworkInfoState();
@@ -29,22 +30,22 @@ class _NetworkInfoState extends State<NetworkInfo> {
             var textStyle = TextStyle(fontSize: 14.0);
 
             var listViewChildren = <Widget>[
-              Container(
-                height: 200.0,
-                padding: EdgeInsets.only(left: 10.0),
-                child: charts.ScatterPlotChart(
-                    _createChartData(loadedResources),
-                    animate: false,
-                    behaviors: [
-                      charts.SlidingViewport(),
-                      charts.PanAndZoomBehavior(),
-                    ],
-                    defaultRenderer:
-                        charts.PointRendererConfig(pointRendererDecorators: [
-                      charts.ComparisonPointsDecorator(
-                          symbolRenderer: charts.CylinderSymbolRenderer())
-                    ])),
-              ),
+              // Container(
+              //   height: 200.0,
+              //   padding: EdgeInsets.only(left: 10.0),
+              //   child: charts.ScatterPlotChart(
+              //       _createChartData(loadedResources),
+              //       animate: false,
+              //       behaviors: [
+              //         charts.SlidingViewport(),
+              //         charts.PanAndZoomBehavior(),
+              //       ],
+              //       defaultRenderer:
+              //           charts.PointRendererConfig(pointRendererDecorators: [
+              //         charts.ComparisonPointsDecorator(
+              //             symbolRenderer: charts.CylinderSymbolRenderer())
+              //       ])),
+              // ),
               Row(
                 children: <Widget>[
                   Container(
@@ -90,11 +91,11 @@ class _NetworkInfoState extends State<NetworkInfo> {
 
             listViewChildren
                 .addAll(loadedResources.reversed.map((loadedResoruce) {
-              var uri = Uri.parse(loadedResoruce.url);
-              String path = uri.path;
+              var url = loadedResoruce.url ?? Uri.parse("about:blank");
+              String path = url.path;
               String resourceName = path.substring(path.lastIndexOf('/') + 1);
 
-              String domain = uri.host.replaceFirst("www.", "");
+              String domain = url.host.replaceFirst("www.", "");
 
               IconData iconData;
               switch (loadedResoruce.initiatorType) {
@@ -115,23 +116,24 @@ class _NetworkInfoState extends State<NetworkInfo> {
               }
 
               var icon;
-              String mimeType = lookupMimeType(loadedResoruce.url);
+              var mimeType = lookupMimeType(url.toString());
 
               if (mimeType != null && mimeType.startsWith("image/") && mimeType != "image/svg+xml") {
-                icon = CachedNetworkImage(
-                  imageUrl: loadedResoruce.url,
-                  width: 20.0,
-                  height: 20.0,
-                  errorWidget: (context, url, error) {
-                    return Icon(
-                      Icons.broken_image,
-                      size: 20.0,
-                    );
-                  },
-                );
+                // icon = CachedNetworkImage(
+                //   imageUrl: url.toString(),
+                //   width: 20.0,
+                //   height: 20.0,
+                //   errorWidget: (context, url, error) {
+                //     return Icon(
+                //       Icons.broken_image,
+                //       size: 20.0,
+                //     );
+                //   },
+                // );
+                icon = CustomImage(url: url, maxWidth: 20.0, height: 20.0);
               } else if (mimeType == "image/svg+xml") {
                 icon = SvgPicture.network(
-                  loadedResoruce.url,
+                  url.toString(),
                   width: 20.0,
                   height: 20.0,
                 );
@@ -146,7 +148,7 @@ class _NetworkInfoState extends State<NetworkInfo> {
                 InkWell(
                     onTap: () {
                       Clipboard.setData(
-                          ClipboardData(text: loadedResoruce.url));
+                          ClipboardData(text: loadedResoruce.url?.toString()));
                     },
                     child: Container(
                       padding:
@@ -183,13 +185,13 @@ class _NetworkInfoState extends State<NetworkInfo> {
                   width: constraints.maxWidth / 4,
                   padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 2.5),
                   alignment: Alignment.center,
-                  child: Text(loadedResoruce.initiatorType, style: textStyle),
+                  child: Text(loadedResoruce.initiatorType ?? "", style: textStyle),
                 ),
                 Flexible(
                     child: Container(
                   padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 2.5),
                   child: Text(
-                      loadedResoruce.duration.toStringAsFixed(2) + " ms",
+                      (loadedResoruce.duration != null) ? loadedResoruce.duration!.toStringAsFixed(2) + " ms" : "",
                       style: textStyle),
                 ))
               ]);
@@ -205,38 +207,38 @@ class _NetworkInfoState extends State<NetworkInfo> {
     });
   }
 
-  List<charts.Series> seriesList;
-
-  /// Create one series with sample hard coded data.
-  static List<charts.Series<LoadedResource, double>> _createChartData(
-      List<LoadedResource> data) {
-    return [
-      new charts.Series<LoadedResource, double>(
-        id: 'LoadedResource',
-        // Providing a color function is optional.
-        colorFn: (LoadedResource loadedResource, _) {
-          return charts.Color(
-            r: ((loadedResource.startTime + loadedResource.duration) * 0xFFFFFF)
-                .toInt(),
-            b: (loadedResource.startTime * 0xFFFFFF).toInt(),
-            g: (loadedResource.duration * 0xFFFFFF).toInt(),
-          );
-        },
-        domainFn: (LoadedResource loadedResource, _) =>
-            loadedResource.startTime + loadedResource.duration,
-        domainLowerBoundFn: (LoadedResource loadedResource, _) =>
-            loadedResource.startTime,
-        domainUpperBoundFn: (LoadedResource loadedResource, _) =>
-            loadedResource.startTime + loadedResource.duration,
-        measureFn: (LoadedResource loadedResource, _) =>
-            data.indexOf(loadedResource),
-        measureLowerBoundFn: (LoadedResource loadedResource, _) =>
-            loadedResource.duration,
-        measureUpperBoundFn: (LoadedResource loadedResource, _) =>
-            loadedResource.duration,
-        radiusPxFn: (LoadedResource loadedResource, _) => 2,
-        data: data,
-      )
-    ];
-  }
+  // List<charts.Series> seriesList;
+  //
+  // /// Create one series with sample hard coded data.
+  // static List<charts.Series<LoadedResource, double>> _createChartData(
+  //     List<LoadedResource> data) {
+  //   return [
+  //     new charts.Series<LoadedResource, double>(
+  //       id: 'LoadedResource',
+  //       // Providing a color function is optional.
+  //       colorFn: (LoadedResource loadedResource, _) {
+  //         return charts.Color(
+  //           r: ((loadedResource.startTime + loadedResource.duration) * 0xFFFFFF)
+  //               .toInt(),
+  //           b: (loadedResource.startTime * 0xFFFFFF).toInt(),
+  //           g: (loadedResource.duration * 0xFFFFFF).toInt(),
+  //         );
+  //       },
+  //       domainFn: (LoadedResource loadedResource, _) =>
+  //           loadedResource.startTime + loadedResource.duration,
+  //       domainLowerBoundFn: (LoadedResource loadedResource, _) =>
+  //           loadedResource.startTime,
+  //       domainUpperBoundFn: (LoadedResource loadedResource, _) =>
+  //           loadedResource.startTime + loadedResource.duration,
+  //       measureFn: (LoadedResource loadedResource, _) =>
+  //           data.indexOf(loadedResource),
+  //       measureLowerBoundFn: (LoadedResource loadedResource, _) =>
+  //           loadedResource.duration,
+  //       measureUpperBoundFn: (LoadedResource loadedResource, _) =>
+  //           loadedResource.duration,
+  //       radiusPxFn: (LoadedResource loadedResource, _) => 2,
+  //       data: data,
+  //     )
+  //   ];
+  // }
 }

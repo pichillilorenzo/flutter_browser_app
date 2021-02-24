@@ -6,7 +6,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
 class IOSSettings extends StatefulWidget {
-  IOSSettings({Key key}) : super(key: key);
+  IOSSettings({Key? key}) : super(key: key);
 
   @override
   _IOSSettingsState createState() => _IOSSettingsState();
@@ -37,10 +37,10 @@ class _IOSSettingsState extends State<IOSSettings> {
         title: const Text("Disallow Over Scroll"),
         subtitle: const Text(
             "Sets whether the WebView should bounce when the scrolling has reached an edge of the content"),
-        value: currentWebViewModel.options.ios.disallowOverScroll,
+        value: currentWebViewModel.options?.ios.disallowOverScroll ?? false,
         onChanged: (value) {
-          currentWebViewModel.options.ios.disallowOverScroll = value;
-          _webViewController.setOptions(options: currentWebViewModel.options);
+          currentWebViewModel.options?.ios.disallowOverScroll = value;
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
           browserModel.save();
           setState(() {});
         },
@@ -49,10 +49,10 @@ class _IOSSettingsState extends State<IOSSettings> {
         title: const Text("Enable Viewport Scale"),
         subtitle: const Text(
             "Enable to allow a viewport meta tag to either disable or restrict the range of user scaling."),
-        value: currentWebViewModel.options.ios.enableViewportScale,
+        value: currentWebViewModel.options?.ios.enableViewportScale ?? false,
         onChanged: (value) {
-          currentWebViewModel.options.ios.enableViewportScale = value;
-          _webViewController.setOptions(options: currentWebViewModel.options);
+          currentWebViewModel.options?.ios.enableViewportScale = value;
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
           browserModel.save();
           setState(() {});
         },
@@ -61,11 +61,11 @@ class _IOSSettingsState extends State<IOSSettings> {
         title: const Text("Suppresses Incremental Rendering"),
         subtitle: const Text(
             "Sets wheter the WebView should suppresses content rendering until it is fully loaded into memory."),
-        value: currentWebViewModel.options.ios.suppressesIncrementalRendering,
+        value: currentWebViewModel.options?.ios.suppressesIncrementalRendering ?? false,
         onChanged: (value) {
-          currentWebViewModel.options.ios.suppressesIncrementalRendering =
+          currentWebViewModel.options?.ios.suppressesIncrementalRendering =
               value;
-          _webViewController.setOptions(options: currentWebViewModel.options);
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
           browserModel.save();
           setState(() {});
         },
@@ -73,10 +73,10 @@ class _IOSSettingsState extends State<IOSSettings> {
       SwitchListTile(
         title: const Text("Allows Air Play For Media Playback"),
         subtitle: const Text("Enable AirPlay."),
-        value: currentWebViewModel.options.ios.allowsAirPlayForMediaPlayback,
+        value: currentWebViewModel.options?.ios.allowsAirPlayForMediaPlayback ?? true,
         onChanged: (value) {
-          currentWebViewModel.options.ios.allowsAirPlayForMediaPlayback = value;
-          _webViewController.setOptions(options: currentWebViewModel.options);
+          currentWebViewModel.options?.ios.allowsAirPlayForMediaPlayback = value;
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
           browserModel.save();
           setState(() {});
         },
@@ -86,11 +86,11 @@ class _IOSSettingsState extends State<IOSSettings> {
         subtitle: const Text(
             "Enable to allow the horizontal swipe gestures trigger back-forward list navigations."),
         value:
-            currentWebViewModel.options.ios.allowsBackForwardNavigationGestures,
+            currentWebViewModel.options?.ios.allowsBackForwardNavigationGestures ?? true,
         onChanged: (value) {
-          currentWebViewModel.options.ios.allowsBackForwardNavigationGestures =
+          currentWebViewModel.options?.ios.allowsBackForwardNavigationGestures =
               value;
-          _webViewController.setOptions(options: currentWebViewModel.options);
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
           browserModel.save();
           setState(() {});
         },
@@ -99,10 +99,10 @@ class _IOSSettingsState extends State<IOSSettings> {
         title: const Text("Ignores Viewport Scale Limits"),
         subtitle: const Text(
             "Sets whether the WebView should always allow scaling of the webpage, regardless of the author's intent."),
-        value: currentWebViewModel.options.ios.ignoresViewportScaleLimits,
+        value: currentWebViewModel.options?.ios.ignoresViewportScaleLimits ?? false,
         onChanged: (value) {
-          currentWebViewModel.options.ios.ignoresViewportScaleLimits = value;
-          _webViewController.setOptions(options: currentWebViewModel.options);
+          currentWebViewModel.options?.ios.ignoresViewportScaleLimits = value;
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
           browserModel.save();
           setState(() {});
         },
@@ -111,10 +111,10 @@ class _IOSSettingsState extends State<IOSSettings> {
         title: const Text("Allows Inline Media Playback"),
         subtitle: const Text(
             "Enable to allow HTML5 media playback to appear inline within the screen layout, using browser-supplied controls rather than native controls."),
-        value: currentWebViewModel.options.ios.allowsInlineMediaPlayback,
+        value: currentWebViewModel.options?.ios.allowsInlineMediaPlayback ?? false,
         onChanged: (value) {
-          currentWebViewModel.options.ios.allowsInlineMediaPlayback = value;
-          _webViewController.setOptions(options: currentWebViewModel.options);
+          currentWebViewModel.options?.ios.allowsInlineMediaPlayback = value;
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
           browserModel.save();
           setState(() {});
         },
@@ -124,11 +124,11 @@ class _IOSSettingsState extends State<IOSSettings> {
         subtitle:
             const Text("Enable to allow HTML5 videos play picture-in-picture."),
         value:
-            currentWebViewModel.options.ios.allowsPictureInPictureMediaPlayback,
+            currentWebViewModel.options?.ios.allowsPictureInPictureMediaPlayback ?? true,
         onChanged: (value) {
-          currentWebViewModel.options.ios.allowsPictureInPictureMediaPlayback =
+          currentWebViewModel.options?.ios.allowsPictureInPictureMediaPlayback =
               value;
-          _webViewController.setOptions(options: currentWebViewModel.options);
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
           browserModel.save();
           setState(() {});
         },
@@ -140,12 +140,12 @@ class _IOSSettingsState extends State<IOSSettings> {
         trailing: DropdownButton<IOSWKSelectionGranularity>(
           hint: Text("Granularity"),
           onChanged: (value) {
-            currentWebViewModel.options.ios.selectionGranularity = value;
-            _webViewController.setOptions(options: currentWebViewModel.options);
+            currentWebViewModel.options?.ios.selectionGranularity = value!;
+            _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
             browserModel.save();
             setState(() {});
           },
-          value: currentWebViewModel.options.ios.selectionGranularity,
+          value: currentWebViewModel.options?.ios.selectionGranularity,
           items: IOSWKSelectionGranularity.values.map((selectionGranularity) {
             return DropdownMenuItem<IOSWKSelectionGranularity>(
               value: selectionGranularity,
@@ -162,7 +162,7 @@ class _IOSSettingsState extends State<IOSSettings> {
         subtitle: Text("Specifying a dataDetectoryTypes value adds interactivity to web content that matches the value."),
         trailing: Container(
           constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 2),
-          child: Text(currentWebViewModel.options.ios.dataDetectorTypes.map((e) => e.toString()).join(", ")),
+          child: Text(currentWebViewModel.options?.ios.dataDetectorTypes.map((e) => e.toString()).join(", ") ?? ""),
         ),
         onTap: () async {
           final dataDetectoryTypesSelected = await showDialog<Set<IOSWKDataDetectorTypes>>(
@@ -170,19 +170,19 @@ class _IOSSettingsState extends State<IOSSettings> {
             builder: (BuildContext context) {
               return MultiSelectDialog(
                 title: const Text("Data Detector Types"),
-                items: IOSWKDataDetectorTypes.values.map((dataDetectoryType) {
+                items: IOSWKDataDetectorTypes.values.map((dataDetectorType) {
                   return MultiSelectDialogItem<IOSWKDataDetectorTypes>(
-                    value: dataDetectoryType,
-                    label: dataDetectoryType.toString()
+                    value: dataDetectorType,
+                    label: dataDetectorType.toString()
                   );
                 }).toList(),
-                initialSelectedValues: currentWebViewModel.options.ios.dataDetectorTypes.toSet(),
+                initialSelectedValues: currentWebViewModel.options?.ios.dataDetectorTypes.toSet(),
               );
             },
           );
           if (dataDetectoryTypesSelected != null) {
-            currentWebViewModel.options.ios.dataDetectorTypes = dataDetectoryTypesSelected.toList();
-            _webViewController.setOptions(options: currentWebViewModel.options);
+            currentWebViewModel.options?.ios.dataDetectorTypes = dataDetectoryTypesSelected.toList();
+            _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
             browserModel.save();
             setState(() {});
           }
@@ -192,11 +192,11 @@ class _IOSSettingsState extends State<IOSSettings> {
         title: const Text("Shared Cookies Enabled"),
         subtitle: const Text(
             "Sets if shared cookies from \"HTTPCookieStorage.shared\" should used for every load request in the WebView."),
-        value: currentWebViewModel.options.ios.sharedCookiesEnabled,
+        value: currentWebViewModel.options?.ios.sharedCookiesEnabled ?? false,
         onChanged: (value) {
-          currentWebViewModel.options.ios.sharedCookiesEnabled =
+          currentWebViewModel.options?.ios.sharedCookiesEnabled =
               value;
-          _webViewController.setOptions(options: currentWebViewModel.options);
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
           browserModel.save();
           setState(() {});
         },
@@ -205,11 +205,11 @@ class _IOSSettingsState extends State<IOSSettings> {
         title: const Text("Automatically Adjusts Scroll Indicator Insets"),
         subtitle: const Text(
             "Configures whether the scroll indicator insets are automatically adjusted by the system."),
-        value: currentWebViewModel.options.ios.automaticallyAdjustsScrollIndicatorInsets,
+        value: currentWebViewModel.options?.ios.automaticallyAdjustsScrollIndicatorInsets ?? false,
         onChanged: (value) {
-          currentWebViewModel.options.ios.automaticallyAdjustsScrollIndicatorInsets =
+          currentWebViewModel.options?.ios.automaticallyAdjustsScrollIndicatorInsets =
               value;
-          _webViewController.setOptions(options: currentWebViewModel.options);
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
           browserModel.save();
           setState(() {});
         },
@@ -218,11 +218,11 @@ class _IOSSettingsState extends State<IOSSettings> {
         title: const Text("Accessibility Ignores Invert Colors"),
         subtitle: const Text(
             "Sets whether the WebView ignores an accessibility request to invert its colors."),
-        value: currentWebViewModel.options.ios.accessibilityIgnoresInvertColors,
+        value: currentWebViewModel.options?.ios.accessibilityIgnoresInvertColors ?? false,
         onChanged: (value) {
-          currentWebViewModel.options.ios.accessibilityIgnoresInvertColors =
+          currentWebViewModel.options?.ios.accessibilityIgnoresInvertColors =
               value;
-          _webViewController.setOptions(options: currentWebViewModel.options);
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
           browserModel.save();
           setState(() {});
         },
@@ -234,12 +234,12 @@ class _IOSSettingsState extends State<IOSSettings> {
         trailing: DropdownButton<IOSUIScrollViewDecelerationRate>(
           hint: Text("Deceleration"),
           onChanged: (value) {
-            currentWebViewModel.options.ios.decelerationRate = value;
-            _webViewController.setOptions(options: currentWebViewModel.options);
+            currentWebViewModel.options?.ios.decelerationRate = value!;
+            _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
             browserModel.save();
             setState(() {});
           },
-          value: currentWebViewModel.options.ios.decelerationRate,
+          value: currentWebViewModel.options?.ios.decelerationRate,
           items: IOSUIScrollViewDecelerationRate.values.map((decelerationRate) {
             return DropdownMenuItem<IOSUIScrollViewDecelerationRate>(
               value: decelerationRate,
@@ -255,11 +255,11 @@ class _IOSSettingsState extends State<IOSSettings> {
         title: const Text("Always Bounce Vertical"),
         subtitle: const Text(
             "Determines whether bouncing always occurs when vertical scrolling reaches the end of the content."),
-        value: currentWebViewModel.options.ios.alwaysBounceVertical,
+        value: currentWebViewModel.options?.ios.alwaysBounceVertical ?? false,
         onChanged: (value) {
-          currentWebViewModel.options.ios.alwaysBounceVertical =
+          currentWebViewModel.options?.ios.alwaysBounceVertical =
               value;
-          _webViewController.setOptions(options: currentWebViewModel.options);
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
           browserModel.save();
           setState(() {});
         },
@@ -268,11 +268,11 @@ class _IOSSettingsState extends State<IOSSettings> {
         title: const Text("Always Bounce Horizontal"),
         subtitle: const Text(
             "Determines whether bouncing always occurs when horizontal scrolling reaches the end of the content view."),
-        value: currentWebViewModel.options.ios.alwaysBounceHorizontal,
+        value: currentWebViewModel.options?.ios.alwaysBounceHorizontal ?? false,
         onChanged: (value) {
-          currentWebViewModel.options.ios.alwaysBounceHorizontal =
+          currentWebViewModel.options?.ios.alwaysBounceHorizontal =
               value;
-          _webViewController.setOptions(options: currentWebViewModel.options);
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
           browserModel.save();
           setState(() {});
         },
@@ -281,11 +281,11 @@ class _IOSSettingsState extends State<IOSSettings> {
         title: const Text("Scrolls To Top"),
         subtitle: const Text(
             "Sets whether the scroll-to-top gesture is enabled."),
-        value: currentWebViewModel.options.ios.scrollsToTop,
+        value: currentWebViewModel.options?.ios.scrollsToTop ?? true,
         onChanged: (value) {
-          currentWebViewModel.options.ios.scrollsToTop =
+          currentWebViewModel.options?.ios.scrollsToTop =
               value;
-          _webViewController.setOptions(options: currentWebViewModel.options);
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
           browserModel.save();
           setState(() {});
         },
@@ -294,11 +294,11 @@ class _IOSSettingsState extends State<IOSSettings> {
         title: const Text("Is Paging Enabled"),
         subtitle: const Text(
             "Determines whether paging is enabled for the scroll view."),
-        value: currentWebViewModel.options.ios.isPagingEnabled,
+        value: currentWebViewModel.options?.ios.isPagingEnabled ?? false,
         onChanged: (value) {
-          currentWebViewModel.options.ios.isPagingEnabled =
+          currentWebViewModel.options?.ios.isPagingEnabled =
               value;
-          _webViewController.setOptions(options: currentWebViewModel.options);
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
           browserModel.save();
           setState(() {});
         },
@@ -310,14 +310,14 @@ class _IOSSettingsState extends State<IOSSettings> {
           width: 50.0,
           child: TextFormField(
             initialValue: currentWebViewModel
-                .options.ios.maximumZoomScale
+                .options?.ios.maximumZoomScale
                 .toString(),
             keyboardType: TextInputType.numberWithOptions(decimal: true),
             onFieldSubmitted: (value) {
-              currentWebViewModel.options.ios.maximumZoomScale =
+              currentWebViewModel.options?.ios.maximumZoomScale =
                   double.parse(value);
-              _webViewController.setOptions(
-                  options: currentWebViewModel.options);
+              _webViewController?.setOptions(
+                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
               browserModel.save();
               setState(() {});
             },
@@ -331,14 +331,14 @@ class _IOSSettingsState extends State<IOSSettings> {
           width: 50.0,
           child: TextFormField(
             initialValue: currentWebViewModel
-                .options.ios.minimumZoomScale
+                .options?.ios.minimumZoomScale
                 .toString(),
             keyboardType: TextInputType.numberWithOptions(decimal: true),
             onFieldSubmitted: (value) {
-              currentWebViewModel.options.ios.minimumZoomScale =
+              currentWebViewModel.options?.ios.minimumZoomScale =
                   double.parse(value);
-              _webViewController.setOptions(
-                  options: currentWebViewModel.options);
+              _webViewController?.setOptions(
+                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
               browserModel.save();
               setState(() {});
             },
@@ -351,12 +351,12 @@ class _IOSSettingsState extends State<IOSSettings> {
             "Configures how safe area insets are added to the adjusted content inset."),
         trailing: DropdownButton<IOSUIScrollViewContentInsetAdjustmentBehavior>(
           onChanged: (value) {
-            currentWebViewModel.options.ios.contentInsetAdjustmentBehavior = value;
-            _webViewController.setOptions(options: currentWebViewModel.options);
+            currentWebViewModel.options?.ios.contentInsetAdjustmentBehavior = value!;
+            _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
             browserModel.save();
             setState(() {});
           },
-          value: currentWebViewModel.options.ios.contentInsetAdjustmentBehavior,
+          value: currentWebViewModel.options?.ios.contentInsetAdjustmentBehavior,
           items: IOSUIScrollViewContentInsetAdjustmentBehavior.values.map((decelerationRate) {
             return DropdownMenuItem<IOSUIScrollViewContentInsetAdjustmentBehavior>(
               value: decelerationRate,

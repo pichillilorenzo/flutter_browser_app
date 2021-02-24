@@ -1,8 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_browser/custom_image.dart';
 import 'package:flutter_browser/webview_tab.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -20,12 +21,12 @@ class LongPressAlertDialog extends StatefulWidget {
     InAppWebViewHitTestResultType.IMAGE_TYPE
   ];
 
-  LongPressAlertDialog({Key key, this.webViewModel, this.hitTestResult, this.requestFocusNodeHrefResult})
+  LongPressAlertDialog({Key? key, required this.webViewModel, required this.hitTestResult, this.requestFocusNodeHrefResult})
       : super(key: key);
 
   final WebViewModel webViewModel;
   final InAppWebViewHitTestResult hitTestResult;
-  final RequestFocusNodeHrefResult requestFocusNodeHrefResult;
+  final RequestFocusNodeHrefResult? requestFocusNodeHrefResult;
 
   @override
   _LongPressAlertDialogState createState() => _LongPressAlertDialogState();
@@ -57,7 +58,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
             InAppWebViewHitTestResultType.SRC_IMAGE_ANCHOR_TYPE || (
         widget.hitTestResult.type ==
             InAppWebViewHitTestResultType.IMAGE_TYPE && widget.requestFocusNodeHrefResult != null
-            && widget.requestFocusNodeHrefResult.url != null && widget.requestFocusNodeHrefResult.url.isNotEmpty
+            && widget.requestFocusNodeHrefResult!.url != null && widget.requestFocusNodeHrefResult!.url.toString().isNotEmpty
     )) {
       return <Widget>[
         _buildLinkTile(),
@@ -85,10 +86,10 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
   }
 
   Widget _buildLinkTile() {
-    var uri = Uri.parse(widget.requestFocusNodeHrefResult.url);
-    var faviconUrl = uri.origin + "/favicon.ico";
+    var url = widget.requestFocusNodeHrefResult?.url ?? Uri.parse("about:blank");
+    var faviconUrl = Uri.parse(url.origin + "/favicon.ico");
 
-    var title = widget.requestFocusNodeHrefResult.title ?? "";
+    var title = widget.requestFocusNodeHrefResult?.title ?? "";
     if (title.isEmpty) {
       title = "Link";
     }
@@ -97,16 +98,17 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
       leading: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          CachedNetworkImage(
-            placeholder: (context, url) => CircularProgressIndicator(),
-            imageUrl: widget.requestFocusNodeHrefResult.src != null ? widget.requestFocusNodeHrefResult.src : faviconUrl,
-            height: 30,
-          )
+          // CachedNetworkImage(
+          //   placeholder: (context, url) => CircularProgressIndicator(),
+          //   imageUrl: widget.requestFocusNodeHrefResult?.src != null ? widget.requestFocusNodeHrefResult!.src : faviconUrl,
+          //   height: 30,
+          // )
+          CustomImage(url: widget.requestFocusNodeHrefResult?.src != null ? Uri.parse(widget.requestFocusNodeHrefResult!.src!) : faviconUrl, maxWidth: 30.0, height: 30.0,)
         ],
       ),
-      title: Text(title),
+      title: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis,),
       subtitle: Text(
-        widget.requestFocusNodeHrefResult.url,
+        widget.requestFocusNodeHrefResult?.url?.toString() ?? "",
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
@@ -135,11 +137,16 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
                   () => new EagerGestureRecognizer(),
                 ),
               ].toSet(),
-              initialUrl: widget.requestFocusNodeHrefResult.url,
+              initialUrlRequest: URLRequest(
+                url: widget.requestFocusNodeHrefResult?.url
+              ),
               initialOptions: InAppWebViewGroupOptions(
-                  crossPlatform: InAppWebViewOptions(
-                debuggingEnabled: settings.debuggingEnabled,
-              )),
+                android: AndroidInAppWebViewOptions(
+                  useHybridComposition: true,
+                  verticalScrollbarThumbColor: Color.fromRGBO(0, 0, 0, 0.5),
+                  horizontalScrollbarThumbColor: Color.fromRGBO(0, 0, 0, 0.5)
+                )
+              ),
               onProgressChanged: (controller, progress) {
                 if (progress > 50) {
                   setState(() {
@@ -162,7 +169,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
       onTap: () {
         browserModel.addTab(WebViewTab(
           key: GlobalKey(),
-          webViewModel: WebViewModel(url: widget.requestFocusNodeHrefResult.url),
+          webViewModel: WebViewModel(url: widget.requestFocusNodeHrefResult?.url),
         ));
         Navigator.pop(context);
       },
@@ -178,7 +185,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
         browserModel.addTab(WebViewTab(
           key: GlobalKey(),
           webViewModel: WebViewModel(
-              url: widget.requestFocusNodeHrefResult.url, isIncognitoMode: true),
+              url: widget.requestFocusNodeHrefResult?.url, isIncognitoMode: true),
         ));
         Navigator.pop(context);
       },
@@ -209,7 +216,9 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
         )
       ]),
       onTap: () {
-        Share.share(widget.hitTestResult.extra);
+        if (widget.hitTestResult.extra != null) {
+          Share.share(widget.hitTestResult.extra!);
+        }
         Navigator.pop(context);
       },
     );
@@ -222,14 +231,15 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
       leading: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          CachedNetworkImage(
-            placeholder: (context, url) => CircularProgressIndicator(),
-            imageUrl: widget.hitTestResult.extra,
-            height: 50,
-          ),
+          // CachedNetworkImage(
+          //   placeholder: (context, url) => CircularProgressIndicator(),
+          //   imageUrl: widget.hitTestResult.extra,
+          //   height: 50,
+          // ),
+          CustomImage(url: Uri.parse(widget.hitTestResult.extra!), maxWidth: 50.0, height: 50.0)
         ],
       ),
-      title: Text(widget.webViewModel.title),
+      title: Text(widget.webViewModel.title ?? ""),
     );
   }
 
@@ -237,17 +247,19 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
     return ListTile(
       title: const Text("Download image"),
       onTap: () async {
-        var uri = Uri.parse(widget.hitTestResult.extra);
-        String path = uri.path;
-        String fileName = path.substring(path.lastIndexOf('/') + 1);
+        if (widget.hitTestResult.extra != null) {
+          var uri = Uri.parse(widget.hitTestResult.extra!);
+          String path = uri.path;
+          String fileName = path.substring(path.lastIndexOf('/') + 1);
 
-        final taskId = await FlutterDownloader.enqueue(
-          url: widget.hitTestResult.extra,
-          fileName: fileName,
-          savedDir: (await getExternalStorageDirectory()).path,
-          showNotification: true,
-          openFileFromNotification: true,
-        );
+          final taskId = await FlutterDownloader.enqueue(
+            url: widget.hitTestResult.extra,
+            fileName: fileName,
+            savedDir: (await getExternalStorageDirectory()).path,
+            showNotification: true,
+            openFileFromNotification: true,
+          );
+        }
         Navigator.pop(context);
       },
     );
@@ -267,7 +279,9 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
         )
       ]),
       onTap: () {
-        Share.share(widget.hitTestResult.extra);
+        if (widget.hitTestResult.extra != null) {
+          Share.share(widget.hitTestResult.extra!);
+        }
         Navigator.pop(context);
       },
     );
@@ -281,7 +295,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
       onTap: () {
         browserModel.addTab(WebViewTab(
           key: GlobalKey(),
-          webViewModel: WebViewModel(url: widget.hitTestResult.extra),
+          webViewModel: WebViewModel(url: Uri.parse(widget.hitTestResult.extra ?? "about:blank")),
         ));
         Navigator.pop(context);
       },
@@ -294,12 +308,14 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
     return ListTile(
       title: const Text("Search this image on Google"),
       onTap: () {
-        var url = "http://images.google.com/searchbyimage?image_url=" +
-            widget.hitTestResult.extra;
-        browserModel.addTab(WebViewTab(
-          key: GlobalKey(),
-          webViewModel: WebViewModel(url: url),
-        ));
+        if (widget.hitTestResult.extra != null) {
+          var url = "http://images.google.com/searchbyimage?image_url=" +
+              widget.hitTestResult.extra!;
+          browserModel.addTab(WebViewTab(
+            key: GlobalKey(),
+            webViewModel: WebViewModel(url: Uri.parse(url)),
+          ));
+        }
         Navigator.pop(context);
       },
     );

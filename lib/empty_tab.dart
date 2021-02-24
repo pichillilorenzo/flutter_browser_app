@@ -6,7 +6,7 @@ import 'models/browser_model.dart';
 import 'models/webview_model.dart';
 
 class EmptyTab extends StatefulWidget {
-  EmptyTab({Key key}) : super(key: key);
+  EmptyTab({Key? key}) : super(key: key);
 
   @override
   _EmptyTabState createState() => _EmptyTabState();
@@ -66,7 +66,7 @@ class _EmptyTabState extends State<EmptyTab> {
     browserModel.addTab(WebViewTab(
       key: GlobalKey(),
       webViewModel: WebViewModel(
-          url: value.startsWith("http") ? value : settings.searchEngine.searchUrl + value
+          url: Uri.parse(value.startsWith("http") ? value : settings.searchEngine.searchUrl + value)
       ),
     ));
   }

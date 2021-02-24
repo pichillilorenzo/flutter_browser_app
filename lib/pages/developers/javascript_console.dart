@@ -5,7 +5,7 @@ import 'package:flutter_browser/models/webview_model.dart';
 import 'package:provider/provider.dart';
 
 class JavaScriptConsole extends StatefulWidget {
-  JavaScriptConsole({Key key}) : super(key: key);
+  JavaScriptConsole({Key? key}) : super(key: key);
 
   @override
   _JavaScriptConsoleState createState() => _JavaScriptConsoleState();
@@ -127,12 +127,14 @@ class _JavaScriptConsoleState extends State<JavaScriptConsole> {
                 onPressed: () {
                   var browserModel =
                   Provider.of<BrowserModel>(context, listen: false);
-                  var webViewModel = browserModel.getCurrentTab().webViewModel;
-                  webViewModel.setJavaScriptConsoleResults([]);
+                  var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+                  if (webViewModel != null) {
+                    webViewModel.setJavaScriptConsoleResults([]);
 
-                  var currentWebViewModel =
-                  Provider.of<WebViewModel>(context, listen: false);
-                  currentWebViewModel.updateWithValue(webViewModel);
+                    var currentWebViewModel =
+                    Provider.of<WebViewModel>(context, listen: false);
+                    currentWebViewModel.updateWithValue(webViewModel);
+                  }
                 },
               )
             ],
@@ -144,38 +146,39 @@ class _JavaScriptConsoleState extends State<JavaScriptConsole> {
 
   void evaluateJavaScript(String source) async {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
-    var webViewModel = browserModel.getCurrentTab().webViewModel;
+    var webViewModel = browserModel.getCurrentTab()?.webViewModel;
 
-    var currentWebViewModel = Provider.of<WebViewModel>(context, listen: false);
+    if (webViewModel != null) {
+      var currentWebViewModel = Provider.of<WebViewModel>(context, listen: false);
 
-    if (source.isNotEmpty &&
-        (webViewModel.javaScriptConsoleHistory.length == 0 ||
-            (webViewModel.javaScriptConsoleHistory.length > 0 &&
-                webViewModel.javaScriptConsoleHistory.last != source))) {
-      webViewModel.addJavaScriptConsoleHistory(source);
+      if (source.isNotEmpty &&
+          (webViewModel.javaScriptConsoleHistory.length == 0 ||
+              (webViewModel.javaScriptConsoleHistory.length > 0 &&
+                  webViewModel.javaScriptConsoleHistory.last != source))) {
+        webViewModel.addJavaScriptConsoleHistory(source);
+        currentWebViewModel.updateWithValue(webViewModel);
+      }
+
+      var result = await webViewModel.webViewController?.evaluateJavascript(source: source);
+
+      webViewModel.addJavaScriptConsoleResults(
+          JavaScriptConsoleResult(data: result.toString()));
       currentWebViewModel.updateWithValue(webViewModel);
-    }
 
-    var result =
-    await webViewModel.webViewController.evaluateJavascript(source: source);
-
-    webViewModel.addJavaScriptConsoleResults(
-        JavaScriptConsoleResult(data: result.toString()));
-    currentWebViewModel.updateWithValue(webViewModel);
-
-    setState(() {
-      Future.delayed(const Duration(milliseconds: 100), () async {
-        await _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 100),
-            curve: Curves.ease);
-        // must be repeated, otherwise it won't scroll to the bottom sometimes
-        await _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 100),
-            curve: Curves.ease);
+      setState(() {
+        Future.delayed(const Duration(milliseconds: 100), () async {
+          await _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 100),
+              curve: Curves.ease);
+          // must be repeated, otherwise it won't scroll to the bottom sometimes
+          await _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 100),
+              curve: Curves.ease);
+        });
       });
-    });
+    }
   }
 
 }

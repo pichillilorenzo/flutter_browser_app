@@ -1,8 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_browser/models/browser_model.dart';
+import 'package:flutter_browser/models/webview_model.dart';
+import 'package:flutter_browser/webview_tab.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:provider/provider.dart';
 
 import 'animated_flutter_browser_logo.dart';
 
@@ -35,8 +39,11 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
             ]
         ),
       ),
-      FlatButton.icon(
+      ElevatedButton.icon(
         icon: Icon(FlutterIcons.github_box_mco, size: 40.0,),
+        style: ButtonStyle(
+          backgroundColor: MaterialStateColor.resolveWith((states) => Colors.grey.shade300)
+        ),
         label: RichText(
           text: TextSpan(
               children: [
@@ -52,7 +59,12 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
           ),
         ),
         onPressed: () {
-          InAppBrowser.openWithSystemBrowser(url: "https://github.com/pichillilorenzo/flutter_inappwebview");
+          var browserModel = Provider.of<BrowserModel>(context, listen: false);
+          browserModel.addTab(WebViewTab(
+            key: GlobalKey(),
+            webViewModel: WebViewModel(url: Uri.parse("https://github.com/pichillilorenzo/flutter_inappwebview")),
+          ));
+          Navigator.pop(context);
         },
       ),
       RichText(
@@ -65,8 +77,11 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
             ]
         ),
       ),
-      FlatButton.icon(
+      ElevatedButton.icon(
         icon: Icon(FlutterIcons.github_box_mco, size: 40.0,),
+        style: ButtonStyle(
+            backgroundColor: MaterialStateColor.resolveWith((states) => Colors.grey.shade300)
+        ),
         label: RichText(
           text: TextSpan(
               children: [
@@ -82,7 +97,12 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
           ),
         ),
         onPressed: () {
-          InAppBrowser.openWithSystemBrowser(url: "https://github.com/pichillilorenzo/flutter_browser_app");
+          var browserModel = Provider.of<BrowserModel>(context, listen: false);
+          browserModel.addTab(WebViewTab(
+            key: GlobalKey(),
+            webViewModel: WebViewModel(url: Uri.parse("https://github.com/pichillilorenzo/flutter_browser_app")),
+          ));
+          Navigator.pop(context);
         },
       ),
       SizedBox(height: 20.0,),
@@ -105,7 +125,7 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
     if (Platform.isIOS) {
       children.addAll(<Widget>[
         SizedBox(height: 20.0,),
-        FlatButton.icon(
+        ElevatedButton.icon(
           icon: Icon(Icons.arrow_back_ios, size: 30.0,),
           label: Text("Go Back", style: TextStyle(fontSize: 20.0),),
           onPressed: () {
