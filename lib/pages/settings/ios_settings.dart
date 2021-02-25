@@ -368,6 +368,68 @@ class _IOSSettingsState extends State<IOSSettings> {
           }).toList(),
         ),
       ),
+      SwitchListTile(
+        title: const Text("Is Directional Lock Enabled"),
+        subtitle: const Text(
+            "A Boolean value that determines whether scrolling is disabled in a particular direction."),
+        value: currentWebViewModel.options?.ios.isDirectionalLockEnabled ?? false,
+        onChanged: (value) {
+          currentWebViewModel.options?.ios.isDirectionalLockEnabled = value;
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          browserModel.save();
+          setState(() {});
+        },
+      ),
+      ListTile(
+        title: const Text("Media Type"),
+        subtitle: const Text("The media type for the contents of the web view."),
+        trailing: Container(
+          width: 100.0,
+          child: TextFormField(
+            initialValue: currentWebViewModel.options?.ios.mediaType?.toString(),
+            onFieldSubmitted: (value) {
+              currentWebViewModel.options?.ios.mediaType = value.isNotEmpty ? value : null;
+              _webViewController?.setOptions(
+                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              browserModel.save();
+              setState(() {});
+            },
+          ),
+        ),
+      ),
+      ListTile(
+        title: const Text("Page Zoom"),
+        subtitle: const Text("The scale factor by which the web view scales content relative to its bounds."),
+        trailing: Container(
+          width: 50.0,
+          child: TextFormField(
+            initialValue: currentWebViewModel
+                .options?.ios.pageZoom
+                .toString(),
+            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            onFieldSubmitted: (value) {
+              currentWebViewModel.options?.ios.pageZoom =
+                  double.parse(value);
+              _webViewController?.setOptions(
+                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              browserModel.save();
+              setState(() {});
+            },
+          ),
+        ),
+      ),
+      SwitchListTile(
+        title: const Text("Apple Pay API Enabled"),
+        subtitle: const Text(
+            "Indicates if Apple Pay API should be enabled on the next page load (JavaScript won't work)."),
+        value: currentWebViewModel.options?.ios.applePayAPIEnabled ?? false,
+        onChanged: (value) {
+          currentWebViewModel.options?.ios.applePayAPIEnabled = value;
+          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          browserModel.save();
+          setState(() {});
+        },
+      ),
     ];
 
     return widgets;

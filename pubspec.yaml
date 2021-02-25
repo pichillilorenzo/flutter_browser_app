@@ -23,7 +23,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_inappwebview: ^5.0.1-nullsafety.1
+  flutter_inappwebview: ^5.0.3-nullsafety.1
     # path: /Users/lorenzopichilli/Desktop/flutter_inappwebview
   flutter_downloader: ^1.5.2
   path_provider: ^1.6.27
@@ -31,7 +31,7 @@ dependencies:
   provider: ^5.0.0-nullsafety.5
   share: ^2.0.0
   share_extend: ^1.1.9
-  charts_flutter: ^0.9.0
+  # charts_flutter: ^0.9.0
   flutter_datetime_picker: ^1.5.0
   crypto: ^2.1.5
   shared_preferences: ^0.5.12+4
@@ -41,6 +41,7 @@ dependencies:
   mime: ^1.0.0
   url_launcher: ^6.0.0
   # cached_network_image: ^2.5.0
+  flutter_colorpicker: ^0.4.0-nullsafety.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

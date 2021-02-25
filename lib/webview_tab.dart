@@ -28,7 +28,6 @@ class WebViewTab extends StatefulWidget {
 
 class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
   InAppWebViewController? _webViewController;
-  double _opacityLevel = 0.0;
   bool _isWindowClosed = false;
 
   TextEditingController _httpAuthUsernameController = TextEditingController();
@@ -55,36 +54,39 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (_webViewController != null) {
+    if (_webViewController != null && Platform.isAndroid) {
       if (state == AppLifecycleState.paused) {
-        pause();
+        pauseAll();
       } else {
-        if (Platform.isAndroid) {
-          resume();
-        } else if (Platform.isIOS) {
-          var currentWebViewModel = Provider.of<WebViewModel>(context, listen: false);
-          if (widget.webViewModel.tabIndex == currentWebViewModel.tabIndex) {
-            resumeTimers();
-          } else {
-            pauseTimers();
-          }
-        }
+        resumeAll();
       }
     }
   }
 
-  void pause() {
+  void pauseAll() {
     if (Platform.isAndroid) {
       _webViewController?.android.pause();
     }
     pauseTimers();
   }
 
-  void resume() {
+  void resumeAll() {
     if (Platform.isAndroid) {
       _webViewController?.android.resume();
     }
     resumeTimers();
+  }
+
+  void pause() {
+    if (Platform.isAndroid) {
+      _webViewController?.android.pause();
+    }
+  }
+
+  void resume() {
+    if (Platform.isAndroid) {
+      _webViewController?.android.resume();
+    }
   }
 
   void pauseTimers() {
@@ -99,10 +101,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      child: Opacity(
-        opacity: _opacityLevel,
-        child: _buildWebView(),
-      )
+      child: _buildWebView(),
     );
   }
 
@@ -121,6 +120,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     initialOptions.crossPlatform.useShouldOverrideUrlLoading = true;
     initialOptions.crossPlatform.javaScriptCanOpenWindowsAutomatically = true;
     initialOptions.crossPlatform.userAgent = "Mozilla/5.0 (Linux; Android 9; LG-H870 Build/PKQ1.190522.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36";
+    initialOptions.crossPlatform.transparentBackground = true;
 
     initialOptions.android.safeBrowsingEnabled = true;
     initialOptions.android.disableDefaultErrorPage = true;
@@ -141,11 +141,8 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         initialOptions: initialOptions,
         windowId: widget.webViewModel.windowId,
         onWebViewCreated: (controller) async {
-          Future.delayed(const Duration(milliseconds: 150), () {
-            setState(() {
-              _opacityLevel = 1.0;
-            });
-          });
+          initialOptions.crossPlatform.transparentBackground = false;
+          await controller.setOptions(options: initialOptions);
           
           _webViewController = controller;
           widget.webViewModel.webViewController = controller;
@@ -169,6 +166,8 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
           if (isCurrentTab(currentWebViewModel)) {
             currentWebViewModel.updateWithValue(widget.webViewModel);
+          } else if (widget.webViewModel.needsToCompleteInitialLoad) {
+            controller.stopLoading();
           }
         },
         onLoadStop: (controller, url) async {
@@ -206,7 +205,14 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           }
 
           if (isCurrentTab(currentWebViewModel)) {
+            widget.webViewModel.needsToCompleteInitialLoad = false;
             currentWebViewModel.updateWithValue(widget.webViewModel);
+
+            var screenshotData = _webViewController?.takeScreenshot(screenshotConfiguration: ScreenshotConfiguration(
+                compressFormat: CompressFormat.JPEG,
+                quality: 20
+            )).timeout(Duration(milliseconds: 1500), onTimeout: () => null,);
+            widget.webViewModel.screenshot = await screenshotData;
           }
         },
         onProgressChanged: (controller, progress) {
@@ -217,8 +223,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           }
         },
         onUpdateVisitedHistory: (controller, url, androidIsReload) async {
-          var currentUrl = await _webViewController?.getUrl();
-          widget.webViewModel.url = currentUrl?.scheme == "data" ? url : currentUrl;
+          widget.webViewModel.url = url;
           widget.webViewModel.title = await _webViewController?.getTitle();
 
           if (isCurrentTab(currentWebViewModel)) {
@@ -475,11 +480,16 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     return action;
   }
 
-  void onShowTab() {
+  void onShowTab() async {
+    this.resume();
+    if (widget.webViewModel.needsToCompleteInitialLoad) {
+      widget.webViewModel.needsToCompleteInitialLoad = false;
+      await widget.webViewModel.webViewController?.loadUrl(urlRequest: URLRequest(url: widget.webViewModel.url));
 
+    }
   }
 
-  void onHideTab() {
-
+  void onHideTab() async {
+    this.pause();
   }
 }

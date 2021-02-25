@@ -23,6 +23,8 @@ class WebViewModel extends ChangeNotifier {
   int? windowId;
   InAppWebViewGroupOptions? options;
   InAppWebViewController? webViewController;
+  Uint8List? screenshot;
+  bool needsToCompleteInitialLoad;
 
   WebViewModel({
     int? tabIndex,
@@ -40,6 +42,7 @@ class WebViewModel extends ChangeNotifier {
     this.windowId,
     this.options,
     this.webViewController,
+    this.needsToCompleteInitialLoad = true
   }) {
     _tabIndex = tabIndex;
     _url = url;
@@ -230,6 +233,7 @@ class WebViewModel extends ChangeNotifier {
       "javaScriptConsoleHistory": _javaScriptConsoleHistory,
       "isSecure": _isSecure,
       "options": options?.toMap(),
+      "screenshot": screenshot,
     };
   }
 

@@ -283,9 +283,29 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
             }
           });
         },
-        onTap: () {
+        onTap: () async {
           if (browserModel.webViewTabs.length > 0) {
-            SystemChannels.textInput.invokeMethod('TextInput.hide');
+            var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+            var webViewController = webViewModel?.webViewController;
+            var widgetsBingind = WidgetsBinding.instance;
+
+            if(widgetsBingind != null && widgetsBingind.window.viewInsets.bottom > 0.0) {
+              SystemChannels.textInput.invokeMethod('TextInput.hide');
+              if (FocusManager.instance.primaryFocus != null)
+                FocusManager.instance.primaryFocus!.unfocus();
+              if (webViewController != null) {
+                await webViewController.evaluateJavascript(source: "document.activeElement.blur();");
+              }
+              await Future.delayed(Duration(milliseconds: 300));
+            }
+            
+            if (webViewModel != null && webViewController != null) {
+              webViewModel.screenshot = await webViewController.takeScreenshot(screenshotConfiguration: ScreenshotConfiguration(
+                  compressFormat: CompressFormat.JPEG,
+                  quality: 20
+              )).timeout(Duration(milliseconds: 1500), onTimeout: () => null,);
+            }
+
             browserModel.showTabScroller = true;
           }
         },
@@ -1030,7 +1050,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
           return AlertDialog(
             content: Image.memory(screenshot),
             actions: <Widget>[
-              FlatButton(
+              ElevatedButton(
                 child: Text("Share"),
                 onPressed: () async {
                   await ShareExtend.share(file.path, "image");

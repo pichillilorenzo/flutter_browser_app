@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_browser/main.dart';
 import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/search_engine_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';

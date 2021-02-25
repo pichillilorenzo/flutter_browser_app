@@ -3,6 +3,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import 'main.dart';
+
 class ScrollableTab extends StatefulWidget {
   final Widget child;
   final double top;
@@ -87,28 +89,28 @@ class _TabViewerState extends State<TabViewer> with SingleTickerProviderStateMix
     for (var i = 0; i < widget.children.length; i++) {
       if (widget.currentIndex == i) {
         if (widget.currentIndex == 0) {
-          positions[widget.currentIndex] = 0;
+          positions[widget.currentIndex] = TAB_VIEWER_TOP_OFFSET_1;
         } else if (widget.currentIndex == 1) {
-          positions[widget.currentIndex] = 10;
+          positions[widget.currentIndex] = TAB_VIEWER_TOP_OFFSET_2;
         } else if (widget.currentIndex >= 2) {
-          positions[widget.currentIndex] = 20;
+          positions[widget.currentIndex] = TAB_VIEWER_TOP_OFFSET_3;
         }
       } else {
         if (i < widget.currentIndex) {
           if (i == 0) {
-            positions[i] = 0;
+            positions[i] = TAB_VIEWER_TOP_OFFSET_1;
           } else if (i == 1) {
-            positions[i] = 10;
+            positions[i] = TAB_VIEWER_TOP_OFFSET_2;
           } else if (i >= 2) {
-            positions[i] = 20;
+            positions[i] = TAB_VIEWER_TOP_OFFSET_3;
           }
         } else {
           if (i == positions.length - 1) {
-            positions[i] = MediaQuery.of(context).size.height - 120;
+            positions[i] = MediaQuery.of(context).size.height - TAB_VIEWER_BOTTOM_OFFSET_1;
           } else if (i == positions.length - 2) {
-            positions[i] = MediaQuery.of(context).size.height - 130;
+            positions[i] = MediaQuery.of(context).size.height - TAB_VIEWER_BOTTOM_OFFSET_2;
           } else if (i <= positions.length - 3) {
-            positions[i] = MediaQuery.of(context).size.height - 140;
+            positions[i] = MediaQuery.of(context).size.height - TAB_VIEWER_BOTTOM_OFFSET_3;
           }
         }
       }
@@ -124,7 +126,7 @@ class _TabViewerState extends State<TabViewer> with SingleTickerProviderStateMix
       positions.removeRange(positions.length - diffLength - 1, positions.length - 1);
       focusedIndex = focusedIndex - 1 < 0 ? 0 : focusedIndex - 1;
       if (positions.length == 1) {
-        positions[0] = 0.0;
+        positions[0] = TAB_VIEWER_TOP_OFFSET_1;
       }
     }
   }
@@ -138,8 +140,7 @@ class _TabViewerState extends State<TabViewer> with SingleTickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: SafeArea(
-      child: GestureDetector(
+        body: GestureDetector(
           onVerticalDragUpdate: (details) {
             setState(() {
               _timer?.cancel();
@@ -157,6 +158,7 @@ class _TabViewerState extends State<TabViewer> with SingleTickerProviderStateMix
                 _timer?.cancel();
                 return;
               }
+
               setState(() {
                 updatePositions(dy);
               });
@@ -171,23 +173,23 @@ class _TabViewerState extends State<TabViewer> with SingleTickerProviderStateMix
                   index != 0 &&
                   index != positions.length - 1) {
                 opacity = 0.15;
-              } else if ((index > 2 && positions[index] <= 20) ||
+              } else if ((index > 2 && positions[index] <= TAB_VIEWER_TOP_OFFSET_3) ||
                   (index < positions.length - 3 &&
                       positions[index] >=
-                          MediaQuery.of(context).size.height - 140)) {
+                          MediaQuery.of(context).size.height - TAB_VIEWER_BOTTOM_OFFSET_3)) {
                 opacity = 0.0;
               }
 
               double scale = 1.0;
-              if (positions[index] < 250) {
-                scale = (positions[index] / 250) + 0.85;
+              if (positions[index] < TAB_VIEWER_TOP_SCALE_TOP_OFFSET) {
+                scale = (positions[index] / TAB_VIEWER_TOP_SCALE_TOP_OFFSET) + 0.85;
                 if (scale > 1) {
                   scale = 1.0;
                 }
               }
-              else if (positions[index] > MediaQuery.of(context).size.height - 230) {
-                var diff = MediaQuery.of(context).size.height - 120 - positions[index];
-                scale = (diff / 230) + 0.7;
+              else if (positions[index] > MediaQuery.of(context).size.height - TAB_VIEWER_TOP_SCALE_BOTTOM_OFFSET) {
+                var diff = MediaQuery.of(context).size.height - TAB_VIEWER_BOTTOM_OFFSET_1 - positions[index];
+                scale = (diff / TAB_VIEWER_TOP_SCALE_BOTTOM_OFFSET) + 0.7;
                 if (scale > 1) {
                   scale = 1.0;
                 }
@@ -219,37 +221,45 @@ class _TabViewerState extends State<TabViewer> with SingleTickerProviderStateMix
                 );
             }).toList(),
           )),
-    ));
+    );
   }
 
   void updatePositions(double dy) {
     positions[focusedIndex] =
         focusedIndex != 0 ? positions[focusedIndex] + dy : 0.0;
-    if (focusedIndex == 0 && positions[focusedIndex] <= 0) {
-      positions[focusedIndex] = 0;
+    if (focusedIndex == 0 && positions[focusedIndex] <= TAB_VIEWER_TOP_OFFSET_1) {
+      positions[focusedIndex] = TAB_VIEWER_TOP_OFFSET_1;
+      focusedIndex = min(positions.length - 1, focusedIndex);
+    } else if (focusedIndex == 1 && positions[focusedIndex] < TAB_VIEWER_TOP_OFFSET_2) {
+      positions[focusedIndex] = TAB_VIEWER_TOP_OFFSET_2;
       focusedIndex = min(positions.length - 1, focusedIndex + 1);
-    } else if (focusedIndex == 1 && positions[focusedIndex] < 10) {
-      positions[focusedIndex] = 10;
-      focusedIndex = min(positions.length - 1, focusedIndex + 1);
-    } else if (focusedIndex >= 2 && positions[focusedIndex] < 20) {
-      positions[focusedIndex] = 20;
+    } else if (focusedIndex >= 2 && positions[focusedIndex] < TAB_VIEWER_TOP_OFFSET_3) {
+      positions[focusedIndex] = TAB_VIEWER_TOP_OFFSET_3;
       focusedIndex = min(positions.length - 1, focusedIndex + 1);
     } else if (focusedIndex == positions.length - 1 &&
-        positions[focusedIndex] > MediaQuery.of(context).size.height - 120) {
-      positions[focusedIndex] = MediaQuery.of(context).size.height - 120;
+        positions[focusedIndex] > MediaQuery.of(context).size.height - TAB_VIEWER_BOTTOM_OFFSET_1) {
+      positions[focusedIndex] = MediaQuery.of(context).size.height - TAB_VIEWER_BOTTOM_OFFSET_1;
       focusedIndex = max(0, focusedIndex - 1);
     } else if (focusedIndex == positions.length - 2 &&
-        positions[focusedIndex] > MediaQuery.of(context).size.height - 130) {
-      positions[focusedIndex] = MediaQuery.of(context).size.height - 130;
+        positions[focusedIndex] > MediaQuery.of(context).size.height - TAB_VIEWER_BOTTOM_OFFSET_2) {
+      positions[focusedIndex] = MediaQuery.of(context).size.height - TAB_VIEWER_BOTTOM_OFFSET_2;
       focusedIndex = max(0, focusedIndex - 1);
     } else if (focusedIndex <= positions.length - 3 &&
-        positions[focusedIndex] > MediaQuery.of(context).size.height - 140) {
-      positions[focusedIndex] = MediaQuery.of(context).size.height - 140;
+        positions[focusedIndex] > MediaQuery.of(context).size.height - TAB_VIEWER_BOTTOM_OFFSET_3) {
+      positions[focusedIndex] = MediaQuery.of(context).size.height - TAB_VIEWER_BOTTOM_OFFSET_3;
       focusedIndex = max(0, focusedIndex - 1);
     }
     if (focusedIndex == 0 && dy < 0 && positions.length > 0 && focusedIndex + 1 < positions.length) {
       focusedIndex++;
       positions[focusedIndex] = positions[focusedIndex] + dy;
+    }
+
+    if (focusedIndex == 0) {
+      _timer?.cancel();
+    } else if (focusedIndex == positions.length - 1 && positions[focusedIndex] <= TAB_VIEWER_TOP_OFFSET_3) {
+      _timer?.cancel();
+    } else if (focusedIndex == positions.length - 2 && positions.length == 2 && positions[focusedIndex] <= TAB_VIEWER_TOP_OFFSET_2) {
+      _timer?.cancel();
     }
   }
 }

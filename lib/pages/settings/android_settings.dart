@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
@@ -848,6 +849,138 @@ class _AndroidSettingsState extends State<AndroidSettings> {
               setState(() {});
             },
           ),
+        ),
+      ),
+      ListTile(
+        title: const Text("Vertical Scrollbar Thumb Color"),
+        subtitle:
+        const Text("Sets the vertical scrollbar thumb color."),
+        trailing: Container(
+          width: 140.0,
+          child: ElevatedButton(
+            child: Text(currentWebViewModel.options?.android.verticalScrollbarThumbColor?.toString() ?? 'Pick a color!', style: TextStyle(fontSize: 12.5),),
+            onPressed: () {
+              showDialog(context: context, builder: (context) {
+                return AlertDialog(
+                  content: SingleChildScrollView(
+                    child: ColorPicker(
+                      pickerColor: Color(0xffffffff),
+                      onColorChanged: (value) async {
+                        currentWebViewModel.options?.android.verticalScrollbarThumbColor = value;
+                        _webViewController?.setOptions(
+                            options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+                        currentWebViewModel.options =
+                        await _webViewController?.getOptions();
+                        browserModel.save();
+                        setState(() {});
+                      },
+                      showLabel: true,
+                      pickerAreaHeightPercent: 0.8,
+                    ),
+                  ),
+                );
+              },);
+            },
+          )
+        ),
+      ),
+      ListTile(
+        title: const Text("Vertical Scrollbar Track Color"),
+        subtitle:
+        const Text("Sets the vertical scrollbar track color."),
+        trailing: Container(
+            width: 140.0,
+            child: ElevatedButton(
+              child: Text(currentWebViewModel.options?.android.verticalScrollbarTrackColor?.toString() ?? 'Pick a color!', style: TextStyle(fontSize: 12.5),),
+              onPressed: () {
+                showDialog(context: context, builder: (context) {
+                  return AlertDialog(
+                    content: SingleChildScrollView(
+                      child: ColorPicker(
+                        pickerColor: Color(0xffffffff),
+                        onColorChanged: (value) async {
+                          currentWebViewModel.options?.android.verticalScrollbarTrackColor = value;
+                          _webViewController?.setOptions(
+                              options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+                          currentWebViewModel.options =
+                          await _webViewController?.getOptions();
+                          browserModel.save();
+                          setState(() {});
+                        },
+                        showLabel: true,
+                        pickerAreaHeightPercent: 0.8,
+                      ),
+                    ),
+                  );
+                },);
+              },
+            )
+        ),
+      ),
+      ListTile(
+        title: const Text("Horizontal Scrollbar Thumb Color"),
+        subtitle:
+        const Text("Sets the horizontal scrollbar thumb color."),
+        trailing: Container(
+            width: 140.0,
+            child: ElevatedButton(
+              child: Text(currentWebViewModel.options?.android.horizontalScrollbarThumbColor?.toString() ?? 'Pick a color!', style: TextStyle(fontSize: 12.5),),
+              onPressed: () {
+                showDialog(context: context, builder: (context) {
+                  return AlertDialog(
+                    content: SingleChildScrollView(
+                      child: ColorPicker(
+                        pickerColor: Color(0xffffffff),
+                        onColorChanged: (value) async {
+                          currentWebViewModel.options?.android.horizontalScrollbarThumbColor = value;
+                          _webViewController?.setOptions(
+                              options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+                          currentWebViewModel.options =
+                          await _webViewController?.getOptions();
+                          browserModel.save();
+                          setState(() {});
+                        },
+                        showLabel: true,
+                        pickerAreaHeightPercent: 0.8,
+                      ),
+                    ),
+                  );
+                },);
+              },
+            )
+        ),
+      ),
+      ListTile(
+        title: const Text("Horizontal Scrollbar Track Color"),
+        subtitle:
+        const Text("Sets the horizontal scrollbar track color."),
+        trailing: Container(
+            width: 140.0,
+            child: ElevatedButton(
+              child: Text(currentWebViewModel.options?.android.horizontalScrollbarTrackColor?.toString() ?? 'Pick a color!', style: TextStyle(fontSize: 12.5),),
+              onPressed: () {
+                showDialog(context: context, builder: (context) {
+                  return AlertDialog(
+                    content: SingleChildScrollView(
+                      child: ColorPicker(
+                        pickerColor: Color(0xffffffff),
+                        onColorChanged: (value) async {
+                          currentWebViewModel.options?.android.horizontalScrollbarTrackColor = value;
+                          _webViewController?.setOptions(
+                              options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+                          currentWebViewModel.options =
+                          await _webViewController?.getOptions();
+                          browserModel.save();
+                          setState(() {});
+                        },
+                        showLabel: true,
+                        pickerAreaHeightPercent: 0.8,
+                      ),
+                    ),
+                  );
+                },);
+              },
+            )
         ),
       ),
     ];
