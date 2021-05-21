@@ -94,6 +94,8 @@ flutter:
     - assets/images/bing_logo.png
     - assets/images/duckduckgo_logo.png
     - assets/images/ecosia_logo.png
+    - assets/images/yandex_logo.png
+    - assets/images/baidu_logo.png
     - assets/icon/icon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
