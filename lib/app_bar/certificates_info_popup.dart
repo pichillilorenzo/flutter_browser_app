@@ -900,7 +900,7 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                       recognizer: TapGestureRecognizer()..onTap = () async {
                         final taskId = await FlutterDownloader.enqueue(
                           url: cRLDistributionPoints.crls![i],
-                          savedDir: (await getExternalStorageDirectory()).path,
+                          savedDir: (await getExternalStorageDirectory())!.path,
                           showNotification: true, // show download progress in status bar (for Android)
                           openFileFromNotification: true, // click on notification to open downloaded file (for Android)
                         );
@@ -982,7 +982,7 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                       recognizer: TapGestureRecognizer()..onTap = () async {
                         final taskId = await FlutterDownloader.enqueue(
                           url: value,
-                          savedDir: (await getExternalStorageDirectory()).path,
+                          savedDir: (await getExternalStorageDirectory())!.path,
                           showNotification: true, // show download progress in status bar (for Android)
                           openFileFromNotification: true, // click on notification to open downloaded file (for Android)
                         );

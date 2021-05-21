@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.1.0+4
 
 environment:
-  sdk: ">=2.12.0-0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -26,18 +26,30 @@ dependencies:
   flutter_inappwebview: ^5.0.3-nullsafety.1
     # path: /Users/lorenzopichilli/Desktop/flutter_inappwebview
   flutter_downloader: ^1.5.2
-  path_provider: ^1.6.27
-  permission_handler: ^5.1.0+2
+  path_provider: ^2.0.1
+  permission_handler: ^8.0.0
   provider: ^5.0.0-nullsafety.5
   share: ^2.0.0
-  share_extend: ^1.1.9
+  share_extend: ^2.0.0
   # charts_flutter: ^0.9.0
-  flutter_datetime_picker: ^1.5.0
-  crypto: ^2.1.5
-  shared_preferences: ^0.5.12+4
+  # flutter_datetime_picker: ^1.5.0
+  #Null-safe https://github.com/Realank/flutter_datetime_picker/issues/241
+  flutter_datetime_picker:
+    git:
+      url: https://github.com/Realank/flutter_datetime_picker.git
+      ref: master
+
+  crypto: ^3.0.1
+  shared_preferences: ^2.0.5
   package_info: ^2.0.0
-  flutter_icons: ^1.1.0
-  flutter_svg: ^0.21.0-nullsafety.0
+  #flutter_icons: ^1.1.0
+  #Null-safe https://github.com/flutter-studio/flutter-icons/issues/41
+  flutter_icons:
+    git:
+      url: https://github.com/adarsh-technocrat/flutter-icons.git
+      branch: null-safety-migration
+
+  flutter_svg: ^0.22.0
   mime: ^1.0.0
   url_launcher: ^6.0.0
   # cached_network_image: ^2.5.0
@@ -47,14 +59,17 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
 
+  #
+  intl: ^0.17.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   # flutter_launcher_icons: ^0.8.1
 
-dependency_overrides:
-  intl: ^0.17.0
-  uuid: ^2.0.2
+# dependency_overrides:
+# intl: ^0.17.0
+ # uuid: ^3.0.4
 
 flutter_icons:
   android: "launcher_icon"
