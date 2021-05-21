@@ -253,9 +253,9 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
           String fileName = path.substring(path.lastIndexOf('/') + 1);
 
           final taskId = await FlutterDownloader.enqueue(
-            url: widget.hitTestResult.extra,
+            url: widget.hitTestResult.extra!,
             fileName: fileName,
-            savedDir: (await getExternalStorageDirectory()).path,
+            savedDir: (await getExternalStorageDirectory())!.path,
             showNotification: true,
             openFileFromNotification: true,
           );

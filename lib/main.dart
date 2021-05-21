@@ -1,3 +1,4 @@
+
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -58,7 +59,7 @@ void main() async {
             browserModel!.setCurrentWebViewModel(webViewModel);
             return browserModel;
           },
-          create: (BuildContext context) => BrowserModel(null),
+          create: (BuildContext context) => BrowserModel(WebViewModel()),
         ),
       ],
       child: FlutterBrowserApp(),

@@ -272,7 +272,7 @@ class BrowserModel extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     Map<String, dynamic> browserData;
     try {
-      browserData = await json.decode(prefs.getString("browser"));
+      browserData = await json.decode(prefs.getString("browser")!);
     } catch (e) {
       print(e);
       return;
