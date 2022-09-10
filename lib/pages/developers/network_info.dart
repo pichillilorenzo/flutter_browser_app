@@ -10,10 +10,10 @@ import 'package:provider/provider.dart';
 // import 'package:charts_flutter/flutter.dart' as charts;
 
 class NetworkInfo extends StatefulWidget {
-  NetworkInfo({Key? key}) : super(key: key);
+  const NetworkInfo({Key? key}) : super(key: key);
 
   @override
-  _NetworkInfoState createState() => _NetworkInfoState();
+  State<NetworkInfo> createState() => _NetworkInfoState();
 }
 
 class _NetworkInfoState extends State<NetworkInfo> {
@@ -27,7 +27,7 @@ class _NetworkInfoState extends State<NetworkInfo> {
       return Selector<WebViewModel, List<LoadedResource>>(
           selector: (context, webViewModel) => webViewModel.loadedResources,
           builder: (context, loadedResources, child) {
-            var textStyle = TextStyle(fontSize: 14.0);
+            var textStyle = const TextStyle(fontSize: 14.0);
 
             var listViewChildren = <Widget>[
               // Container(
@@ -115,10 +115,12 @@ class _NetworkInfoState extends State<NetworkInfo> {
                   iconData = Icons.insert_drive_file;
               }
 
-              var icon;
+              Widget icon;
               var mimeType = lookupMimeType(url.toString());
 
-              if (mimeType != null && mimeType.startsWith("image/") && mimeType != "image/svg+xml") {
+              if (mimeType != null &&
+                  mimeType.startsWith("image/") &&
+                  mimeType != "image/svg+xml") {
                 // icon = CachedNetworkImage(
                 //   imageUrl: url.toString(),
                 //   width: 20.0,
@@ -151,17 +153,17 @@ class _NetworkInfoState extends State<NetworkInfo> {
                           ClipboardData(text: loadedResoruce.url?.toString()));
                     },
                     child: Container(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 5.0, horizontal: 2.5),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 5.0, horizontal: 2.5),
                       width: constraints.maxWidth / 3.0,
                       child: Row(
                         children: <Widget>[
-                          Container(
+                          SizedBox(
                             height: 20.0,
                             width: 20.0,
                             child: icon,
                           ),
-                          SizedBox(
+                          const SizedBox(
                             width: 10.0,
                           ),
                           Expanded(
@@ -177,21 +179,27 @@ class _NetworkInfoState extends State<NetworkInfo> {
                 Container(
                   width: constraints.maxWidth / 4,
                   alignment: Alignment.centerRight,
-                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 2.5),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 5.0, horizontal: 2.5),
                   child: Text(domain,
                       overflow: TextOverflow.ellipsis, style: textStyle),
                 ),
                 Container(
                   width: constraints.maxWidth / 4,
-                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 2.5),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 5.0, horizontal: 2.5),
                   alignment: Alignment.center,
-                  child: Text(loadedResoruce.initiatorType ?? "", style: textStyle),
+                  child: Text(loadedResoruce.initiatorType ?? "",
+                      style: textStyle),
                 ),
                 Flexible(
                     child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 2.5),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 5.0, horizontal: 2.5),
                   child: Text(
-                      (loadedResoruce.duration != null) ? loadedResoruce.duration!.toStringAsFixed(2) + " ms" : "",
+                      (loadedResoruce.duration != null)
+                          ? "${loadedResoruce.duration!.toStringAsFixed(2)} ms"
+                          : "",
                       style: textStyle),
                 ))
               ]);

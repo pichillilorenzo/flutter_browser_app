@@ -6,10 +6,10 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
 class AndroidSettings extends StatefulWidget {
-  AndroidSettings({Key? key}) : super(key: key);
+  const AndroidSettings({Key? key}) : super(key: key);
 
   @override
-  _AndroidSettingsState createState() => _AndroidSettingsState();
+  State<AndroidSettings> createState() => _AndroidSettingsState();
 }
 
 class _AndroidSettingsState extends State<AndroidSettings> {
@@ -22,32 +22,33 @@ class _AndroidSettingsState extends State<AndroidSettings> {
 
   List<Widget> _buildAndroidWebViewTabSettings() {
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
-    if (browserModel.webViewTabs.length == 0) {
+    if (browserModel.webViewTabs.isEmpty) {
       return [];
     }
     var currentWebViewModel = Provider.of<WebViewModel>(context, listen: true);
-    var _webViewController = currentWebViewModel.webViewController;
+    var webViewController = currentWebViewModel.webViewController;
 
     var widgets = <Widget>[
-      ListTile(
-        title: const Text("Current WebView Android Settings"),
+      const ListTile(
+        title: Text("Current WebView Android Settings"),
         enabled: false,
       ),
       ListTile(
         title: const Text("Text Zoom"),
         subtitle: const Text("Sets the text zoom of the page in percent."),
-        trailing: Container(
+        trailing: SizedBox(
           width: 50.0,
           child: TextFormField(
             initialValue:
                 currentWebViewModel.options?.android.textZoom.toString(),
-            keyboardType: TextInputType.numberWithOptions(),
+            keyboardType: const TextInputType.numberWithOptions(),
             onFieldSubmitted: (value) async {
               currentWebViewModel.options?.android.textZoom = int.parse(value);
-              _webViewController?.setOptions(
-                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              webViewController?.setOptions(
+                  options: currentWebViewModel.options ??
+                      InAppWebViewGroupOptions());
               currentWebViewModel.options =
-                  await _webViewController?.getOptions();
+                  await webViewController?.getOptions();
               browserModel.save();
               setState(() {});
             },
@@ -61,8 +62,10 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         value: currentWebViewModel.options?.android.clearSessionCache ?? false,
         onChanged: (value) async {
           currentWebViewModel.options?.android.clearSessionCache = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
@@ -71,11 +74,14 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         title: const Text("Built In Zoom Controls"),
         subtitle: const Text(
             "Sets whether the WebView should use its built-in zoom mechanisms."),
-        value: currentWebViewModel.options?.android.builtInZoomControls ?? false,
+        value:
+            currentWebViewModel.options?.android.builtInZoomControls ?? false,
         onChanged: (value) async {
           currentWebViewModel.options?.android.builtInZoomControls = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
@@ -84,11 +90,14 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         title: const Text("Display Zoom Controls"),
         subtitle: const Text(
             "Sets whether the WebView should display on-screen zoom controls when using the built-in zoom mechanisms."),
-        value: currentWebViewModel.options?.android.displayZoomControls ?? false,
+        value:
+            currentWebViewModel.options?.android.displayZoomControls ?? false,
         onChanged: (value) async {
           currentWebViewModel.options?.android.displayZoomControls = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
@@ -100,8 +109,10 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         value: currentWebViewModel.options?.android.databaseEnabled ?? true,
         onChanged: (value) async {
           currentWebViewModel.options?.android.databaseEnabled = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
@@ -114,7 +125,9 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         onChanged: (value) {
           setState(() {
             currentWebViewModel.options?.android.domStorageEnabled = value;
-            _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+            webViewController?.setOptions(
+                options:
+                    currentWebViewModel.options ?? InAppWebViewGroupOptions());
             browserModel.save();
           });
         },
@@ -126,26 +139,31 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         value: currentWebViewModel.options?.android.useWideViewPort ?? true,
         onChanged: (value) async {
           currentWebViewModel.options?.android.useWideViewPort = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
       ),
-      ListTile(
-        title: const Text("Mixed Content Mode"),
-        subtitle: const Text(
+      const ListTile(
+        title: Text("Mixed Content Mode"),
+        subtitle: Text(
             "Configures the WebView's behavior when a secure origin attempts to load a resource from an insecure origin."),
       ),
       Container(
-        padding: EdgeInsets.only(left: 20.0, top: 0.0, right: 20.0, bottom: 10.0),
+        padding: const EdgeInsets.only(
+            left: 20.0, top: 0.0, right: 20.0, bottom: 10.0),
         alignment: Alignment.center,
         child: DropdownButton<AndroidMixedContentMode>(
-          hint: Text("Mixed Content Mode"),
+          hint: const Text("Mixed Content Mode"),
           onChanged: (value) async {
             currentWebViewModel.options?.android.mixedContentMode = value;
-            _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-            currentWebViewModel.options = await _webViewController?.getOptions();
+            webViewController?.setOptions(
+                options:
+                    currentWebViewModel.options ?? InAppWebViewGroupOptions());
+            currentWebViewModel.options = await webViewController?.getOptions();
             browserModel.save();
             setState(() {});
           },
@@ -155,7 +173,7 @@ class _AndroidSettingsState extends State<AndroidSettings> {
               value: mixedContentMode,
               child: Text(
                 mixedContentMode.toString(),
-                style: TextStyle(fontSize: 12.5),
+                style: const TextStyle(fontSize: 12.5),
               ),
             );
           }).toList(),
@@ -168,8 +186,10 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         value: currentWebViewModel.options?.android.allowContentAccess ?? true,
         onChanged: (value) async {
           currentWebViewModel.options?.android.allowContentAccess = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
@@ -181,29 +201,32 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         value: currentWebViewModel.options?.android.allowFileAccess ?? true,
         onChanged: (value) async {
           currentWebViewModel.options?.android.allowFileAccess = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
       ),
-      ListTile(
-        title: const Text("App Cache Path"),
-        subtitle: const Text(
+      const ListTile(
+        title: Text("App Cache Path"),
+        subtitle: Text(
             "Sets the path to the Application Caches files. In order for the Application Caches API to be enabled, this option must be set a path to which the application can write."),
       ),
       Container(
-        padding: EdgeInsets.only(left: 20.0, top: 0.0, right: 20.0, bottom: 20.0),
+        padding: const EdgeInsets.only(
+            left: 20.0, top: 0.0, right: 20.0, bottom: 20.0),
         alignment: Alignment.center,
         child: TextFormField(
           initialValue: currentWebViewModel.options?.android.appCachePath,
           keyboardType: TextInputType.text,
           onFieldSubmitted: (value) async {
             currentWebViewModel.options?.android.appCachePath = value.trim();
-            _webViewController?.setOptions(
-                options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-            currentWebViewModel.options =
-            await _webViewController?.getOptions();
+            webViewController?.setOptions(
+                options:
+                    currentWebViewModel.options ?? InAppWebViewGroupOptions());
+            currentWebViewModel.options = await webViewController?.getOptions();
             browserModel.save();
             setState(() {});
           },
@@ -216,8 +239,10 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         value: currentWebViewModel.options?.android.blockNetworkImage ?? false,
         onChanged: (value) async {
           currentWebViewModel.options?.android.blockNetworkImage = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
@@ -229,26 +254,31 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         value: currentWebViewModel.options?.android.blockNetworkLoads ?? false,
         onChanged: (value) async {
           currentWebViewModel.options?.android.blockNetworkLoads = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
       ),
-      ListTile(
-        title: const Text("Cache Mode"),
-        subtitle: const Text(
+      const ListTile(
+        title: Text("Cache Mode"),
+        subtitle: Text(
             "Overrides the way the cache is used. The way the cache is used is based on the navigation type."),
       ),
       Container(
-        padding: EdgeInsets.only(left: 20.0, top: 0.0, right: 20.0, bottom: 10.0),
+        padding: const EdgeInsets.only(
+            left: 20.0, top: 0.0, right: 20.0, bottom: 10.0),
         alignment: Alignment.center,
         child: DropdownButton<AndroidCacheMode>(
-          hint: Text("Cache Mode"),
+          hint: const Text("Cache Mode"),
           onChanged: (value) async {
             currentWebViewModel.options?.android.cacheMode = value;
-            _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-            currentWebViewModel.options = await _webViewController?.getOptions();
+            webViewController?.setOptions(
+                options:
+                    currentWebViewModel.options ?? InAppWebViewGroupOptions());
+            currentWebViewModel.options = await webViewController?.getOptions();
             browserModel.save();
             setState(() {});
           },
@@ -258,7 +288,7 @@ class _AndroidSettingsState extends State<AndroidSettings> {
               value: cacheMode,
               child: Text(
                 cacheMode.toString(),
-                style: TextStyle(fontSize: 12.5),
+                style: const TextStyle(fontSize: 12.5),
               ),
             );
           }).toList(),
@@ -267,17 +297,19 @@ class _AndroidSettingsState extends State<AndroidSettings> {
       ListTile(
         title: const Text("Cursive Font Family"),
         subtitle: const Text("Sets the cursive font family name."),
-        trailing: Container(
+        trailing: SizedBox(
           width: MediaQuery.of(context).size.width / 3,
           child: TextFormField(
-            initialValue: currentWebViewModel.options?.android.cursiveFontFamily,
+            initialValue:
+                currentWebViewModel.options?.android.cursiveFontFamily,
             keyboardType: TextInputType.text,
             onFieldSubmitted: (value) async {
               currentWebViewModel.options?.android.cursiveFontFamily = value;
-              _webViewController?.setOptions(
-                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              webViewController?.setOptions(
+                  options: currentWebViewModel.options ??
+                      InAppWebViewGroupOptions());
               currentWebViewModel.options =
-                  await _webViewController?.getOptions();
+                  await webViewController?.getOptions();
               browserModel.save();
               setState(() {});
             },
@@ -287,20 +319,21 @@ class _AndroidSettingsState extends State<AndroidSettings> {
       ListTile(
         title: const Text("Default Fixed Font Size"),
         subtitle: const Text("Sets the default fixed font size."),
-        trailing: Container(
+        trailing: SizedBox(
           width: 50,
           child: TextFormField(
             initialValue: currentWebViewModel
                 .options?.android.defaultFixedFontSize
                 .toString(),
-            keyboardType: TextInputType.numberWithOptions(),
+            keyboardType: const TextInputType.numberWithOptions(),
             onFieldSubmitted: (value) async {
               currentWebViewModel.options?.android.defaultFixedFontSize =
                   int.parse(value);
-              _webViewController?.setOptions(
-                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              webViewController?.setOptions(
+                  options: currentWebViewModel.options ??
+                      InAppWebViewGroupOptions());
               currentWebViewModel.options =
-                  await _webViewController?.getOptions();
+                  await webViewController?.getOptions();
               browserModel.save();
               setState(() {});
             },
@@ -310,19 +343,20 @@ class _AndroidSettingsState extends State<AndroidSettings> {
       ListTile(
         title: const Text("Default Font Size"),
         subtitle: const Text("Sets the default font size."),
-        trailing: Container(
+        trailing: SizedBox(
           width: 50.0,
           child: TextFormField(
             initialValue:
                 currentWebViewModel.options?.android.defaultFontSize.toString(),
-            keyboardType: TextInputType.numberWithOptions(),
+            keyboardType: const TextInputType.numberWithOptions(),
             onFieldSubmitted: (value) async {
               currentWebViewModel.options?.android.defaultFontSize =
                   int.parse(value);
-              _webViewController?.setOptions(
-                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              webViewController?.setOptions(
+                  options: currentWebViewModel.options ??
+                      InAppWebViewGroupOptions());
               currentWebViewModel.options =
-                  await _webViewController?.getOptions();
+                  await webViewController?.getOptions();
               browserModel.save();
               setState(() {});
             },
@@ -333,7 +367,7 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         title: const Text("Default Text Encoding Name"),
         subtitle: const Text(
             "Sets the default text encoding name to use when decoding html pages."),
-        trailing: Container(
+        trailing: SizedBox(
           width: MediaQuery.of(context).size.width / 3,
           child: TextFormField(
             initialValue:
@@ -342,42 +376,46 @@ class _AndroidSettingsState extends State<AndroidSettings> {
             onFieldSubmitted: (value) async {
               currentWebViewModel.options?.android.defaultTextEncodingName =
                   value;
-              _webViewController?.setOptions(
-                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              webViewController?.setOptions(
+                  options: currentWebViewModel.options ??
+                      InAppWebViewGroupOptions());
               currentWebViewModel.options =
-                  await _webViewController?.getOptions();
+                  await webViewController?.getOptions();
               browserModel.save();
               setState(() {});
             },
           ),
         ),
       ),
-      ListTile(
-        title: const Text("Disabled Action Mode Menu Items"),
-        subtitle: const Text(
+      const ListTile(
+        title: Text("Disabled Action Mode Menu Items"),
+        subtitle: Text(
             "Disables the action mode menu items according to menuItems flag."),
       ),
       Container(
-        padding: EdgeInsets.only(left: 20.0, top: 0.0, right: 20.0, bottom: 10.0),
+        padding: const EdgeInsets.only(
+            left: 20.0, top: 0.0, right: 20.0, bottom: 10.0),
         alignment: Alignment.center,
         child: DropdownButton<AndroidActionModeMenuItem>(
-          hint: Text("Action Mode Menu Items"),
+          hint: const Text("Action Mode Menu Items"),
           onChanged: (value) async {
             currentWebViewModel.options?.android.disabledActionModeMenuItems =
                 value;
-            _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-            currentWebViewModel.options = await _webViewController?.getOptions();
+            webViewController?.setOptions(
+                options:
+                    currentWebViewModel.options ?? InAppWebViewGroupOptions());
+            currentWebViewModel.options = await webViewController?.getOptions();
             browserModel.save();
             setState(() {});
           },
           value:
-          currentWebViewModel.options?.android.disabledActionModeMenuItems,
+              currentWebViewModel.options?.android.disabledActionModeMenuItems,
           items: AndroidActionModeMenuItem.values.map((actionModeMenuItem) {
             return DropdownMenuItem<AndroidActionModeMenuItem>(
               value: actionModeMenuItem,
               child: Text(
                 actionModeMenuItem.toString(),
-                style: TextStyle(fontSize: 12.5),
+                style: const TextStyle(fontSize: 12.5),
               ),
             );
           }).toList(),
@@ -386,17 +424,19 @@ class _AndroidSettingsState extends State<AndroidSettings> {
       ListTile(
         title: const Text("Fantasy Font Family"),
         subtitle: const Text("Sets the fantasy font family name."),
-        trailing: Container(
+        trailing: SizedBox(
           width: MediaQuery.of(context).size.width / 3,
           child: TextFormField(
-            initialValue: currentWebViewModel.options?.android.fantasyFontFamily,
+            initialValue:
+                currentWebViewModel.options?.android.fantasyFontFamily,
             keyboardType: TextInputType.text,
             onFieldSubmitted: (value) async {
               currentWebViewModel.options?.android.fantasyFontFamily = value;
-              _webViewController?.setOptions(
-                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              webViewController?.setOptions(
+                  options: currentWebViewModel.options ??
+                      InAppWebViewGroupOptions());
               currentWebViewModel.options =
-                  await _webViewController?.getOptions();
+                  await webViewController?.getOptions();
               browserModel.save();
               setState(() {});
             },
@@ -406,17 +446,18 @@ class _AndroidSettingsState extends State<AndroidSettings> {
       ListTile(
         title: const Text("Fixed Font Family"),
         subtitle: const Text("Sets the fixed font family name."),
-        trailing: Container(
+        trailing: SizedBox(
           width: MediaQuery.of(context).size.width / 3,
           child: TextFormField(
             initialValue: currentWebViewModel.options?.android.fixedFontFamily,
             keyboardType: TextInputType.text,
             onFieldSubmitted: (value) async {
               currentWebViewModel.options?.android.fixedFontFamily = value;
-              _webViewController?.setOptions(
-                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              webViewController?.setOptions(
+                  options: currentWebViewModel.options ??
+                      InAppWebViewGroupOptions());
               currentWebViewModel.options =
-                  await _webViewController?.getOptions();
+                  await webViewController?.getOptions();
               browserModel.save();
               setState(() {});
             },
@@ -427,11 +468,13 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         title: const Text("Force Dark"),
         subtitle: const Text("Set the force dark mode for this WebView."),
         trailing: DropdownButton<AndroidForceDark>(
-          hint: Text("Force Dark"),
+          hint: const Text("Force Dark"),
           onChanged: (value) async {
             currentWebViewModel.options?.android.forceDark = value;
-            _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-            currentWebViewModel.options = await _webViewController?.getOptions();
+            webViewController?.setOptions(
+                options:
+                    currentWebViewModel.options ?? InAppWebViewGroupOptions());
+            currentWebViewModel.options = await webViewController?.getOptions();
             browserModel.save();
             setState(() {});
           },
@@ -441,7 +484,7 @@ class _AndroidSettingsState extends State<AndroidSettings> {
               value: forceDark,
               child: Text(
                 forceDark.toString(),
-                style: TextStyle(fontSize: 12.5),
+                style: const TextStyle(fontSize: 12.5),
               ),
             );
           }).toList(),
@@ -453,8 +496,10 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         value: currentWebViewModel.options?.android.geolocationEnabled ?? true,
         onChanged: (value) async {
           currentWebViewModel.options?.android.geolocationEnabled = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
@@ -464,11 +509,13 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         subtitle: const Text(
             "Sets the underlying layout algorithm. This will cause a re-layout of the WebView."),
         trailing: DropdownButton<AndroidLayoutAlgorithm>(
-          hint: Text("Layout Algorithm"),
+          hint: const Text("Layout Algorithm"),
           onChanged: (value) async {
             currentWebViewModel.options?.android.layoutAlgorithm = value;
-            _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-            currentWebViewModel.options = await _webViewController?.getOptions();
+            webViewController?.setOptions(
+                options:
+                    currentWebViewModel.options ?? InAppWebViewGroupOptions());
+            currentWebViewModel.options = await webViewController?.getOptions();
             browserModel.save();
             setState(() {});
           },
@@ -478,7 +525,7 @@ class _AndroidSettingsState extends State<AndroidSettings> {
               value: layoutAlgorithm,
               child: Text(
                 layoutAlgorithm.toString(),
-                style: TextStyle(fontSize: 12.5),
+                style: const TextStyle(fontSize: 12.5),
               ),
             );
           }).toList(),
@@ -488,11 +535,14 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         title: const Text("Load With Overview Mode"),
         subtitle: const Text(
             "Sets whether the WebView loads pages in overview mode, that is, zooms out the content to fit on screen by width."),
-        value: currentWebViewModel.options?.android.loadWithOverviewMode ?? false,
+        value:
+            currentWebViewModel.options?.android.loadWithOverviewMode ?? false,
         onChanged: (value) async {
           currentWebViewModel.options?.android.loadWithOverviewMode = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
@@ -501,11 +551,14 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         title: const Text("Loads Images Automatically"),
         subtitle: const Text(
             "Sets whether the WebView should load image resources. Note that this method controls loading of all images, including those embedded using the data URI scheme."),
-        value: currentWebViewModel.options?.android.loadsImagesAutomatically ?? true,
+        value: currentWebViewModel.options?.android.loadsImagesAutomatically ??
+            true,
         onChanged: (value) async {
           currentWebViewModel.options?.android.loadsImagesAutomatically = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
@@ -513,20 +566,21 @@ class _AndroidSettingsState extends State<AndroidSettings> {
       ListTile(
         title: const Text("Minimum Logical Font Size"),
         subtitle: const Text("Sets the minimum logical font size."),
-        trailing: Container(
+        trailing: SizedBox(
           width: 50.0,
           child: TextFormField(
             initialValue: currentWebViewModel
                 .options?.android.minimumLogicalFontSize
                 .toString(),
-            keyboardType: TextInputType.numberWithOptions(),
+            keyboardType: const TextInputType.numberWithOptions(),
             onFieldSubmitted: (value) async {
               currentWebViewModel.options?.android.minimumLogicalFontSize =
                   int.parse(value);
-              _webViewController?.setOptions(
-                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              webViewController?.setOptions(
+                  options: currentWebViewModel.options ??
+                      InAppWebViewGroupOptions());
               currentWebViewModel.options =
-                  await _webViewController?.getOptions();
+                  await webViewController?.getOptions();
               browserModel.save();
               setState(() {});
             },
@@ -537,19 +591,20 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         title: const Text("Initial Scale"),
         subtitle: const Text(
             "Sets the initial scale for this WebView. 0 means default."),
-        trailing: Container(
+        trailing: SizedBox(
           width: 50.0,
           child: TextFormField(
             initialValue:
                 currentWebViewModel.options?.android.initialScale.toString(),
-            keyboardType: TextInputType.numberWithOptions(),
+            keyboardType: const TextInputType.numberWithOptions(),
             onFieldSubmitted: (value) async {
               currentWebViewModel.options?.android.initialScale =
                   int.parse(value);
-              _webViewController?.setOptions(
-                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              webViewController?.setOptions(
+                  options: currentWebViewModel.options ??
+                      InAppWebViewGroupOptions());
               currentWebViewModel.options =
-                  await _webViewController?.getOptions();
+                  await webViewController?.getOptions();
               browserModel.save();
               setState(() {});
             },
@@ -563,8 +618,10 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         value: currentWebViewModel.options?.android.needInitialFocus ?? true,
         onChanged: (value) async {
           currentWebViewModel.options?.android.needInitialFocus = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
@@ -576,8 +633,10 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         value: currentWebViewModel.options?.android.offscreenPreRaster ?? false,
         onChanged: (value) async {
           currentWebViewModel.options?.android.offscreenPreRaster = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
@@ -585,7 +644,7 @@ class _AndroidSettingsState extends State<AndroidSettings> {
       ListTile(
         title: const Text("Sans-Serif Font Family"),
         subtitle: const Text("Sets the sans-serif font family name."),
-        trailing: Container(
+        trailing: SizedBox(
           width: MediaQuery.of(context).size.width / 3,
           child: TextFormField(
             initialValue:
@@ -593,10 +652,11 @@ class _AndroidSettingsState extends State<AndroidSettings> {
             keyboardType: TextInputType.text,
             onFieldSubmitted: (value) async {
               currentWebViewModel.options?.android.sansSerifFontFamily = value;
-              _webViewController?.setOptions(
-                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              webViewController?.setOptions(
+                  options: currentWebViewModel.options ??
+                      InAppWebViewGroupOptions());
               currentWebViewModel.options =
-                  await _webViewController?.getOptions();
+                  await webViewController?.getOptions();
               browserModel.save();
               setState(() {});
             },
@@ -606,17 +666,18 @@ class _AndroidSettingsState extends State<AndroidSettings> {
       ListTile(
         title: const Text("Serif Font Family"),
         subtitle: const Text("Sets the serif font family name."),
-        trailing: Container(
+        trailing: SizedBox(
           width: MediaQuery.of(context).size.width / 3,
           child: TextFormField(
             initialValue: currentWebViewModel.options?.android.serifFontFamily,
             keyboardType: TextInputType.text,
             onFieldSubmitted: (value) async {
               currentWebViewModel.options?.android.serifFontFamily = value;
-              _webViewController?.setOptions(
-                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              webViewController?.setOptions(
+                  options: currentWebViewModel.options ??
+                      InAppWebViewGroupOptions());
               currentWebViewModel.options =
-                  await _webViewController?.getOptions();
+                  await webViewController?.getOptions();
               browserModel.save();
               setState(() {});
             },
@@ -626,7 +687,7 @@ class _AndroidSettingsState extends State<AndroidSettings> {
       ListTile(
         title: const Text("Standard Font Family"),
         subtitle: const Text("Sets the standard font family name."),
-        trailing: Container(
+        trailing: SizedBox(
           width: MediaQuery.of(context).size.width / 3,
           child: TextFormField(
             initialValue:
@@ -634,10 +695,11 @@ class _AndroidSettingsState extends State<AndroidSettings> {
             keyboardType: TextInputType.text,
             onFieldSubmitted: (value) async {
               currentWebViewModel.options?.android.standardFontFamily = value;
-              _webViewController?.setOptions(
-                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              webViewController?.setOptions(
+                  options: currentWebViewModel.options ??
+                      InAppWebViewGroupOptions());
               currentWebViewModel.options =
-                  await _webViewController?.getOptions();
+                  await webViewController?.getOptions();
               browserModel.save();
               setState(() {});
             },
@@ -651,8 +713,10 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         value: currentWebViewModel.options?.android.saveFormData ?? true,
         onChanged: (value) async {
           currentWebViewModel.options?.android.saveFormData = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
@@ -661,11 +725,14 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         title: const Text("Third Party Cookies Enabled"),
         subtitle: const Text(
             "Sets whether the Webview should enable third party cookies."),
-        value: currentWebViewModel.options?.android.thirdPartyCookiesEnabled ?? true,
+        value: currentWebViewModel.options?.android.thirdPartyCookiesEnabled ??
+            true,
         onChanged: (value) async {
           currentWebViewModel.options?.android.thirdPartyCookiesEnabled = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
@@ -674,11 +741,14 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         title: const Text("Hardware Acceleration"),
         subtitle: const Text(
             "Sets whether the Webview should enable Hardware Acceleration."),
-        value: currentWebViewModel.options?.android.hardwareAcceleration ?? true,
+        value:
+            currentWebViewModel.options?.android.hardwareAcceleration ?? true,
         onChanged: (value) async {
           currentWebViewModel.options?.android.hardwareAcceleration = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
@@ -687,28 +757,34 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         title: const Text("Support Multiple Windows"),
         subtitle: const Text(
             "Sets whether the WebView whether supports multiple windows."),
-        value: currentWebViewModel.options?.android.supportMultipleWindows ?? false,
+        value: currentWebViewModel.options?.android.supportMultipleWindows ??
+            false,
         onChanged: (value) async {
           currentWebViewModel.options?.android.supportMultipleWindows = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
       ),
-      ListTile(
-        title: const Text("Over Scroll Mode"),
-        subtitle: const Text("Sets the WebView's over-scroll mode."),
+      const ListTile(
+        title: Text("Over Scroll Mode"),
+        subtitle: Text("Sets the WebView's over-scroll mode."),
       ),
       Container(
-        padding: EdgeInsets.only(left: 20.0, top: 0.0, right: 20.0, bottom: 10.0),
+        padding: const EdgeInsets.only(
+            left: 20.0, top: 0.0, right: 20.0, bottom: 10.0),
         alignment: Alignment.center,
         child: DropdownButton<AndroidOverScrollMode>(
-          hint: Text("Over Scroll Mode"),
+          hint: const Text("Over Scroll Mode"),
           onChanged: (value) async {
             currentWebViewModel.options?.android.overScrollMode = value;
-            _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-            currentWebViewModel.options = await _webViewController?.getOptions();
+            webViewController?.setOptions(
+                options:
+                    currentWebViewModel.options ?? InAppWebViewGroupOptions());
+            currentWebViewModel.options = await webViewController?.getOptions();
             browserModel.save();
             setState(() {});
           },
@@ -718,7 +794,7 @@ class _AndroidSettingsState extends State<AndroidSettings> {
               value: overScrollMode,
               child: Text(
                 overScrollMode.toString(),
-                style: TextStyle(fontSize: 12.5),
+                style: const TextStyle(fontSize: 12.5),
               ),
             );
           }).toList(),
@@ -730,25 +806,30 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         value: currentWebViewModel.options?.android.networkAvailable ?? true,
         onChanged: (value) async {
           currentWebViewModel.options?.android.networkAvailable = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
       ),
-      ListTile(
-        title: const Text("Scroll Bar Style"),
-        subtitle: const Text("Specify the style of the scrollbars."),
+      const ListTile(
+        title: Text("Scroll Bar Style"),
+        subtitle: Text("Specify the style of the scrollbars."),
       ),
       Container(
-        padding: EdgeInsets.only(left: 20.0, top: 0.0, right: 20.0, bottom: 10.0),
+        padding: const EdgeInsets.only(
+            left: 20.0, top: 0.0, right: 20.0, bottom: 10.0),
         alignment: Alignment.center,
         child: DropdownButton<AndroidScrollBarStyle>(
-          hint: Text("Scroll Bar Style"),
+          hint: const Text("Scroll Bar Style"),
           onChanged: (value) async {
             currentWebViewModel.options?.android.scrollBarStyle = value;
-            _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-            currentWebViewModel.options = await _webViewController?.getOptions();
+            webViewController?.setOptions(
+                options:
+                    currentWebViewModel.options ?? InAppWebViewGroupOptions());
+            currentWebViewModel.options = await webViewController?.getOptions();
             browserModel.save();
             setState(() {});
           },
@@ -758,26 +839,29 @@ class _AndroidSettingsState extends State<AndroidSettings> {
               value: scrollBarStyle,
               child: Text(
                 scrollBarStyle.toString(),
-                style: TextStyle(fontSize: 12.5),
+                style: const TextStyle(fontSize: 12.5),
               ),
             );
           }).toList(),
         ),
       ),
-      ListTile(
-        title: const Text("Vertical Scrollbar Position"),
-        subtitle: const Text("Set the position of the vertical scroll bar."),
+      const ListTile(
+        title: Text("Vertical Scrollbar Position"),
+        subtitle: Text("Set the position of the vertical scroll bar."),
       ),
       Container(
-        padding: EdgeInsets.only(left: 20.0, top: 0.0, right: 20.0, bottom: 10.0),
+        padding: const EdgeInsets.only(
+            left: 20.0, top: 0.0, right: 20.0, bottom: 10.0),
         alignment: Alignment.center,
         child: DropdownButton<AndroidVerticalScrollbarPosition>(
-          hint: Text("Vertical Scrollbar Position"),
+          hint: const Text("Vertical Scrollbar Position"),
           onChanged: (value) async {
             currentWebViewModel.options?.android.verticalScrollbarPosition =
                 value;
-            _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-            currentWebViewModel.options = await _webViewController?.getOptions();
+            webViewController?.setOptions(
+                options:
+                    currentWebViewModel.options ?? InAppWebViewGroupOptions());
+            currentWebViewModel.options = await webViewController?.getOptions();
             browserModel.save();
             setState(() {});
           },
@@ -788,7 +872,7 @@ class _AndroidSettingsState extends State<AndroidSettings> {
               value: verticalScrollbarPosition,
               child: Text(
                 verticalScrollbarPosition.toString(),
-                style: TextStyle(fontSize: 12.5),
+                style: const TextStyle(fontSize: 12.5),
               ),
             );
           }).toList(),
@@ -798,18 +882,22 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         title: const Text("Scroll Bar Default Delay Before Fade"),
         subtitle: const Text(
             "Defines the delay in milliseconds that a scrollbar waits before fade out."),
-        trailing: Container(
+        trailing: SizedBox(
           width: 50.0,
           child: TextFormField(
-            initialValue: currentWebViewModel.options?.android.scrollBarDefaultDelayBeforeFade?.toString() ?? "0",
-            keyboardType: TextInputType.numberWithOptions(),
+            initialValue: currentWebViewModel
+                    .options?.android.scrollBarDefaultDelayBeforeFade
+                    ?.toString() ??
+                "0",
+            keyboardType: const TextInputType.numberWithOptions(),
             onFieldSubmitted: (value) async {
               currentWebViewModel.options?.android
                   .scrollBarDefaultDelayBeforeFade = int.parse(value);
-              _webViewController?.setOptions(
-                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              webViewController?.setOptions(
+                  options: currentWebViewModel.options ??
+                      InAppWebViewGroupOptions());
               currentWebViewModel.options =
-                  await _webViewController?.getOptions();
+                  await webViewController?.getOptions();
               browserModel.save();
               setState(() {});
             },
@@ -820,11 +908,14 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         title: const Text("Scrollbar Fading Enabled"),
         subtitle: const Text(
             "Define whether scrollbars will fade when the view is not scrolling."),
-        value: currentWebViewModel.options?.android.scrollbarFadingEnabled ?? true,
+        value:
+            currentWebViewModel.options?.android.scrollbarFadingEnabled ?? true,
         onChanged: (value) async {
           currentWebViewModel.options?.android.scrollbarFadingEnabled = value;
-          _webViewController?.setOptions(options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await _webViewController?.getOptions();
+          webViewController?.setOptions(
+              options:
+                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
+          currentWebViewModel.options = await webViewController?.getOptions();
           browserModel.save();
           setState(() {});
         },
@@ -833,18 +924,22 @@ class _AndroidSettingsState extends State<AndroidSettings> {
         title: const Text("Scroll Bar Fade Duration"),
         subtitle:
             const Text("Define the scrollbar fade duration in milliseconds."),
-        trailing: Container(
+        trailing: SizedBox(
           width: 50.0,
           child: TextFormField(
-            initialValue: currentWebViewModel.options?.android.scrollBarFadeDuration?.toString() ?? "0",
-            keyboardType: TextInputType.numberWithOptions(),
+            initialValue: currentWebViewModel
+                    .options?.android.scrollBarFadeDuration
+                    ?.toString() ??
+                "0",
+            keyboardType: const TextInputType.numberWithOptions(),
             onFieldSubmitted: (value) async {
               currentWebViewModel.options?.android.scrollBarFadeDuration =
                   int.parse(value);
-              _webViewController?.setOptions(
-                  options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
+              webViewController?.setOptions(
+                  options: currentWebViewModel.options ??
+                      InAppWebViewGroupOptions());
               currentWebViewModel.options =
-                  await _webViewController?.getOptions();
+                  await webViewController?.getOptions();
               browserModel.save();
               setState(() {});
             },
@@ -853,135 +948,185 @@ class _AndroidSettingsState extends State<AndroidSettings> {
       ),
       ListTile(
         title: const Text("Vertical Scrollbar Thumb Color"),
-        subtitle:
-        const Text("Sets the vertical scrollbar thumb color."),
-        trailing: Container(
-          width: 140.0,
-          child: ElevatedButton(
-            child: Text(currentWebViewModel.options?.android.verticalScrollbarThumbColor?.toString() ?? 'Pick a color!', style: TextStyle(fontSize: 12.5),),
-            onPressed: () {
-              showDialog(context: context, builder: (context) {
-                return AlertDialog(
-                  content: SingleChildScrollView(
-                    child: ColorPicker(
-                      pickerColor: Color(0xffffffff),
-                      onColorChanged: (value) async {
-                        currentWebViewModel.options?.android.verticalScrollbarThumbColor = value;
-                        _webViewController?.setOptions(
-                            options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-                        currentWebViewModel.options =
-                        await _webViewController?.getOptions();
-                        browserModel.save();
-                        setState(() {});
-                      },
-                      showLabel: true,
-                      pickerAreaHeightPercent: 0.8,
-                    ),
-                  ),
+        subtitle: const Text("Sets the vertical scrollbar thumb color."),
+        trailing: SizedBox(
+            width: 140.0,
+            child: ElevatedButton(
+              child: Text(
+                currentWebViewModel.options?.android.verticalScrollbarThumbColor
+                        ?.toString() ??
+                    'Pick a color!',
+                style: const TextStyle(fontSize: 12.5),
+              ),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      content: SingleChildScrollView(
+                        child: ColorPicker(
+                          pickerColor: const Color(0xffffffff),
+                          onColorChanged: (value) async {
+                            currentWebViewModel.options?.android
+                                .verticalScrollbarThumbColor = value;
+                            webViewController?.setOptions(
+                                options: currentWebViewModel.options ??
+                                    InAppWebViewGroupOptions());
+                            currentWebViewModel.options =
+                                await webViewController?.getOptions();
+                            browserModel.save();
+                            setState(() {});
+                          },
+                          labelTypes: const [
+                            ColorLabelType.rgb,
+                            ColorLabelType.hsv,
+                            ColorLabelType.hsl
+                          ],
+                          pickerAreaHeightPercent: 0.8,
+                        ),
+                      ),
+                    );
+                  },
                 );
-              },);
-            },
-          )
-        ),
+              },
+            )),
       ),
       ListTile(
         title: const Text("Vertical Scrollbar Track Color"),
-        subtitle:
-        const Text("Sets the vertical scrollbar track color."),
-        trailing: Container(
+        subtitle: const Text("Sets the vertical scrollbar track color."),
+        trailing: SizedBox(
             width: 140.0,
             child: ElevatedButton(
-              child: Text(currentWebViewModel.options?.android.verticalScrollbarTrackColor?.toString() ?? 'Pick a color!', style: TextStyle(fontSize: 12.5),),
+              child: Text(
+                currentWebViewModel.options?.android.verticalScrollbarTrackColor
+                        ?.toString() ??
+                    'Pick a color!',
+                style: const TextStyle(fontSize: 12.5),
+              ),
               onPressed: () {
-                showDialog(context: context, builder: (context) {
-                  return AlertDialog(
-                    content: SingleChildScrollView(
-                      child: ColorPicker(
-                        pickerColor: Color(0xffffffff),
-                        onColorChanged: (value) async {
-                          currentWebViewModel.options?.android.verticalScrollbarTrackColor = value;
-                          _webViewController?.setOptions(
-                              options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-                          currentWebViewModel.options =
-                          await _webViewController?.getOptions();
-                          browserModel.save();
-                          setState(() {});
-                        },
-                        showLabel: true,
-                        pickerAreaHeightPercent: 0.8,
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      content: SingleChildScrollView(
+                        child: ColorPicker(
+                          pickerColor: const Color(0xffffffff),
+                          onColorChanged: (value) async {
+                            currentWebViewModel.options?.android
+                                .verticalScrollbarTrackColor = value;
+                            webViewController?.setOptions(
+                                options: currentWebViewModel.options ??
+                                    InAppWebViewGroupOptions());
+                            currentWebViewModel.options =
+                                await webViewController?.getOptions();
+                            browserModel.save();
+                            setState(() {});
+                          },
+                          labelTypes: const [
+                            ColorLabelType.rgb,
+                            ColorLabelType.hsv,
+                            ColorLabelType.hsl
+                          ],
+                          pickerAreaHeightPercent: 0.8,
+                        ),
                       ),
-                    ),
-                  );
-                },);
+                    );
+                  },
+                );
               },
-            )
-        ),
+            )),
       ),
       ListTile(
         title: const Text("Horizontal Scrollbar Thumb Color"),
-        subtitle:
-        const Text("Sets the horizontal scrollbar thumb color."),
-        trailing: Container(
+        subtitle: const Text("Sets the horizontal scrollbar thumb color."),
+        trailing: SizedBox(
             width: 140.0,
             child: ElevatedButton(
-              child: Text(currentWebViewModel.options?.android.horizontalScrollbarThumbColor?.toString() ?? 'Pick a color!', style: TextStyle(fontSize: 12.5),),
+              child: Text(
+                currentWebViewModel
+                        .options?.android.horizontalScrollbarThumbColor
+                        ?.toString() ??
+                    'Pick a color!',
+                style: const TextStyle(fontSize: 12.5),
+              ),
               onPressed: () {
-                showDialog(context: context, builder: (context) {
-                  return AlertDialog(
-                    content: SingleChildScrollView(
-                      child: ColorPicker(
-                        pickerColor: Color(0xffffffff),
-                        onColorChanged: (value) async {
-                          currentWebViewModel.options?.android.horizontalScrollbarThumbColor = value;
-                          _webViewController?.setOptions(
-                              options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-                          currentWebViewModel.options =
-                          await _webViewController?.getOptions();
-                          browserModel.save();
-                          setState(() {});
-                        },
-                        showLabel: true,
-                        pickerAreaHeightPercent: 0.8,
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      content: SingleChildScrollView(
+                        child: ColorPicker(
+                          pickerColor: const Color(0xffffffff),
+                          onColorChanged: (value) async {
+                            currentWebViewModel.options?.android
+                                .horizontalScrollbarThumbColor = value;
+                            webViewController?.setOptions(
+                                options: currentWebViewModel.options ??
+                                    InAppWebViewGroupOptions());
+                            currentWebViewModel.options =
+                                await webViewController?.getOptions();
+                            browserModel.save();
+                            setState(() {});
+                          },
+                          labelTypes: const [
+                            ColorLabelType.rgb,
+                            ColorLabelType.hsv,
+                            ColorLabelType.hsl
+                          ],
+                          pickerAreaHeightPercent: 0.8,
+                        ),
                       ),
-                    ),
-                  );
-                },);
+                    );
+                  },
+                );
               },
-            )
-        ),
+            )),
       ),
       ListTile(
         title: const Text("Horizontal Scrollbar Track Color"),
-        subtitle:
-        const Text("Sets the horizontal scrollbar track color."),
-        trailing: Container(
+        subtitle: const Text("Sets the horizontal scrollbar track color."),
+        trailing: SizedBox(
             width: 140.0,
             child: ElevatedButton(
-              child: Text(currentWebViewModel.options?.android.horizontalScrollbarTrackColor?.toString() ?? 'Pick a color!', style: TextStyle(fontSize: 12.5),),
+              child: Text(
+                currentWebViewModel
+                        .options?.android.horizontalScrollbarTrackColor
+                        ?.toString() ??
+                    'Pick a color!',
+                style: const TextStyle(fontSize: 12.5),
+              ),
               onPressed: () {
-                showDialog(context: context, builder: (context) {
-                  return AlertDialog(
-                    content: SingleChildScrollView(
-                      child: ColorPicker(
-                        pickerColor: Color(0xffffffff),
-                        onColorChanged: (value) async {
-                          currentWebViewModel.options?.android.horizontalScrollbarTrackColor = value;
-                          _webViewController?.setOptions(
-                              options: currentWebViewModel.options ?? InAppWebViewGroupOptions());
-                          currentWebViewModel.options =
-                          await _webViewController?.getOptions();
-                          browserModel.save();
-                          setState(() {});
-                        },
-                        showLabel: true,
-                        pickerAreaHeightPercent: 0.8,
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      content: SingleChildScrollView(
+                        child: ColorPicker(
+                          pickerColor: const Color(0xffffffff),
+                          onColorChanged: (value) async {
+                            currentWebViewModel.options?.android
+                                .horizontalScrollbarTrackColor = value;
+                            webViewController?.setOptions(
+                                options: currentWebViewModel.options ??
+                                    InAppWebViewGroupOptions());
+                            currentWebViewModel.options =
+                                await webViewController?.getOptions();
+                            browserModel.save();
+                            setState(() {});
+                          },
+                          labelTypes: const [
+                            ColorLabelType.rgb,
+                            ColorLabelType.hsv,
+                            ColorLabelType.hsl
+                          ],
+                          pickerAreaHeightPercent: 0.8,
+                        ),
                       ),
-                    ),
-                  );
-                },);
+                    );
+                  },
+                );
               },
-            )
-        ),
+            )),
       ),
     ];
 

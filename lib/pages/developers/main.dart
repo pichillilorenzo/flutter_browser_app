@@ -4,14 +4,13 @@ import 'package:flutter_browser/pages/developers/network_info.dart';
 import 'package:flutter_browser/pages/developers/storage_manager.dart';
 
 class DevelopersPage extends StatefulWidget {
-  DevelopersPage({Key? key}) : super(key: key);
+  const DevelopersPage({Key? key}) : super(key: key);
 
   @override
-  _DevelopersPageState createState() => _DevelopersPageState();
+  State<DevelopersPage> createState() => _DevelopersPageState();
 }
 
 class _DevelopersPageState extends State<DevelopersPage> {
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -22,7 +21,7 @@ class _DevelopersPageState extends State<DevelopersPage> {
             onTap: (value) {
               FocusScope.of(context).unfocus();
             },
-            tabs: [
+            tabs: const [
               Tab(
                 icon: Icon(Icons.code),
                 text: "JavaScript Console",
@@ -37,9 +36,9 @@ class _DevelopersPageState extends State<DevelopersPage> {
               ),
             ],
           ),
-          title: Text('Developers'),
+          title: const Text('Developers'),
         ),
-        body: TabBarView(
+        body: const TabBarView(
           physics: NeverScrollableScrollPhysics(),
           children: [
             JavaScriptConsole(),

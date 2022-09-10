@@ -1,4 +1,6 @@
 // import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -9,19 +11,23 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'models/browser_model.dart';
 import 'models/webview_model.dart';
 
 class LongPressAlertDialog extends StatefulWidget {
-  static const List<InAppWebViewHitTestResultType> HIT_TEST_RESULT_SUPPORTED = [
+  static const List<InAppWebViewHitTestResultType> hitTestResultSupported = [
     InAppWebViewHitTestResultType.SRC_IMAGE_ANCHOR_TYPE,
     InAppWebViewHitTestResultType.SRC_ANCHOR_TYPE,
     InAppWebViewHitTestResultType.IMAGE_TYPE
   ];
 
-  LongPressAlertDialog({Key? key, required this.webViewModel, required this.hitTestResult, this.requestFocusNodeHrefResult})
+  const LongPressAlertDialog(
+      {Key? key,
+      required this.webViewModel,
+      required this.hitTestResult,
+      this.requestFocusNodeHrefResult})
       : super(key: key);
 
   final WebViewModel webViewModel;
@@ -29,7 +35,7 @@ class LongPressAlertDialog extends StatefulWidget {
   final RequestFocusNodeHrefResult? requestFocusNodeHrefResult;
 
   @override
-  _LongPressAlertDialogState createState() => _LongPressAlertDialogState();
+  State<LongPressAlertDialog> createState() => _LongPressAlertDialogState();
 }
 
 class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
@@ -38,9 +44,9 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      contentPadding: EdgeInsets.all(0.0),
+      contentPadding: const EdgeInsets.all(0.0),
       content: SingleChildScrollView(
-        child: Container(
+        child: SizedBox(
           width: double.maxFinite,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -55,16 +61,17 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
     if (widget.hitTestResult.type ==
             InAppWebViewHitTestResultType.SRC_ANCHOR_TYPE ||
         widget.hitTestResult.type ==
-            InAppWebViewHitTestResultType.SRC_IMAGE_ANCHOR_TYPE || (
-        widget.hitTestResult.type ==
-            InAppWebViewHitTestResultType.IMAGE_TYPE && widget.requestFocusNodeHrefResult != null
-            && widget.requestFocusNodeHrefResult!.url != null && widget.requestFocusNodeHrefResult!.url.toString().isNotEmpty
-    )) {
+            InAppWebViewHitTestResultType.SRC_IMAGE_ANCHOR_TYPE ||
+        (widget.hitTestResult.type ==
+                InAppWebViewHitTestResultType.IMAGE_TYPE &&
+            widget.requestFocusNodeHrefResult != null &&
+            widget.requestFocusNodeHrefResult!.url != null &&
+            widget.requestFocusNodeHrefResult!.url.toString().isNotEmpty)) {
       return <Widget>[
         _buildLinkTile(),
-        Divider(),
+        const Divider(),
         _buildLinkPreview(),
-        Divider(),
+        const Divider(),
         _buildOpenNewTab(),
         _buildOpenNewIncognitoTab(),
         _buildCopyAddressLink(),
@@ -74,7 +81,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
         InAppWebViewHitTestResultType.IMAGE_TYPE) {
       return <Widget>[
         _buildImageTile(),
-        Divider(),
+        const Divider(),
         _buildOpenImageNewTab(),
         _buildDownloadImage(),
         _buildSearchImageOnGoogle(),
@@ -86,8 +93,9 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
   }
 
   Widget _buildLinkTile() {
-    var url = widget.requestFocusNodeHrefResult?.url ?? Uri.parse("about:blank");
-    var faviconUrl = Uri.parse(url.origin + "/favicon.ico");
+    var url =
+        widget.requestFocusNodeHrefResult?.url ?? Uri.parse("about:blank");
+    var faviconUrl = Uri.parse("${url.origin}/favicon.ico");
 
     var title = widget.requestFocusNodeHrefResult?.title ?? "";
     if (title.isEmpty) {
@@ -103,10 +111,20 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
           //   imageUrl: widget.requestFocusNodeHrefResult?.src != null ? widget.requestFocusNodeHrefResult!.src : faviconUrl,
           //   height: 30,
           // )
-          CustomImage(url: widget.requestFocusNodeHrefResult?.src != null ? Uri.parse(widget.requestFocusNodeHrefResult!.src!) : faviconUrl, maxWidth: 30.0, height: 30.0,)
+          CustomImage(
+            url: widget.requestFocusNodeHrefResult?.src != null
+                ? Uri.parse(widget.requestFocusNodeHrefResult!.src!)
+                : faviconUrl,
+            maxWidth: 30.0,
+            height: 30.0,
+          )
         ],
       ),
-      title: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis,),
+      title: Text(
+        title,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
       subtitle: Text(
         widget.requestFocusNodeHrefResult?.url?.toString() ?? "",
         maxLines: 2,
@@ -118,35 +136,34 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
 
   Widget _buildLinkPreview() {
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
-    var settings = browserModel.getSettings();
+    browserModel.getSettings();
 
     return ListTile(
-      title: Center(child: const Text("Link Preview")),
+      title: const Center(child: Text("Link Preview")),
       subtitle: Container(
-        padding: EdgeInsets.only(top: 15.0),
+        padding: const EdgeInsets.only(top: 15.0),
         height: 250,
         child: IndexedStack(
           index: _isLinkPreviewReady ? 1 : 0,
           children: <Widget>[
-            Center(
+            const Center(
               child: CircularProgressIndicator(),
             ),
             InAppWebView(
-              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-                new Factory<OneSequenceGestureRecognizer>(
-                  () => new EagerGestureRecognizer(),
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                Factory<OneSequenceGestureRecognizer>(
+                  () => EagerGestureRecognizer(),
                 ),
-              ].toSet(),
-              initialUrlRequest: URLRequest(
-                url: widget.requestFocusNodeHrefResult?.url
-              ),
+              },
+              initialUrlRequest:
+                  URLRequest(url: widget.requestFocusNodeHrefResult?.url),
               initialOptions: InAppWebViewGroupOptions(
-                android: AndroidInAppWebViewOptions(
-                  useHybridComposition: true,
-                  verticalScrollbarThumbColor: Color.fromRGBO(0, 0, 0, 0.5),
-                  horizontalScrollbarThumbColor: Color.fromRGBO(0, 0, 0, 0.5)
-                )
-              ),
+                  android: AndroidInAppWebViewOptions(
+                      useHybridComposition: true,
+                      verticalScrollbarThumbColor:
+                          const Color.fromRGBO(0, 0, 0, 0.5),
+                      horizontalScrollbarThumbColor:
+                          const Color.fromRGBO(0, 0, 0, 0.5))),
               onProgressChanged: (controller, progress) {
                 if (progress > 50) {
                   setState(() {
@@ -169,7 +186,8 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
       onTap: () {
         browserModel.addTab(WebViewTab(
           key: GlobalKey(),
-          webViewModel: WebViewModel(url: widget.requestFocusNodeHrefResult?.url),
+          webViewModel:
+              WebViewModel(url: widget.requestFocusNodeHrefResult?.url),
         ));
         Navigator.pop(context);
       },
@@ -185,7 +203,8 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
         browserModel.addTab(WebViewTab(
           key: GlobalKey(),
           webViewModel: WebViewModel(
-              url: widget.requestFocusNodeHrefResult?.url, isIncognitoMode: true),
+              url: widget.requestFocusNodeHrefResult?.url,
+              isIncognitoMode: true),
         ));
         Navigator.pop(context);
       },
@@ -204,17 +223,19 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
 
   Widget _buildShareLink() {
     return ListTile(
-      title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        const Text("Share link"),
-        Padding(
-          padding: EdgeInsets.only(right: 12.5),
-          child: Icon(
-            Icons.share,
-            color: Colors.black54,
-            size: 20.0,
-          ),
-        )
-      ]),
+      title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: const [
+            Text("Share link"),
+            Padding(
+              padding: EdgeInsets.only(right: 12.5),
+              child: Icon(
+                Icons.share,
+                color: Colors.black54,
+                size: 20.0,
+              ),
+            )
+          ]),
       onTap: () {
         if (widget.hitTestResult.extra != null) {
           Share.share(widget.hitTestResult.extra!);
@@ -226,8 +247,8 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
 
   Widget _buildImageTile() {
     return ListTile(
-      contentPadding:
-          EdgeInsets.only(left: 15.0, top: 15.0, right: 15.0, bottom: 5.0),
+      contentPadding: const EdgeInsets.only(
+          left: 15.0, top: 15.0, right: 15.0, bottom: 5.0),
       leading: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -236,7 +257,10 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
           //   imageUrl: widget.hitTestResult.extra,
           //   height: 50,
           // ),
-          CustomImage(url: Uri.parse(widget.hitTestResult.extra!), maxWidth: 50.0, height: 50.0)
+          CustomImage(
+              url: Uri.parse(widget.hitTestResult.extra!),
+              maxWidth: 50.0,
+              height: 50.0)
         ],
       ),
       title: Text(widget.webViewModel.title ?? ""),
@@ -247,37 +271,42 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
     return ListTile(
       title: const Text("Download image"),
       onTap: () async {
-        if (widget.hitTestResult.extra != null) {
+        String? url = widget.hitTestResult.extra;
+        if (url != null) {
           var uri = Uri.parse(widget.hitTestResult.extra!);
           String path = uri.path;
           String fileName = path.substring(path.lastIndexOf('/') + 1);
-
-          final taskId = await FlutterDownloader.enqueue(
-            url: widget.hitTestResult.extra,
+          Directory? directory = await getExternalStorageDirectory();
+          await FlutterDownloader.enqueue(
+            url: url,
             fileName: fileName,
-            savedDir: (await getExternalStorageDirectory()).path,
+            savedDir: directory!.path,
             showNotification: true,
             openFileFromNotification: true,
           );
         }
-        Navigator.pop(context);
+        if (mounted) {
+          Navigator.pop(context);
+        }
       },
     );
   }
 
   Widget _buildShareImage() {
     return ListTile(
-      title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        const Text("Share image"),
-        Padding(
-          padding: EdgeInsets.only(right: 12.5),
-          child: Icon(
-            Icons.share,
-            color: Colors.black54,
-            size: 20.0,
-          ),
-        )
-      ]),
+      title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: const [
+            Text("Share image"),
+            Padding(
+              padding: EdgeInsets.only(right: 12.5),
+              child: Icon(
+                Icons.share,
+                color: Colors.black54,
+                size: 20.0,
+              ),
+            )
+          ]),
       onTap: () {
         if (widget.hitTestResult.extra != null) {
           Share.share(widget.hitTestResult.extra!);
@@ -295,7 +324,8 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
       onTap: () {
         browserModel.addTab(WebViewTab(
           key: GlobalKey(),
-          webViewModel: WebViewModel(url: Uri.parse(widget.hitTestResult.extra ?? "about:blank")),
+          webViewModel: WebViewModel(
+              url: Uri.parse(widget.hitTestResult.extra ?? "about:blank")),
         ));
         Navigator.pop(context);
       },
@@ -309,8 +339,8 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
       title: const Text("Search this image on Google"),
       onTap: () {
         if (widget.hitTestResult.extra != null) {
-          var url = "http://images.google.com/searchbyimage?image_url=" +
-              widget.hitTestResult.extra!;
+          var url =
+              "http://images.google.com/searchbyimage?image_url=${widget.hitTestResult.extra!}";
           browserModel.addTab(WebViewTab(
             key: GlobalKey(),
             webViewModel: WebViewModel(url: Uri.parse(url)),

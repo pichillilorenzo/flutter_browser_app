@@ -9,7 +9,7 @@ class CustomPopupMenuItem<T> extends PopupMenuEntry<T> {
     this.textStyle,
     this.isIconButtonRow = false,
     required this.child,
-  })  : super(key: key);
+  }) : super(key: key);
 
   final T? value;
 

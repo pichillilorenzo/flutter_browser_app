@@ -5,15 +5,16 @@ import 'package:flutter_browser/models/webview_model.dart';
 import 'package:provider/provider.dart';
 
 class JavaScriptConsole extends StatefulWidget {
-  JavaScriptConsole({Key? key}) : super(key: key);
+  const JavaScriptConsole({Key? key}) : super(key: key);
 
   @override
-  _JavaScriptConsoleState createState() => _JavaScriptConsoleState();
+  State<JavaScriptConsole> createState() => _JavaScriptConsoleState();
 }
 
 class _JavaScriptConsoleState extends State<JavaScriptConsole> {
-  TextEditingController _customJavaScriptController = TextEditingController();
-  ScrollController _scrollController = ScrollController();
+  final TextEditingController _customJavaScriptController =
+      TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   int currentJavaScriptHistory = 0;
 
@@ -36,7 +37,7 @@ class _JavaScriptConsoleState extends State<JavaScriptConsole> {
         Flexible(
           child: Selector<WebViewModel, List<Widget>>(
             selector: (context, webViewModel) =>
-            webViewModel.javaScriptConsoleResults,
+                webViewModel.javaScriptConsoleResults,
             builder: (context, javaScriptConsoleResults, child) {
               return ListView.builder(
                 controller: _scrollController,
@@ -48,8 +49,8 @@ class _JavaScriptConsoleState extends State<JavaScriptConsole> {
             },
           ),
         ),
-        Divider(),
-        Container(
+        const Divider(),
+        SizedBox(
           height: 75.0,
           child: Row(
             children: <Widget>[
@@ -62,22 +63,22 @@ class _JavaScriptConsoleState extends State<JavaScriptConsole> {
                   controller: _customJavaScriptController,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                       hintText: "document.querySelector('body') ...",
                       prefixIcon:
-                      Icon(Icons.keyboard_arrow_right, color: Colors.blue),
+                          Icon(Icons.keyboard_arrow_right, color: Colors.blue),
                       border: InputBorder.none),
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.play_arrow),
+                icon: const Icon(Icons.play_arrow),
                 onPressed: () {
                   evaluateJavaScript(_customJavaScriptController.text);
                 },
               ),
               Selector<WebViewModel, List<String>>(
                   selector: (context, webViewModel) =>
-                  webViewModel.javaScriptConsoleHistory,
+                      webViewModel.javaScriptConsoleHistory,
                   builder: (context, javaScriptConsoleHistory, child) {
                     currentJavaScriptHistory = javaScriptConsoleHistory.length;
 
@@ -87,15 +88,15 @@ class _JavaScriptConsoleState extends State<JavaScriptConsole> {
                         SizedBox(
                           height: 35.0,
                           child: IconButton(
-                            icon: Icon(Icons.keyboard_arrow_up),
+                            icon: const Icon(Icons.keyboard_arrow_up),
                             onPressed: () {
                               currentJavaScriptHistory--;
                               if (currentJavaScriptHistory < 0) {
                                 currentJavaScriptHistory = 0;
                               } else {
                                 _customJavaScriptController.text =
-                                javaScriptConsoleHistory[
-                                currentJavaScriptHistory];
+                                    javaScriptConsoleHistory[
+                                        currentJavaScriptHistory];
                               }
                             },
                           ),
@@ -103,7 +104,7 @@ class _JavaScriptConsoleState extends State<JavaScriptConsole> {
                         SizedBox(
                           height: 35.0,
                           child: IconButton(
-                            icon: Icon(Icons.keyboard_arrow_down),
+                            icon: const Icon(Icons.keyboard_arrow_down),
                             onPressed: () {
                               if (currentJavaScriptHistory + 1 >=
                                   javaScriptConsoleHistory.length) {
@@ -113,8 +114,8 @@ class _JavaScriptConsoleState extends State<JavaScriptConsole> {
                               } else {
                                 currentJavaScriptHistory++;
                                 _customJavaScriptController.text =
-                                javaScriptConsoleHistory[
-                                currentJavaScriptHistory];
+                                    javaScriptConsoleHistory[
+                                        currentJavaScriptHistory];
                               }
                             },
                           ),
@@ -123,16 +124,16 @@ class _JavaScriptConsoleState extends State<JavaScriptConsole> {
                     );
                   }),
               IconButton(
-                icon: Icon(Icons.cancel),
+                icon: const Icon(Icons.cancel),
                 onPressed: () {
                   var browserModel =
-                  Provider.of<BrowserModel>(context, listen: false);
+                      Provider.of<BrowserModel>(context, listen: false);
                   var webViewModel = browserModel.getCurrentTab()?.webViewModel;
                   if (webViewModel != null) {
                     webViewModel.setJavaScriptConsoleResults([]);
 
                     var currentWebViewModel =
-                    Provider.of<WebViewModel>(context, listen: false);
+                        Provider.of<WebViewModel>(context, listen: false);
                     currentWebViewModel.updateWithValue(webViewModel);
                   }
                 },
@@ -149,17 +150,19 @@ class _JavaScriptConsoleState extends State<JavaScriptConsole> {
     var webViewModel = browserModel.getCurrentTab()?.webViewModel;
 
     if (webViewModel != null) {
-      var currentWebViewModel = Provider.of<WebViewModel>(context, listen: false);
+      var currentWebViewModel =
+          Provider.of<WebViewModel>(context, listen: false);
 
       if (source.isNotEmpty &&
-          (webViewModel.javaScriptConsoleHistory.length == 0 ||
-              (webViewModel.javaScriptConsoleHistory.length > 0 &&
+          (webViewModel.javaScriptConsoleHistory.isEmpty ||
+              (webViewModel.javaScriptConsoleHistory.isNotEmpty &&
                   webViewModel.javaScriptConsoleHistory.last != source))) {
         webViewModel.addJavaScriptConsoleHistory(source);
         currentWebViewModel.updateWithValue(webViewModel);
       }
 
-      var result = await webViewModel.webViewController?.evaluateJavascript(source: source);
+      var result = await webViewModel.webViewController
+          ?.evaluateJavascript(source: source);
 
       webViewModel.addJavaScriptConsoleResults(
           JavaScriptConsoleResult(data: result.toString()));
@@ -180,5 +183,4 @@ class _JavaScriptConsoleState extends State<JavaScriptConsole> {
       });
     }
   }
-
 }

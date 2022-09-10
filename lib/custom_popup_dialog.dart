@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_browser/material_transparent_page_route.dart';
 
 class CustomPopupDialogPageRoute<T> extends MaterialTransparentPageRoute<T> {
-
   final Color overlayColor;
   final Duration? customTransitionDuration;
   bool isPopped = false;
@@ -12,12 +11,14 @@ class CustomPopupDialogPageRoute<T> extends MaterialTransparentPageRoute<T> {
     Duration? transitionDuration,
     Color? overlayColor,
     RouteSettings? settings,
-  })  : this.overlayColor = overlayColor ?? Colors.black.withOpacity(0.5),
+  })  : overlayColor = overlayColor ?? Colors.black.withOpacity(0.5),
         customTransitionDuration = transitionDuration,
         super(builder: builder, settings: settings);
 
   @override
-  Duration get transitionDuration => customTransitionDuration != null ? customTransitionDuration! : const Duration(milliseconds: 300);
+  Duration get transitionDuration => customTransitionDuration != null
+      ? customTransitionDuration!
+      : const Duration(milliseconds: 300);
 
   @override
   bool didPop(T? result) {
@@ -26,7 +27,8 @@ class CustomPopupDialogPageRoute<T> extends MaterialTransparentPageRoute<T> {
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation, Widget child) {
     return Scaffold(
         backgroundColor: Colors.transparent,
         body: Stack(
@@ -42,31 +44,36 @@ class CustomPopupDialogPageRoute<T> extends MaterialTransparentPageRoute<T> {
                 },
                 child: Opacity(
                   opacity: animation.value,
-                  child: Container(
-                      color: overlayColor
-                  ),
+                  child: Container(color: overlayColor),
                 ),
               ),
             ),
             child,
           ],
-        )
-    ) ;
+        ));
     // return child;
   }
 }
 
 class CustomPopupDialog extends StatefulWidget {
-
   final Widget child;
   final Duration transitionDuration;
 
-  CustomPopupDialog({Key? key, required this.child, this.transitionDuration = const Duration(milliseconds: 300)}): super(key: key);
+  const CustomPopupDialog(
+      {Key? key,
+      required this.child,
+      this.transitionDuration = const Duration(milliseconds: 300)})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _CustomPopupDialogState();
 
-  static CustomPopupDialogPageRoute show({required BuildContext context, Widget? child, WidgetBuilder? builder, Color? overlayColor, required Duration transitionDuration}) {
+  static CustomPopupDialogPageRoute show(
+      {required BuildContext context,
+      Widget? child,
+      WidgetBuilder? builder,
+      Color? overlayColor,
+      required Duration transitionDuration}) {
     var route = CustomPopupDialogPageRoute(
       transitionDuration: transitionDuration,
       overlayColor: overlayColor,
@@ -77,15 +84,13 @@ class CustomPopupDialog extends StatefulWidget {
         );
       },
     );
-    Navigator.push(
-        context, route);
+    Navigator.push(context, route);
     return route;
   }
 }
 
 class _CustomPopupDialogState extends State<CustomPopupDialog>
     with SingleTickerProviderStateMixin {
-
   late AnimationController _slideController;
   late Animation<Offset> _offsetSlideAnimation;
 
@@ -97,7 +102,7 @@ class _CustomPopupDialogState extends State<CustomPopupDialog>
       vsync: this,
     );
 
-    var begin = Offset(0.0, -1.0);
+    var begin = const Offset(0.0, -1.0);
     var end = Offset.zero;
     var tween = Tween(begin: begin, end: end);
 
@@ -129,11 +134,10 @@ class _CustomPopupDialogState extends State<CustomPopupDialog>
           SlideTransition(
             position: _offsetSlideAnimation,
             child: Container(
-                padding: EdgeInsets.all(15.0),
+                padding: const EdgeInsets.all(15.0),
                 width: MediaQuery.of(context).size.width,
                 color: Colors.white,
-                child: widget.child
-            ),
+                child: widget.child),
           ),
         ],
       ),
@@ -147,6 +151,8 @@ class _CustomPopupDialogState extends State<CustomPopupDialog>
 
   Future<void> hide() async {
     await hideTransition();
-    Navigator.pop(context);
+    if (mounted) {
+      Navigator.pop(context);
+    }
   }
 }

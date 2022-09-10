@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
+const EdgeInsets _defaultInsetPadding =
+    EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0);
 
 class MultiSelectDialogItem<V> {
   const MultiSelectDialogItem({required this.value, required this.label});
@@ -10,24 +11,26 @@ class MultiSelectDialogItem<V> {
 }
 
 class MultiSelectDialog<V> extends StatefulWidget {
-  MultiSelectDialog({Key? key,
-    this.title,
-    this.titlePadding,
-    this.titleTextStyle,
-    this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
-    this.contentTextStyle,
-    this.actionsPadding = EdgeInsets.zero,
-    this.actionsOverflowDirection,
-    this.actionsOverflowButtonSpacing,
-    this.buttonPadding,
-    this.backgroundColor,
-    this.elevation,
-    this.semanticLabel,
-    this.insetPadding = _defaultInsetPadding,
-    this.clipBehavior = Clip.none,
-    this.shape,
-    this.items,
-    this.initialSelectedValues}) : super(key: key);
+  const MultiSelectDialog(
+      {Key? key,
+      this.title,
+      this.titlePadding,
+      this.titleTextStyle,
+      this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
+      this.contentTextStyle,
+      this.actionsPadding = EdgeInsets.zero,
+      this.actionsOverflowDirection,
+      this.actionsOverflowButtonSpacing,
+      this.buttonPadding,
+      this.backgroundColor,
+      this.elevation,
+      this.semanticLabel,
+      this.insetPadding = _defaultInsetPadding,
+      this.clipBehavior = Clip.none,
+      this.shape,
+      this.items,
+      this.initialSelectedValues})
+      : super(key: key);
 
   final Widget? title;
   final EdgeInsetsGeometry? titlePadding;
@@ -52,8 +55,9 @@ class MultiSelectDialog<V> extends StatefulWidget {
 }
 
 class _MultiSelectDialogState<V> extends State<MultiSelectDialog<V>> {
-  final _selectedValues = Set<V>();
+  final _selectedValues = <V>{};
 
+  @override
   void initState() {
     super.initState();
     if (widget.initialSelectedValues != null) {
@@ -85,7 +89,7 @@ class _MultiSelectDialogState<V> extends State<MultiSelectDialog<V>> {
       title: widget.title,
       content: SingleChildScrollView(
         child: ListTileTheme(
-          contentPadding: EdgeInsets.fromLTRB(14.0, 0.0, 24.0, 0.0),
+          contentPadding: const EdgeInsets.fromLTRB(14.0, 0.0, 24.0, 0.0),
           child: ListBody(
             children: widget.items?.map(_buildItem).toList() ?? <Widget>[],
           ),
@@ -93,12 +97,12 @@ class _MultiSelectDialogState<V> extends State<MultiSelectDialog<V>> {
       ),
       actions: <Widget>[
         ElevatedButton(
-          child: Text('CANCEL'),
           onPressed: _onCancelTap,
+          child: const Text('CANCEL'),
         ),
         ElevatedButton(
-          child: Text('OK'),
           onPressed: _onSubmitTap,
+          child: const Text('OK'),
         )
       ],
       titlePadding: widget.titlePadding,
@@ -124,7 +128,8 @@ class _MultiSelectDialogState<V> extends State<MultiSelectDialog<V>> {
       value: checked,
       title: Text(item.label),
       controlAffinity: ListTileControlAffinity.leading,
-      onChanged: (checked) => checked != null ? _onItemCheckedChange(item.value, checked) : null,
+      onChanged: (checked) =>
+          checked != null ? _onItemCheckedChange(item.value, checked) : null,
     );
   }
 }

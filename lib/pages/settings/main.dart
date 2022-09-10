@@ -1,18 +1,19 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/pages/settings/android_settings.dart';
 import 'package:flutter_browser/pages/settings/cross_platform_settings.dart';
 import 'package:flutter_browser/pages/settings/ios_settings.dart';
-import 'package:flutter_icons/flutter_icons.dart';
+import 'package:flutter_font_icons/flutter_font_icons.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
 import '../../custom_popup_menu_item.dart';
 
 class PopupSettingsMenuActions {
+  // ignore: constant_identifier_names
   static const String RESET_BROWSER_SETTINGS = "Reset Browser Settings";
+  // ignore: constant_identifier_names
   static const String RESET_WEBVIEW_SETTINGS = "Reset WebView Settings";
 
   static const List<String> choices = <String>[
@@ -22,10 +23,10 @@ class PopupSettingsMenuActions {
 }
 
 class SettingsPage extends StatefulWidget {
-  SettingsPage({Key? key}) : super(key: key);
+  const SettingsPage({Key? key}) : super(key: key);
 
   @override
-  _SettingsPageState createState() => _SettingsPageState();
+  State<SettingsPage> createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
@@ -39,10 +40,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 onTap: (value) {
                   FocusScope.of(context).unfocus();
                 },
-                tabs: [
+                tabs: const [
                   Tab(
                     text: "Cross-Platform",
-                    icon: Container(
+                    icon: SizedBox(
                       width: 25,
                       height: 25,
                       child: CircleAvatar(
@@ -59,7 +60,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   Tab(
                     text: "iOS",
-                    icon: Icon(FlutterIcons.apple1_ant),
+                    icon: Icon(AntDesign.apple1),
                   ),
                 ]),
             title: const Text(
@@ -75,11 +76,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       value: PopupSettingsMenuActions.RESET_BROWSER_SETTINGS,
                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
+                          children: const [
                             Text(PopupSettingsMenuActions
                                 .RESET_BROWSER_SETTINGS),
                             Icon(
-                              FlutterIcons.web_fou,
+                              Foundation.web,
                               color: Colors.black,
                             )
                           ]),
@@ -89,11 +90,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       value: PopupSettingsMenuActions.RESET_WEBVIEW_SETTINGS,
                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
+                          children: const [
                             Text(PopupSettingsMenuActions
                                 .RESET_WEBVIEW_SETTINGS),
                             Icon(
-                              FlutterIcons.web_mdi,
+                              MaterialIcons.web,
                               color: Colors.black,
                             )
                           ]),
@@ -105,7 +106,7 @@ class _SettingsPageState extends State<SettingsPage> {
               )
             ],
           ),
-          body: TabBarView(
+          body: const TabBarView(
             physics: NeverScrollableScrollPhysics(),
             children: [
               CrossPlatformSettings(),
@@ -127,10 +128,11 @@ class _SettingsPageState extends State<SettingsPage> {
         break;
       case PopupSettingsMenuActions.RESET_WEBVIEW_SETTINGS:
         var browserModel = Provider.of<BrowserModel>(context, listen: false);
-        var settings = browserModel.getSettings();
-        var currentWebViewModel = Provider.of<WebViewModel>(context, listen: false);
-        var _webViewController = currentWebViewModel.webViewController;
-        await _webViewController?.setOptions(
+        browserModel.getSettings();
+        var currentWebViewModel =
+            Provider.of<WebViewModel>(context, listen: false);
+        var webViewController = currentWebViewModel.webViewController;
+        await webViewController?.setOptions(
             options: InAppWebViewGroupOptions(
                 crossPlatform: InAppWebViewOptions(
                     incognito: currentWebViewModel.isIncognitoMode,
@@ -140,9 +142,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 ios: IOSInAppWebViewOptions(
                     allowsLinkPreview: false,
                     isFraudulentWebsiteWarningEnabled: true)));
-        currentWebViewModel.options = await _webViewController?.getOptions();
+        currentWebViewModel.options = await webViewController?.getOptions();
         browserModel.save();
-        setState(() { });
+        setState(() {});
         break;
     }
   }

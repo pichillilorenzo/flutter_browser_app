@@ -1,5 +1,3 @@
-import 'dart:collection';
-import 'dart:typed_data';
 import 'package:collection/collection.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -7,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 class WebViewModel extends ChangeNotifier {
-
   int? _tabIndex;
   Uri? _url;
   String? _title;
@@ -26,24 +23,23 @@ class WebViewModel extends ChangeNotifier {
   Uint8List? screenshot;
   bool needsToCompleteInitialLoad;
 
-  WebViewModel({
-    int? tabIndex,
-    Uri? url,
-    String? title,
-    Favicon? favicon,
-    double progress = 0.0,
-    bool loaded = false,
-    bool isDesktopMode = false,
-    bool isIncognitoMode = false,
-    List<Widget>? javaScriptConsoleResults,
-    List<String>? javaScriptConsoleHistory,
-    List<LoadedResource>? loadedResources,
-    bool isSecure = false,
-    this.windowId,
-    this.options,
-    this.webViewController,
-    this.needsToCompleteInitialLoad = true
-  }) {
+  WebViewModel(
+      {int? tabIndex,
+      Uri? url,
+      String? title,
+      Favicon? favicon,
+      double progress = 0.0,
+      bool loaded = false,
+      bool isDesktopMode = false,
+      bool isIncognitoMode = false,
+      List<Widget>? javaScriptConsoleResults,
+      List<String>? javaScriptConsoleHistory,
+      List<LoadedResource>? loadedResources,
+      bool isSecure = false,
+      this.windowId,
+      this.options,
+      this.webViewController,
+      this.needsToCompleteInitialLoad = true}) {
     _tabIndex = tabIndex;
     _url = url;
     _favicon = favicon;
@@ -134,7 +130,7 @@ class WebViewModel extends ChangeNotifier {
       UnmodifiableListView(_javaScriptConsoleResults);
 
   setJavaScriptConsoleResults(List<Widget> value) {
-    if (!IterableEquality().equals(value, _javaScriptConsoleResults)) {
+    if (!const IterableEquality().equals(value, _javaScriptConsoleResults)) {
       _javaScriptConsoleResults = value;
       notifyListeners();
     }
@@ -149,7 +145,7 @@ class WebViewModel extends ChangeNotifier {
       UnmodifiableListView(_javaScriptConsoleHistory);
 
   setJavaScriptConsoleHistory(List<String> value) {
-    if (!IterableEquality().equals(value, _javaScriptConsoleHistory)) {
+    if (!const IterableEquality().equals(value, _javaScriptConsoleHistory)) {
       _javaScriptConsoleHistory = value;
       notifyListeners();
     }
@@ -164,7 +160,7 @@ class WebViewModel extends ChangeNotifier {
       UnmodifiableListView(_loadedResources);
 
   setLoadedResources(List<LoadedResource> value) {
-    if (!IterableEquality().equals(value, _loadedResources)) {
+    if (!const IterableEquality().equals(value, _loadedResources)) {
       _loadedResources = value;
       notifyListeners();
     }
@@ -193,8 +189,10 @@ class WebViewModel extends ChangeNotifier {
     loaded = webViewModel.loaded;
     isDesktopMode = webViewModel.isDesktopMode;
     isIncognitoMode = webViewModel.isIncognitoMode;
-    setJavaScriptConsoleResults(webViewModel._javaScriptConsoleResults.toList());
-    setJavaScriptConsoleHistory(webViewModel._javaScriptConsoleHistory.toList());
+    setJavaScriptConsoleResults(
+        webViewModel._javaScriptConsoleResults.toList());
+    setJavaScriptConsoleHistory(
+        webViewModel._javaScriptConsoleHistory.toList());
     setLoadedResources(webViewModel._loadedResources.toList());
     isSecure = webViewModel.isSecure;
     options = webViewModel.options;
@@ -202,23 +200,28 @@ class WebViewModel extends ChangeNotifier {
   }
 
   static WebViewModel? fromMap(Map<String, dynamic>? map) {
-    return map != null ? WebViewModel(
-        tabIndex: map["tabIndex"],
-        url: map["url"] != null ? Uri.parse(map["url"]) : null,
-        title: map["title"],
-        favicon: map["favicon"] != null ? Favicon(
-          url: Uri.parse(map["favicon"]["url"]),
-          rel: map["favicon"]["rel"],
-          width: map["favicon"]["width"],
-          height: map["favicon"]["height"],
-        ) : null,
-        progress: map["progress"],
-        isDesktopMode: map["isDesktopMode"],
-        isIncognitoMode: map["isIncognitoMode"],
-        javaScriptConsoleHistory: map["javaScriptConsoleHistory"]?.cast<String>(),
-        isSecure: map["isSecure"],
-        options: InAppWebViewGroupOptions.fromMap(map["options"]),
-    ) : null;
+    return map != null
+        ? WebViewModel(
+            tabIndex: map["tabIndex"],
+            url: map["url"] != null ? Uri.parse(map["url"]) : null,
+            title: map["title"],
+            favicon: map["favicon"] != null
+                ? Favicon(
+                    url: Uri.parse(map["favicon"]["url"]),
+                    rel: map["favicon"]["rel"],
+                    width: map["favicon"]["width"],
+                    height: map["favicon"]["height"],
+                  )
+                : null,
+            progress: map["progress"],
+            isDesktopMode: map["isDesktopMode"],
+            isIncognitoMode: map["isIncognitoMode"],
+            javaScriptConsoleHistory:
+                map["javaScriptConsoleHistory"]?.cast<String>(),
+            isSecure: map["isSecure"],
+            options: InAppWebViewGroupOptions.fromMap(map["options"]),
+          )
+        : null;
   }
 
   Map<String, dynamic> toMap() {
