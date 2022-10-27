@@ -132,17 +132,15 @@ class _SettingsPageState extends State<SettingsPage> {
         var currentWebViewModel =
             Provider.of<WebViewModel>(context, listen: false);
         var webViewController = currentWebViewModel.webViewController;
-        await webViewController?.setOptions(
-            options: InAppWebViewGroupOptions(
-                crossPlatform: InAppWebViewOptions(
-                    incognito: currentWebViewModel.isIncognitoMode,
-                    useOnDownloadStart: true,
-                    useOnLoadResource: true),
-                android: AndroidInAppWebViewOptions(safeBrowsingEnabled: true),
-                ios: IOSInAppWebViewOptions(
-                    allowsLinkPreview: false,
-                    isFraudulentWebsiteWarningEnabled: true)));
-        currentWebViewModel.options = await webViewController?.getOptions();
+        await webViewController?.setSettings(
+            settings: InAppWebViewSettings(
+                incognito: currentWebViewModel.isIncognitoMode,
+                useOnDownloadStart: true,
+                useOnLoadResource: true,
+                safeBrowsingEnabled: true,
+                allowsLinkPreview: false,
+                isFraudulentWebsiteWarningEnabled: true));
+        currentWebViewModel.settings = await webViewController?.getSettings();
         browserModel.save();
         setState(() {});
         break;

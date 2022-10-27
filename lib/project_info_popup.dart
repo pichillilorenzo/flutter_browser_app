@@ -1,10 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
+import 'package:flutter_browser/util.dart';
 import 'package:flutter_browser/webview_tab.dart';
 import 'package:flutter_font_icons/flutter_font_icons.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
 import 'animated_flutter_browser_logo.dart';
@@ -58,7 +58,7 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
           browserModel.addTab(WebViewTab(
             key: GlobalKey(),
             webViewModel: WebViewModel(
-                url: Uri.parse(
+                url: WebUri(
                     "https://github.com/pichillilorenzo/flutter_inappwebview")),
           ));
           Navigator.pop(context);
@@ -90,7 +90,7 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
           browserModel.addTab(WebViewTab(
             key: GlobalKey(),
             webViewModel: WebViewModel(
-                url: Uri.parse(
+                url: WebUri(
                     "https://github.com/pichillilorenzo/flutter_browser_app")),
           ));
           Navigator.pop(context);
@@ -114,7 +114,7 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
       ),
     ];
 
-    if (Platform.isIOS) {
+    if (Util.isIOS()) {
       children.addAll(<Widget>[
         const SizedBox(
           height: 20.0,

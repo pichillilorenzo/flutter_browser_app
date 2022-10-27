@@ -1,8 +1,8 @@
-import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
+import 'package:flutter_browser/util.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -34,7 +34,7 @@ void main() async {
 
   WEB_ARCHIVE_DIR = (await getApplicationSupportDirectory()).path;
 
-  if (Platform.isIOS) {
+  if (Util.isIOS()) {
     TAB_VIEWER_BOTTOM_OFFSET_1 = 130.0;
     TAB_VIEWER_BOTTOM_OFFSET_2 = 140.0;
     TAB_VIEWER_BOTTOM_OFFSET_3 = 150.0;
@@ -45,8 +45,8 @@ void main() async {
   }
 
   await FlutterDownloader.initialize(
-      debug: true // optional: set false to disable printing logs to console
-      );
+    debug: kDebugMode
+  );
 
   await Permission.camera.request();
   await Permission.microphone.request();

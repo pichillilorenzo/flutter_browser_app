@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_browser/models/webview_model.dart';
+import 'package:flutter_browser/util.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
@@ -95,9 +94,9 @@ class _StorageManagerState extends State<StorageManager> {
           _buildHttpAuthCredentialDatabaseExpansionTile(constraints),
         ];
 
-        if (Platform.isAndroid) {
+        if (Util.isAndroid()) {
           entryItems.add(_buildAndroidWebStorageExpansionTile(constraints));
-        } else if (Platform.isIOS) {
+        } else if (Util.isIOS()) {
           entryItems.add(_buildIOSWebStorageExpansionTile(constraints));
         }
 
@@ -112,7 +111,7 @@ class _StorageManagerState extends State<StorageManager> {
   }
 
   Widget _buildCookiesExpansionTile(BoxConstraints constraints) {
-    return Selector<WebViewModel, Uri>(
+    return Selector<WebViewModel, WebUri>(
       selector: (context, webViewModel) => webViewModel.url!,
       builder: (context, url, child) {
         return FutureBuilder(
@@ -661,7 +660,7 @@ class _StorageManagerState extends State<StorageManager> {
           selector: (context, webViewModel) => webViewModel.url!,
           builder: (context, url, child) {
             return FutureBuilder(
-              future: _webStorageManager.android
+              future: _webStorageManager
                   .getQuotaForOrigin(origin: url.origin),
               builder: (context, snapshot) {
                 return Text(snapshot.hasData ? snapshot.data.toString() : "");
@@ -676,7 +675,7 @@ class _StorageManagerState extends State<StorageManager> {
             return ListTile(
               title: const Text("Usage"),
               subtitle: FutureBuilder(
-                future: _webStorageManager.android
+                future: _webStorageManager
                     .getUsageForOrigin(origin: url.origin),
                 builder: (context, snapshot) {
                   return Text(snapshot.hasData ? snapshot.data.toString() : "");
@@ -685,7 +684,7 @@ class _StorageManagerState extends State<StorageManager> {
               trailing: IconButton(
                 icon: const Icon(Icons.clear),
                 onPressed: () async {
-                  await _webStorageManager.android
+                  await _webStorageManager
                       .deleteOrigin(origin: url.origin);
                   setState(() {});
                 },
@@ -708,12 +707,12 @@ class _StorageManagerState extends State<StorageManager> {
 
   Widget _buildIOSWebStorageExpansionTile(BoxConstraints constraints) {
     return FutureBuilder(
-      future: _webStorageManager.ios
-          .fetchDataRecords(dataTypes: IOSWKWebsiteDataType.ALL),
+      future: _webStorageManager
+          .fetchDataRecords(dataTypes: WebsiteDataType.ALL),
       builder: (context, snapshot) {
-        List<IOSWKWebsiteDataRecord> dataRecords = snapshot.hasData
-            ? (snapshot.data as List<IOSWKWebsiteDataRecord>)
-            : <IOSWKWebsiteDataRecord>[];
+        List<WebsiteDataRecord> dataRecords = snapshot.hasData
+            ? (snapshot.data as List<WebsiteDataRecord>)
+            : <WebsiteDataRecord>[];
 
         var rows = <DataRow>[];
 
@@ -753,7 +752,7 @@ class _StorageManagerState extends State<StorageManager> {
               icon: const Icon(Icons.cancel),
               onPressed: () async {
                 if (dataRecord.dataTypes != null) {
-                  await _webStorageManager.ios.removeDataFor(
+                  await _webStorageManager.removeDataFor(
                       dataTypes: dataRecord.dataTypes!,
                       dataRecords: [dataRecord]);
                 }
@@ -807,8 +806,8 @@ class _StorageManagerState extends State<StorageManager> {
                 child: TextButton(
                   child: const Text("Clear all"),
                   onPressed: () async {
-                    await _webStorageManager.ios.removeDataModifiedSince(
-                        dataTypes: IOSWKWebsiteDataType.ALL,
+                    await _webStorageManager.removeDataModifiedSince(
+                        dataTypes: WebsiteDataType.ALL,
                         date: DateTime.fromMillisecondsSinceEpoch(0));
                     setState(() {});
                   },

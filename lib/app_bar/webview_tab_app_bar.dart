@@ -1,6 +1,6 @@
+// import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:io';
 
-// import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_browser/app_bar/url_info_popup.dart';
@@ -84,7 +84,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
   @override
   Widget build(BuildContext context) {
-    return Selector<WebViewModel, Uri?>(
+    return Selector<WebViewModel, WebUri?>(
         selector: (context, webViewModel) => webViewModel.url,
         builder: (context, url, child) {
           if (url == null) {
@@ -136,8 +136,8 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         if (webViewController != null) {
           var url =
               settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
-                  ? Uri.parse(settings.customUrlHomePage)
-                  : Uri.parse(settings.searchEngine.url);
+                  ? WebUri(settings.customUrlHomePage)
+                  : WebUri(settings.searchEngine.url);
           webViewController.loadUrl(urlRequest: URLRequest(url: url));
         } else {
           addNewTab();
@@ -159,10 +159,10 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         children: <Widget>[
           TextField(
             onSubmitted: (value) {
-              var url = Uri.parse(value.trim());
+              var url = WebUri(value.trim());
               if (!url.scheme.startsWith("http") &&
                   !Util.isLocalizedContent(url)) {
-                url = Uri.parse(settings.searchEngine.searchUrl + value);
+                url = WebUri(settings.searchEngine.searchUrl + value);
               }
 
               if (webViewController != null) {
@@ -367,7 +367,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
                   var children = <Widget>[];
 
-                  if (Platform.isIOS) {
+                  if (Util.isIOS()) {
                     children.add(
                       SizedBox(
                           width: 35.0,
@@ -436,7 +436,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                                 }
 
                                 String webArchivePath =
-                                    "$WEB_ARCHIVE_DIR${Platform.pathSeparator}${url.scheme}-${url.host}${url.path.replaceAll("/", "-")}${DateTime.now().microsecondsSinceEpoch}.${Platform.isAndroid ? WebArchiveFormat.MHT.toValue() : WebArchiveFormat.WEBARCHIVE.toValue()}";
+                                    "$WEB_ARCHIVE_DIR${Platform.pathSeparator}${url.scheme}-${url.host}${url.path.replaceAll("/", "-")}${DateTime.now().microsecondsSinceEpoch}.${Util.isAndroid() ? WebArchiveFormat.MHT.toValue() : WebArchiveFormat.WEBARCHIVE.toValue()}";
 
                                 String? savedPath =
                                     (await webViewController?.saveWebArchive(
@@ -705,6 +705,8 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
   }
 
   void _popupMenuChoiceAction(String choice) async {
+    var currentWebViewModel = Provider.of<WebViewModel>(context, listen: false);
+
     switch (choice) {
       case PopupMenuActions.NEW_TAB:
         addNewTab();
@@ -722,7 +724,11 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         showWebArchives();
         break;
       case PopupMenuActions.FIND_ON_PAGE:
-        if (widget.showFindOnPage != null) {
+        var isFindInteractionEnabled = currentWebViewModel.settings?.isFindInteractionEnabled ?? false;
+        var findInteractionController = currentWebViewModel.findInteractionController;
+        if (Util.isIOS() && isFindInteractionEnabled && findInteractionController != null) {
+          await findInteractionController.presentFindNavigator();
+        } else if (widget.showFindOnPage != null) {
           widget.showFindOnPage!();
         }
         break;
@@ -750,13 +756,13 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     }
   }
 
-  void addNewTab({Uri? url}) {
+  void addNewTab({WebUri? url}) {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var settings = browserModel.getSettings();
 
     url ??= settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
-        ? Uri.parse(settings.customUrlHomePage)
-        : Uri.parse(settings.searchEngine.url);
+        ? WebUri(settings.customUrlHomePage)
+        : WebUri(settings.searchEngine.url);
 
     browserModel.addTab(WebViewTab(
       key: GlobalKey(),
@@ -764,13 +770,13 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     ));
   }
 
-  void addNewIncognitoTab({Uri? url}) {
+  void addNewIncognitoTab({WebUri? url}) {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var settings = browserModel.getSettings();
 
     url ??= settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
-        ? Uri.parse(settings.customUrlHomePage)
-        : Uri.parse(settings.searchEngine.url);
+        ? WebUri(settings.customUrlHomePage)
+        : WebUri(settings.searchEngine.url);
 
     browserModel.addTab(WebViewTab(
       key: GlobalKey(),
@@ -793,7 +799,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                       var url = favorite.url;
                       var faviconUrl = favorite.favicon != null
                           ? favorite.favicon!.url
-                          : Uri.parse("${url?.origin ?? ""}/favicon.ico");
+                          : WebUri("${url?.origin ?? ""}/favicon.ico");
 
                       return ListTile(
                         leading: Column(
@@ -881,7 +887,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                                     //   height: 30,
                                     // )
                                     CustomImage(
-                                        url: Uri.parse(
+                                        url: WebUri(
                                             "${url?.origin ?? ""}/favicon.ico"),
                                         maxWidth: 30.0,
                                         height: 30.0)
@@ -932,7 +938,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                   //   height: 30,
                   // )
                   CustomImage(
-                      url: Uri.parse("${url?.origin ?? ""}/favicon.ico"),
+                      url: WebUri("${url?.origin ?? ""}/favicon.ico"),
                       maxWidth: 30.0,
                       height: 30.0)
                 ],
@@ -957,7 +963,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                       Provider.of<BrowserModel>(context, listen: false);
                   browserModel.addTab(WebViewTab(
                     key: GlobalKey(),
-                    webViewModel: WebViewModel(url: Uri.parse("file://$path")),
+                    webViewModel: WebViewModel(url: WebUri("file://$path")),
                   ));
                 }
                 Navigator.pop(context);
@@ -999,12 +1005,13 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
       webViewModel?.isDesktopMode = !webViewModel.isDesktopMode;
       currentWebViewModel.isDesktopMode = webViewModel?.isDesktopMode ?? false;
 
-      await webViewController.setOptions(
-          options: InAppWebViewGroupOptions(
-              crossPlatform: InAppWebViewOptions(
-                  preferredContentMode: webViewModel?.isDesktopMode ?? false
-                      ? UserPreferredContentMode.DESKTOP
-                      : UserPreferredContentMode.RECOMMENDED)));
+      var currentSettings = await webViewController.getSettings();
+      if (currentSettings != null) {
+        currentSettings.preferredContentMode = webViewModel?.isDesktopMode ?? false
+            ? UserPreferredContentMode.DESKTOP
+            : UserPreferredContentMode.RECOMMENDED;
+        await webViewController.setSettings(settings: currentSettings);
+      }
       await webViewController.reload();
     }
   }

@@ -1,7 +1,7 @@
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 class FavoriteModel {
-  Uri? url;
+  WebUri? url;
   String? title;
   Favicon? favicon;
 
@@ -10,11 +10,11 @@ class FavoriteModel {
   static FavoriteModel? fromMap(Map<String, dynamic>? map) {
     return map != null
         ? FavoriteModel(
-            url: map["url"] != null ? Uri.parse(map["url"]) : null,
+            url: map["url"] != null ? WebUri(map["url"]) : null,
             title: map["title"],
             favicon: map["favicon"] != null
                 ? Favicon(
-                    url: Uri.parse(map["favicon"]["url"]),
+                    url: WebUri(map["favicon"]["url"]),
                     rel: map["favicon"]["rel"],
                     width: map["favicon"]["width"],
                     height: map["favicon"]["height"],

@@ -4,6 +4,7 @@ import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/pages/settings/main.dart';
 import 'package:flutter_browser/webview_tab.dart';
 import 'package:flutter_font_icons/flutter_font_icons.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
 import '../custom_popup_menu_item.dart';
@@ -181,13 +182,13 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
     }
   }
 
-  void addNewTab({Uri? url}) {
+  void addNewTab({WebUri? url}) {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var settings = browserModel.getSettings();
 
     url ??= settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
-        ? Uri.parse(settings.customUrlHomePage)
-        : Uri.parse(settings.searchEngine.url);
+        ? WebUri(settings.customUrlHomePage)
+        : WebUri(settings.searchEngine.url);
 
     browserModel.showTabScroller = false;
 
@@ -197,13 +198,13 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
     ));
   }
 
-  void addNewIncognitoTab({Uri? url}) {
+  void addNewIncognitoTab({WebUri? url}) {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var settings = browserModel.getSettings();
 
     url ??= settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
-        ? Uri.parse(settings.customUrlHomePage)
-        : Uri.parse(settings.searchEngine.url);
+        ? WebUri(settings.customUrlHomePage)
+        : WebUri(settings.searchEngine.url);
 
     browserModel.showTabScroller = false;
 

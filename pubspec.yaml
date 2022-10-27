@@ -17,10 +17,11 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.1.0+4
+version: 2.0.0
 
 environment:
-  sdk: '>=2.18.0 <3.0.0'
+  sdk: ">=2.18.0 <3.0.0"
+  flutter: ">=3.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -35,24 +36,23 @@ dependencies:
   # For material you.
   dynamic_color: ^1.5.4
 
-  flutter_inappwebview: ^5.4.3+7
-    # path: /Users/lorenzopichilli/Desktop/flutter_inappwebview
-  flutter_downloader: ^1.8.3
+  flutter_inappwebview: ^6.0.0-beta.11
+  flutter_downloader: ^1.8.4
   path_provider: ^2.0.11
-  permission_handler: ^10.0.0
-  provider: ^6.0.3
-  share_plus: ^4.1.0
+  permission_handler: ^10.2.0
+  provider: ^6.0.4
+  share_plus: ^6.1.0
   share_extend: ^2.0.0
   # charts_flutter: ^0.9.0
   flutter_datetime_picker: ^1.5.1
   crypto: ^3.0.2
   shared_preferences: ^2.0.15
-  package_info_plus: ^1.4.3+1
+  package_info_plus: ^3.0.1
 #  flutter_icons: ^1.1.0
   flutter_font_icons: ^2.2.5
-  flutter_svg: ^1.1.5
+  flutter_svg: ^1.1.6
   mime: ^1.0.2
-  url_launcher: ^6.1.5
+  url_launcher: ^6.1.6
   # cached_network_image: ^2.5.0
   flutter_colorpicker: ^1.0.3
   intl: ^0.17.0

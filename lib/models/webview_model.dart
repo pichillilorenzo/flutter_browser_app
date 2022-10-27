@@ -6,7 +6,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 class WebViewModel extends ChangeNotifier {
   int? _tabIndex;
-  Uri? _url;
+  WebUri? _url;
   String? _title;
   Favicon? _favicon;
   late double _progress;
@@ -18,14 +18,16 @@ class WebViewModel extends ChangeNotifier {
   late List<LoadedResource> _loadedResources;
   late bool _isSecure;
   int? windowId;
-  InAppWebViewGroupOptions? options;
+  InAppWebViewSettings? settings;
   InAppWebViewController? webViewController;
+  PullToRefreshController? pullToRefreshController;
+  FindInteractionController? findInteractionController;
   Uint8List? screenshot;
   bool needsToCompleteInitialLoad;
 
   WebViewModel(
       {int? tabIndex,
-      Uri? url,
+        WebUri? url,
       String? title,
       Favicon? favicon,
       double progress = 0.0,
@@ -37,8 +39,10 @@ class WebViewModel extends ChangeNotifier {
       List<LoadedResource>? loadedResources,
       bool isSecure = false,
       this.windowId,
-      this.options,
+      this.settings,
       this.webViewController,
+        this.pullToRefreshController,
+        this.findInteractionController,
       this.needsToCompleteInitialLoad = true}) {
     _tabIndex = tabIndex;
     _url = url;
@@ -51,7 +55,7 @@ class WebViewModel extends ChangeNotifier {
     _javaScriptConsoleHistory = javaScriptConsoleHistory ?? <String>[];
     _loadedResources = loadedResources ?? <LoadedResource>[];
     _isSecure = isSecure;
-    options = options ?? InAppWebViewGroupOptions();
+    settings = settings ?? InAppWebViewSettings();
   }
 
   int? get tabIndex => _tabIndex;
@@ -63,9 +67,9 @@ class WebViewModel extends ChangeNotifier {
     }
   }
 
-  Uri? get url => _url;
+  WebUri? get url => _url;
 
-  set url(Uri? value) {
+  set url(WebUri? value) {
     if (value != _url) {
       _url = value;
       notifyListeners();
@@ -195,19 +199,21 @@ class WebViewModel extends ChangeNotifier {
         webViewModel._javaScriptConsoleHistory.toList());
     setLoadedResources(webViewModel._loadedResources.toList());
     isSecure = webViewModel.isSecure;
-    options = webViewModel.options;
+    settings = webViewModel.settings;
     webViewController = webViewModel.webViewController;
+    pullToRefreshController = webViewModel.pullToRefreshController;
+    findInteractionController = webViewModel.findInteractionController;
   }
 
   static WebViewModel? fromMap(Map<String, dynamic>? map) {
     return map != null
         ? WebViewModel(
             tabIndex: map["tabIndex"],
-            url: map["url"] != null ? Uri.parse(map["url"]) : null,
+            url: map["url"] != null ? WebUri(map["url"]) : null,
             title: map["title"],
             favicon: map["favicon"] != null
                 ? Favicon(
-                    url: Uri.parse(map["favicon"]["url"]),
+                    url: WebUri(map["favicon"]["url"]),
                     rel: map["favicon"]["rel"],
                     width: map["favicon"]["width"],
                     height: map["favicon"]["height"],
@@ -219,7 +225,7 @@ class WebViewModel extends ChangeNotifier {
             javaScriptConsoleHistory:
                 map["javaScriptConsoleHistory"]?.cast<String>(),
             isSecure: map["isSecure"],
-            options: InAppWebViewGroupOptions.fromMap(map["options"]),
+            settings: InAppWebViewSettings.fromMap(map["settings"]),
           )
         : null;
   }
@@ -235,7 +241,7 @@ class WebViewModel extends ChangeNotifier {
       "isIncognitoMode": _isIncognitoMode,
       "javaScriptConsoleHistory": _javaScriptConsoleHistory,
       "isSecure": _isSecure,
-      "options": options?.toMap(),
+      "settings": settings?.toMap(),
       "screenshot": screenshot,
     };
   }

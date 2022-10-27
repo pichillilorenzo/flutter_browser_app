@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/webview_tab.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
 import 'models/browser_model.dart';
@@ -17,7 +18,7 @@ class _EmptyTabState extends State<EmptyTab> {
 
   @override
   Widget build(BuildContext context) {
-    var browserModel = Provider.of<BrowserModel>(context, listen: false);
+    var browserModel = Provider.of<BrowserModel>(context, listen: true);
     var settings = browserModel.getSettings();
 
     return Scaffold(
@@ -73,7 +74,7 @@ class _EmptyTabState extends State<EmptyTab> {
     browserModel.addTab(WebViewTab(
       key: GlobalKey(),
       webViewModel: WebViewModel(
-          url: Uri.parse(value.startsWith("http")
+          url: WebUri(value.startsWith("http")
               ? value
               : settings.searchEngine.searchUrl + value)),
     ));

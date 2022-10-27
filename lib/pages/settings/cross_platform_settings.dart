@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/search_engine_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
+import 'package:flutter_browser/util.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
@@ -160,19 +159,19 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
         title: const Text("Debugging Enabled"),
         subtitle: const Text(
             "Enables debugging of web contents loaded into any WebViews of this application. On iOS the debugging mode is always enabled."),
-        value: Platform.isAndroid ? settings.debuggingEnabled : true,
+        value: Util.isAndroid() ? settings.debuggingEnabled : true,
         onChanged: (value) {
           setState(() {
             settings.debuggingEnabled = value;
             browserModel.updateSettings(settings);
             if (browserModel.webViewTabs.isNotEmpty) {
               var webViewModel = browserModel.getCurrentTab()?.webViewModel;
-              if (Platform.isAndroid) {
-                AndroidInAppWebViewController.setWebContentsDebuggingEnabled(
+              if (Util.isAndroid()) {
+                InAppWebViewController.setWebContentsDebuggingEnabled(
                     settings.debuggingEnabled);
               }
-              webViewModel?.webViewController?.setOptions(
-                  options: webViewModel.options ?? InAppWebViewGroupOptions());
+              webViewModel?.webViewController?.setSettings(
+                  settings: webViewModel.settings ?? InAppWebViewSettings());
               browserModel.save();
             }
           });
@@ -231,15 +230,15 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
       )
     ];
 
-    if (Platform.isAndroid) {
+    if (Util.isAndroid()) {
       widgets.addAll(<Widget>[
         FutureBuilder(
-          future: AndroidInAppWebViewController.getCurrentWebViewPackage(),
+          future: InAppWebViewController.getCurrentWebViewPackage(),
           builder: (context, snapshot) {
             String packageDescription = "";
             if (snapshot.hasData) {
-              AndroidWebViewPackageInfo packageInfo =
-                  snapshot.data as AndroidWebViewPackageInfo;
+              WebViewPackageInfo packageInfo =
+                  snapshot.data as WebViewPackageInfo;
               packageDescription =
                   "${packageInfo.packageName ?? ""} - ${packageInfo.versionName ?? ""}";
             }
@@ -272,14 +271,12 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
         title: const Text("JavaScript Enabled"),
         subtitle:
             const Text("Sets whether the WebView should enable JavaScript."),
-        value: currentWebViewModel.options?.crossPlatform.javaScriptEnabled ??
-            true,
+        value: currentWebViewModel.settings?.javaScriptEnabled ?? true,
         onChanged: (value) async {
-          currentWebViewModel.options?.crossPlatform.javaScriptEnabled = value;
-          webViewController?.setOptions(
-              options:
-                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await webViewController?.getOptions();
+          currentWebViewModel.settings?.javaScriptEnabled = value;
+          webViewController?.setSettings(
+              settings: currentWebViewModel.settings ?? InAppWebViewSettings());
+          currentWebViewModel.settings = await webViewController?.getSettings();
           browserModel.save();
           setState(() {});
         },
@@ -288,13 +285,12 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
         title: const Text("Cache Enabled"),
         subtitle:
             const Text("Sets whether the WebView should use browser caching."),
-        value: currentWebViewModel.options?.crossPlatform.cacheEnabled ?? true,
+        value: currentWebViewModel.settings?.cacheEnabled ?? true,
         onChanged: (value) async {
-          currentWebViewModel.options?.crossPlatform.cacheEnabled = value;
-          webViewController?.setOptions(
-              options:
-                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await webViewController?.getOptions();
+          currentWebViewModel.settings?.cacheEnabled = value;
+          webViewController?.setSettings(
+              settings: currentWebViewModel.settings ?? InAppWebViewSettings());
+          currentWebViewModel.settings = await webViewController?.getSettings();
           browserModel.save();
           setState(() {});
         },
@@ -303,14 +299,13 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
         builder: (context, setState) {
           return ListTile(
             title: const Text("Custom User Agent"),
-            subtitle: Text(currentWebViewModel
-                        .options?.crossPlatform.userAgent.isNotEmpty ??
-                    false
-                ? currentWebViewModel.options!.crossPlatform.userAgent
-                : "Set a custom user agent ..."),
+            subtitle: Text(
+                currentWebViewModel.settings?.userAgent?.isNotEmpty ?? false
+                    ? currentWebViewModel.settings!.userAgent!
+                    : "Set a custom user agent ..."),
             onTap: () {
               _customUserAgentController.text =
-                  currentWebViewModel.options?.crossPlatform.userAgent ?? "";
+                  currentWebViewModel.settings?.userAgent ?? "";
 
               showDialog(
                 context: context,
@@ -327,13 +322,14 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
                               Expanded(
                                 child: TextField(
                                   onSubmitted: (value) async {
-                                    currentWebViewModel.options?.crossPlatform
-                                        .userAgent = value;
-                                    webViewController?.setOptions(
-                                        options: currentWebViewModel.options ??
-                                            InAppWebViewGroupOptions());
-                                    currentWebViewModel.options =
-                                        await webViewController?.getOptions();
+                                    currentWebViewModel.settings?.userAgent =
+                                        value;
+                                    webViewController?.setSettings(
+                                        settings:
+                                            currentWebViewModel.settings ??
+                                                InAppWebViewSettings());
+                                    currentWebViewModel.settings =
+                                        await webViewController?.getSettings();
                                     browserModel.save();
                                     setState(() {
                                       Navigator.pop(context);
@@ -363,13 +359,12 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
         title: const Text("Support Zoom"),
         subtitle: const Text(
             "Sets whether the WebView should not support zooming using its on-screen zoom controls and gestures."),
-        value: currentWebViewModel.options?.crossPlatform.supportZoom ?? true,
+        value: currentWebViewModel.settings?.supportZoom ?? true,
         onChanged: (value) async {
-          currentWebViewModel.options?.crossPlatform.supportZoom = value;
-          webViewController?.setOptions(
-              options:
-                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await webViewController?.getOptions();
+          currentWebViewModel.settings?.supportZoom = value;
+          webViewController?.setSettings(
+              settings: currentWebViewModel.settings ?? InAppWebViewSettings());
+          currentWebViewModel.settings = await webViewController?.getSettings();
           browserModel.save();
           setState(() {});
         },
@@ -378,16 +373,14 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
         title: const Text("Media Playback Requires User Gesture"),
         subtitle: const Text(
             "Sets whether the WebView should prevent HTML5 audio or video from autoplaying."),
-        value: currentWebViewModel
-                .options?.crossPlatform.mediaPlaybackRequiresUserGesture ??
+        value: currentWebViewModel.settings?.mediaPlaybackRequiresUserGesture ??
             true,
         onChanged: (value) async {
-          currentWebViewModel
-              .options?.crossPlatform.mediaPlaybackRequiresUserGesture = value;
-          webViewController?.setOptions(
-              options:
-                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await webViewController?.getOptions();
+          currentWebViewModel.settings?.mediaPlaybackRequiresUserGesture =
+              value;
+          webViewController?.setSettings(
+              settings: currentWebViewModel.settings ?? InAppWebViewSettings());
+          currentWebViewModel.settings = await webViewController?.getSettings();
           browserModel.save();
           setState(() {});
         },
@@ -396,16 +389,12 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
         title: const Text("Vertical ScrollBar Enabled"),
         subtitle: const Text(
             "Sets whether the vertical scrollbar should be drawn or not."),
-        value: currentWebViewModel
-                .options?.crossPlatform.verticalScrollBarEnabled ??
-            true,
+        value: currentWebViewModel.settings?.verticalScrollBarEnabled ?? true,
         onChanged: (value) async {
-          currentWebViewModel.options?.crossPlatform.verticalScrollBarEnabled =
-              value;
-          webViewController?.setOptions(
-              options:
-                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await webViewController?.getOptions();
+          currentWebViewModel.settings?.verticalScrollBarEnabled = value;
+          webViewController?.setSettings(
+              settings: currentWebViewModel.settings ?? InAppWebViewSettings());
+          currentWebViewModel.settings = await webViewController?.getSettings();
           browserModel.save();
           setState(() {});
         },
@@ -414,16 +403,12 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
         title: const Text("Horizontal ScrollBar Enabled"),
         subtitle: const Text(
             "Sets whether the horizontal scrollbar should be drawn or not."),
-        value: currentWebViewModel
-                .options?.crossPlatform.horizontalScrollBarEnabled ??
-            true,
+        value: currentWebViewModel.settings?.horizontalScrollBarEnabled ?? true,
         onChanged: (value) async {
-          currentWebViewModel
-              .options?.crossPlatform.horizontalScrollBarEnabled = value;
-          webViewController?.setOptions(
-              options:
-                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await webViewController?.getOptions();
+          currentWebViewModel.settings?.horizontalScrollBarEnabled = value;
+          webViewController?.setSettings(
+              settings: currentWebViewModel.settings ?? InAppWebViewSettings());
+          currentWebViewModel.settings = await webViewController?.getSettings();
           browserModel.save();
           setState(() {});
         },
@@ -432,16 +417,12 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
         title: const Text("Disable Vertical Scroll"),
         subtitle: const Text(
             "Sets whether vertical scroll should be enabled or not."),
-        value:
-            currentWebViewModel.options?.crossPlatform.disableVerticalScroll ??
-                false,
+        value: currentWebViewModel.settings?.disableVerticalScroll ?? false,
         onChanged: (value) async {
-          currentWebViewModel.options?.crossPlatform.disableVerticalScroll =
-              value;
-          webViewController?.setOptions(
-              options:
-                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await webViewController?.getOptions();
+          currentWebViewModel.settings?.disableVerticalScroll = value;
+          webViewController?.setSettings(
+              settings: currentWebViewModel.settings ?? InAppWebViewSettings());
+          currentWebViewModel.settings = await webViewController?.getSettings();
           browserModel.save();
           setState(() {});
         },
@@ -450,16 +431,12 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
         title: const Text("Disable Horizontal Scroll"),
         subtitle: const Text(
             "Sets whether horizontal scroll should be enabled or not."),
-        value: currentWebViewModel
-                .options?.crossPlatform.disableHorizontalScroll ??
-            false,
+        value: currentWebViewModel.settings?.disableHorizontalScroll ?? false,
         onChanged: (value) async {
-          currentWebViewModel.options?.crossPlatform.disableHorizontalScroll =
-              value;
-          webViewController?.setOptions(
-              options:
-                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await webViewController?.getOptions();
+          currentWebViewModel.settings?.disableHorizontalScroll = value;
+          webViewController?.setSettings(
+              settings: currentWebViewModel.settings ?? InAppWebViewSettings());
+          currentWebViewModel.settings = await webViewController?.getSettings();
           browserModel.save();
           setState(() {});
         },
@@ -468,14 +445,12 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
         title: const Text("Disable Context Menu"),
         subtitle:
             const Text("Sets whether context menu should be enabled or not."),
-        value: currentWebViewModel.options?.crossPlatform.disableContextMenu ??
-            false,
+        value: currentWebViewModel.settings?.disableContextMenu ?? false,
         onChanged: (value) async {
-          currentWebViewModel.options?.crossPlatform.disableContextMenu = value;
-          webViewController?.setOptions(
-              options:
-                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await webViewController?.getOptions();
+          currentWebViewModel.settings?.disableContextMenu = value;
+          webViewController?.setSettings(
+              settings: currentWebViewModel.settings ?? InAppWebViewSettings());
+          currentWebViewModel.settings = await webViewController?.getSettings();
           browserModel.save();
           setState(() {});
         },
@@ -486,18 +461,16 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
         trailing: SizedBox(
           width: 50.0,
           child: TextFormField(
-            initialValue: currentWebViewModel
-                .options?.crossPlatform.minimumFontSize
-                .toString(),
+            initialValue:
+                currentWebViewModel.settings?.minimumFontSize.toString(),
             keyboardType: const TextInputType.numberWithOptions(),
             onFieldSubmitted: (value) async {
-              currentWebViewModel.options?.crossPlatform.minimumFontSize =
-                  int.parse(value);
-              webViewController?.setOptions(
-                  options: currentWebViewModel.options ??
-                      InAppWebViewGroupOptions());
-              currentWebViewModel.options =
-                  await webViewController?.getOptions();
+              currentWebViewModel.settings?.minimumFontSize = int.parse(value);
+              webViewController?.setSettings(
+                  settings:
+                      currentWebViewModel.settings ?? InAppWebViewSettings());
+              currentWebViewModel.settings =
+                  await webViewController?.getSettings();
               browserModel.save();
               setState(() {});
             },
@@ -508,16 +481,13 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
         title: const Text("Allow File Access From File URLs"),
         subtitle: const Text(
             "Sets whether JavaScript running in the context of a file scheme URL should be allowed to access content from other file scheme URLs."),
-        value: currentWebViewModel
-                .options?.crossPlatform.allowFileAccessFromFileURLs ??
-            false,
+        value:
+            currentWebViewModel.settings?.allowFileAccessFromFileURLs ?? false,
         onChanged: (value) async {
-          currentWebViewModel
-              .options?.crossPlatform.allowFileAccessFromFileURLs = value;
-          webViewController?.setOptions(
-              options:
-                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await webViewController?.getOptions();
+          currentWebViewModel.settings?.allowFileAccessFromFileURLs = value;
+          webViewController?.setSettings(
+              settings: currentWebViewModel.settings ?? InAppWebViewSettings());
+          currentWebViewModel.settings = await webViewController?.getSettings();
           browserModel.save();
           setState(() {});
         },
@@ -526,16 +496,14 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
         title: const Text("Allow Universal Access From File URLs"),
         subtitle: const Text(
             "Sets whether JavaScript running in the context of a file scheme URL should be allowed to access content from any origin."),
-        value: currentWebViewModel
-                .options?.crossPlatform.allowUniversalAccessFromFileURLs ??
+        value: currentWebViewModel.settings?.allowUniversalAccessFromFileURLs ??
             false,
         onChanged: (value) async {
-          currentWebViewModel
-              .options?.crossPlatform.allowUniversalAccessFromFileURLs = value;
-          webViewController?.setOptions(
-              options:
-                  currentWebViewModel.options ?? InAppWebViewGroupOptions());
-          currentWebViewModel.options = await webViewController?.getOptions();
+          currentWebViewModel.settings?.allowUniversalAccessFromFileURLs =
+              value;
+          webViewController?.setSettings(
+              settings: currentWebViewModel.settings ?? InAppWebViewSettings());
+          currentWebViewModel.settings = await webViewController?.getSettings();
           browserModel.save();
           setState(() {});
         },

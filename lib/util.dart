@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class Util {
   static bool urlIsSecure(Uri url) {
     return (url.scheme == "https") || Util.isLocalizedContent(url);
@@ -9,5 +11,13 @@ class Util {
         url.scheme == "data" ||
         url.scheme == "javascript" ||
         url.scheme == "about");
+  }
+
+  static bool isAndroid() {
+    return !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+  }
+
+  static bool isIOS() {
+    return !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
   }
 }

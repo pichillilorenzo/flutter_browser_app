@@ -157,13 +157,11 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
               },
               initialUrlRequest:
                   URLRequest(url: widget.requestFocusNodeHrefResult?.url),
-              initialOptions: InAppWebViewGroupOptions(
-                  android: AndroidInAppWebViewOptions(
-                      useHybridComposition: true,
-                      verticalScrollbarThumbColor:
-                          const Color.fromRGBO(0, 0, 0, 0.5),
-                      horizontalScrollbarThumbColor:
-                          const Color.fromRGBO(0, 0, 0, 0.5))),
+              initialSettings: InAppWebViewSettings(
+                  verticalScrollbarThumbColor:
+                      const Color.fromRGBO(0, 0, 0, 0.5),
+                  horizontalScrollbarThumbColor:
+                      const Color.fromRGBO(0, 0, 0, 0.5)),
               onProgressChanged: (controller, progress) {
                 if (progress > 50) {
                   setState(() {
@@ -325,7 +323,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
         browserModel.addTab(WebViewTab(
           key: GlobalKey(),
           webViewModel: WebViewModel(
-              url: Uri.parse(widget.hitTestResult.extra ?? "about:blank")),
+              url: WebUri(widget.hitTestResult.extra ?? "about:blank")),
         ));
         Navigator.pop(context);
       },
@@ -343,7 +341,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
               "http://images.google.com/searchbyimage?image_url=${widget.hitTestResult.extra!}";
           browserModel.addTab(WebViewTab(
             key: GlobalKey(),
-            webViewModel: WebViewModel(url: Uri.parse(url)),
+            webViewModel: WebViewModel(url: WebUri(url)),
           ));
         }
         Navigator.pop(context);

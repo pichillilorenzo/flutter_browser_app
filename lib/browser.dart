@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 // import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +7,9 @@ import 'package:flutter_browser/custom_image.dart';
 import 'package:flutter_browser/tab_viewer.dart';
 import 'package:flutter_browser/app_bar/browser_app_bar.dart';
 import 'package:flutter_browser/models/webview_model.dart';
+import 'package:flutter_browser/util.dart';
 import 'package:flutter_browser/webview_tab.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
 import 'app_bar/tab_viewer_app_bar.dart';
@@ -35,14 +36,14 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
   }
 
   getIntentData() async {
-    if (Platform.isAndroid) {
+    if (Util.isAndroid()) {
       String? url = await platform.invokeMethod("getIntentData");
       if (url != null) {
         if (mounted) {
           var browserModel = Provider.of<BrowserModel>(context, listen: false);
           browserModel.addTab(WebViewTab(
             key: GlobalKey(),
-            webViewModel: WebViewModel(url: Uri.parse(url)),
+            webViewModel: WebViewModel(url: WebUri(url)),
           ));
         }
       }

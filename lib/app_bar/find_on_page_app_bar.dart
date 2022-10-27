@@ -31,7 +31,7 @@ class _FindOnPageAppBarState extends State<FindOnPageAppBar> {
   Widget build(BuildContext context) {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var webViewModel = browserModel.getCurrentTab()?.webViewModel;
-    var webViewController = webViewModel?.webViewController;
+    var findInteractionController = webViewModel?.findInteractionController;
 
     return AppBar(
       titleSpacing: 10.0,
@@ -39,7 +39,7 @@ class _FindOnPageAppBarState extends State<FindOnPageAppBar> {
           height: 40.0,
           child: TextField(
             onSubmitted: (value) {
-              webViewController?.findAllAsync(find: value);
+              findInteractionController?.findAll(find: value);
             },
             controller: _finOnPageController,
             textInputAction: TextInputAction.go,
@@ -59,19 +59,19 @@ class _FindOnPageAppBarState extends State<FindOnPageAppBar> {
         IconButton(
           icon: const Icon(Icons.keyboard_arrow_up),
           onPressed: () {
-            webViewController?.findNext(forward: false);
+            findInteractionController?.findNext(forward: false);
           },
         ),
         IconButton(
           icon: const Icon(Icons.keyboard_arrow_down),
           onPressed: () {
-            webViewController?.findNext(forward: true);
+            findInteractionController?.findNext(forward: true);
           },
         ),
         IconButton(
           icon: const Icon(Icons.close),
           onPressed: () {
-            webViewController?.clearMatches();
+            findInteractionController?.clearMatches();
             _finOnPageController.text = "";
 
             if (widget.hideFindOnPage != null) {

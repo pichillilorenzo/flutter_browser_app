@@ -49,14 +49,14 @@ const GoogleSearchEngine = SearchEngineModel(
 // ignore: constant_identifier_names
 const YahooSearchEngine = SearchEngineModel(
     name: "Yahoo",
-    url: "https://www.bing.com//",
+    url: "https://yahoo.com/",
     searchUrl: "https://search.yahoo.com/search?p=",
     assetIcon: "assets/images/yahoo_logo.png");
 
 // ignore: constant_identifier_names
 const BingSearchEngine = SearchEngineModel(
     name: "Bing",
-    url: "https://yahoo.com/",
+    url: "https://www.bing.com/",
     searchUrl: "https://www.bing.com/search?q=",
     assetIcon: "assets/images/bing_logo.png");
 
