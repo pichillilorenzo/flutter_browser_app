@@ -5,20 +5,19 @@ import 'package:provider/provider.dart';
 class FindOnPageAppBar extends StatefulWidget {
   final void Function()? hideFindOnPage;
 
-  FindOnPageAppBar({Key? key, this.hideFindOnPage}): super(key: key);
+  const FindOnPageAppBar({Key? key, this.hideFindOnPage}) : super(key: key);
 
   @override
-  _FindOnPageAppBarState createState() => _FindOnPageAppBarState();
+  State<FindOnPageAppBar> createState() => _FindOnPageAppBarState();
 }
 
 class _FindOnPageAppBarState extends State<FindOnPageAppBar> {
+  final TextEditingController _finOnPageController = TextEditingController();
 
-  TextEditingController _finOnPageController = TextEditingController();
-
-  OutlineInputBorder outlineBorder = OutlineInputBorder(
+  OutlineInputBorder outlineBorder = const OutlineInputBorder(
     borderSide: BorderSide(color: Colors.transparent, width: 0.0),
-    borderRadius: const BorderRadius.all(
-      const Radius.circular(50.0),
+    borderRadius: BorderRadius.all(
+      Radius.circular(50.0),
     ),
   );
 
@@ -32,15 +31,15 @@ class _FindOnPageAppBarState extends State<FindOnPageAppBar> {
   Widget build(BuildContext context) {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var webViewModel = browserModel.getCurrentTab()?.webViewModel;
-    var _webViewController = webViewModel?.webViewController;
+    var webViewController = webViewModel?.webViewController;
 
     return AppBar(
       titleSpacing: 10.0,
-      title: Container(
+      title: SizedBox(
           height: 40.0,
           child: TextField(
             onSubmitted: (value) {
-              _webViewController?.findAllAsync(find: value);
+              webViewController?.findAllAsync(find: value);
             },
             controller: _finOnPageController,
             textInputAction: TextInputAction.go,
@@ -52,27 +51,27 @@ class _FindOnPageAppBarState extends State<FindOnPageAppBar> {
               focusedBorder: outlineBorder,
               enabledBorder: outlineBorder,
               hintText: "Find on page ...",
-              hintStyle: TextStyle(color: Colors.black54, fontSize: 16.0),
+              hintStyle: const TextStyle(color: Colors.black54, fontSize: 16.0),
             ),
-            style: TextStyle(color: Colors.black, fontSize: 16.0),
+            style: const TextStyle(color: Colors.black, fontSize: 16.0),
           )),
       actions: <Widget>[
         IconButton(
-          icon: Icon(Icons.keyboard_arrow_up),
+          icon: const Icon(Icons.keyboard_arrow_up),
           onPressed: () {
-            _webViewController?.findNext(forward: false);
+            webViewController?.findNext(forward: false);
           },
         ),
         IconButton(
-          icon: Icon(Icons.keyboard_arrow_down),
+          icon: const Icon(Icons.keyboard_arrow_down),
           onPressed: () {
-            _webViewController?.findNext(forward: true);
+            webViewController?.findNext(forward: true);
           },
         ),
         IconButton(
-          icon: Icon(Icons.close),
+          icon: const Icon(Icons.close),
           onPressed: () {
-            _webViewController?.clearMatches();
+            webViewController?.clearMatches();
             _finOnPageController.text = "";
 
             if (widget.hideFindOnPage != null) {
@@ -83,5 +82,4 @@ class _FindOnPageAppBarState extends State<FindOnPageAppBar> {
       ],
     );
   }
-
 }

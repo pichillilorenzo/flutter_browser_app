@@ -7,27 +7,25 @@ class WebArchiveModel {
   String? path;
   DateTime timestamp;
 
-  WebArchiveModel({
-    this.url,
-    this.title,
-    this.favicon,
-    this.path,
-    required this.timestamp
-  });
+  WebArchiveModel(
+      {this.url, this.title, this.favicon, this.path, required this.timestamp});
 
   static WebArchiveModel? fromMap(Map<String, dynamic>? map) {
-    return map != null ? WebArchiveModel(
-        url: map["url"] != null ? Uri.parse(map["url"]) : null,
-        title: map["title"],
-        path: map["path"],
-        timestamp: DateTime.fromMicrosecondsSinceEpoch(map["timestamp"]),
-        favicon: map["favicon"] != null ? Favicon(
-          url: Uri.parse(map["favicon"]["url"]),
-          rel: map["favicon"]["rel"],
-          width: map["favicon"]["width"],
-          height: map["favicon"]["height"],
-        ) : null
-    ) : null;
+    return map != null
+        ? WebArchiveModel(
+            url: map["url"] != null ? Uri.parse(map["url"]) : null,
+            title: map["title"],
+            path: map["path"],
+            timestamp: DateTime.fromMicrosecondsSinceEpoch(map["timestamp"]),
+            favicon: map["favicon"] != null
+                ? Favicon(
+                    url: Uri.parse(map["favicon"]["url"]),
+                    rel: map["favicon"]["rel"],
+                    width: map["favicon"]["width"],
+                    height: map["favicon"]["height"],
+                  )
+                : null)
+        : null;
   }
 
   Map<String, dynamic> toMap() {

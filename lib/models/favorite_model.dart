@@ -5,23 +5,22 @@ class FavoriteModel {
   String? title;
   Favicon? favicon;
 
-  FavoriteModel({
-    required this.url,
-    required this.title,
-    this.favicon
-  });
+  FavoriteModel({required this.url, required this.title, this.favicon});
 
   static FavoriteModel? fromMap(Map<String, dynamic>? map) {
-    return map != null ? FavoriteModel(
-      url: map["url"] != null ? Uri.parse(map["url"]) : null,
-      title: map["title"],
-      favicon: map["favicon"] != null ? Favicon(
-        url: Uri.parse(map["favicon"]["url"]),
-        rel: map["favicon"]["rel"],
-        width: map["favicon"]["width"],
-        height: map["favicon"]["height"],
-      ) : null
-    ) : null;
+    return map != null
+        ? FavoriteModel(
+            url: map["url"] != null ? Uri.parse(map["url"]) : null,
+            title: map["title"],
+            favicon: map["favicon"] != null
+                ? Favicon(
+                    url: Uri.parse(map["favicon"]["url"]),
+                    rel: map["favicon"]["rel"],
+                    width: map["favicon"]["width"],
+                    height: map["favicon"]["height"],
+                  )
+                : null)
+        : null;
   }
 
   Map<String, dynamic> toMap() {

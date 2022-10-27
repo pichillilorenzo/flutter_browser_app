@@ -1,5 +1,4 @@
 class Util {
-
   static bool urlIsSecure(Uri url) {
     return (url.scheme == "https") || Util.isLocalizedContent(url);
   }
@@ -11,5 +10,4 @@ class Util {
         url.scheme == "javascript" ||
         url.scheme == "about");
   }
-
 }

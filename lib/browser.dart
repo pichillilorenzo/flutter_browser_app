@@ -16,15 +16,15 @@ import 'empty_tab.dart';
 import 'models/browser_model.dart';
 
 class Browser extends StatefulWidget {
-  Browser({Key? key}) : super(key: key);
+  const Browser({Key? key}) : super(key: key);
 
   @override
-  _BrowserState createState() => _BrowserState();
+  State<Browser> createState() => _BrowserState();
 }
 
 class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
-
-  static const platform = const MethodChannel('com.pichillilorenzo.flutter_browser.intent_data');
+  static const platform =
+      MethodChannel('com.pichillilorenzo.flutter_browser.intent_data');
 
   var _isRestored = false;
 
@@ -38,11 +38,13 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
     if (Platform.isAndroid) {
       String? url = await platform.invokeMethod("getIntentData");
       if (url != null) {
-        var browserModel = Provider.of<BrowserModel>(context, listen: false);
-        browserModel.addTab(WebViewTab(
-          key: GlobalKey(),
-          webViewModel: WebViewModel(url: Uri.parse(url)),
-        ));
+        if (mounted) {
+          var browserModel = Provider.of<BrowserModel>(context, listen: false);
+          browserModel.addTab(WebViewTab(
+            key: GlobalKey(),
+            webViewModel: WebViewModel(url: Uri.parse(url)),
+          ));
+        }
       }
     }
   }
@@ -64,7 +66,7 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
       _isRestored = true;
       restore();
     }
-    precacheImage(AssetImage("assets/icon/icon.png"), context);
+    precacheImage(const AssetImage("assets/icon/icon.png"), context);
   }
 
   @override
@@ -83,7 +85,8 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
       browserModel.save();
     });
 
-    var canShowTabScroller = browserModel.showTabScroller && browserModel.webViewTabs.isNotEmpty;
+    var canShowTabScroller =
+        browserModel.showTabScroller && browserModel.webViewTabs.isNotEmpty;
 
     return IndexedStack(
       index: canShowTabScroller ? 1 : 0,
@@ -99,11 +102,11 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
         onWillPop: () async {
           var browserModel = Provider.of<BrowserModel>(context, listen: false);
           var webViewModel = browserModel.getCurrentTab()?.webViewModel;
-          var _webViewController = webViewModel?.webViewController;
+          var webViewController = webViewModel?.webViewController;
 
-          if (_webViewController != null) {
-            if (await _webViewController.canGoBack()) {
-              _webViewController.goBack();
+          if (webViewController != null) {
+            if (await webViewController.canGoBack()) {
+              webViewController.goBack();
               return false;
             }
           }
@@ -112,46 +115,47 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
             setState(() {
               browserModel.closeTab(webViewModel.tabIndex!);
             });
-            FocusScope.of(context).unfocus();
+            if (mounted) {
+              FocusScope.of(context).unfocus();
+            }
             return false;
           }
 
-          return browserModel.webViewTabs.length == 0;
+          return browserModel.webViewTabs.isEmpty;
         },
         child: Listener(
-          onPointerUp:  (_) {
+          onPointerUp: (_) {
             FocusScopeNode currentFocus = FocusScope.of(context);
-            if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+            if (!currentFocus.hasPrimaryFocus &&
+                currentFocus.focusedChild != null) {
               currentFocus.focusedChild!.unfocus();
             }
           },
           child: Scaffold(
-              appBar: BrowserAppBar(),
-              body: _buildWebViewTabsContent()
-          ),
-        )
-    );
+              appBar: const BrowserAppBar(), body: _buildWebViewTabsContent()),
+        ));
   }
 
   Widget _buildWebViewTabsContent() {
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
 
-    if (browserModel.webViewTabs.length == 0) {
-      return EmptyTab();
+    if (browserModel.webViewTabs.isEmpty) {
+      return const EmptyTab();
     }
 
     var stackChildren = <Widget>[
       IndexedStack(
         index: browserModel.getCurrentTabIndex(),
         children: browserModel.webViewTabs.map((webViewTab) {
-          var isCurrentTab = webViewTab.webViewModel.tabIndex == browserModel.getCurrentTabIndex();
+          var isCurrentTab = webViewTab.webViewModel.tabIndex ==
+              browserModel.getCurrentTabIndex();
 
           if (isCurrentTab) {
             Future.delayed(const Duration(milliseconds: 100), () {
-              webViewTab.key.currentState?.onShowTab();
+              webViewTabStateKey.currentState?.onShowTab();
             });
           } else {
-            webViewTab.key.currentState?.onHideTab();
+            webViewTabStateKey.currentState?.onHideTab();
           }
 
           return webViewTab;
@@ -173,7 +177,7 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
             return Container();
           }
           return PreferredSize(
-              preferredSize: Size(double.infinity, 4.0),
+              preferredSize: const Size(double.infinity, 4.0),
               child: SizedBox(
                   height: 4.0,
                   child: LinearProgressIndicator(
@@ -191,25 +195,26 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
           return false;
         },
         child: Scaffold(
-            appBar: TabViewerAppBar(),
+            appBar: const TabViewerAppBar(),
             body: TabViewer(
               currentIndex: browserModel.getCurrentTabIndex(),
               children: browserModel.webViewTabs.map((webViewTab) {
-
-                webViewTab.key.currentState?.pause();
+                webViewTabStateKey.currentState?.pause();
                 var screenshotData = webViewTab.webViewModel.screenshot;
                 Widget screenshotImage = Container(
-                  decoration: BoxDecoration(color: Colors.white),
+                  decoration: const BoxDecoration(color: Colors.white),
                   width: double.infinity,
-                  child: screenshotData != null ? Image.memory(screenshotData) : null,
+                  child: screenshotData != null
+                      ? Image.memory(screenshotData)
+                      : null,
                 );
 
                 var url = webViewTab.webViewModel.url;
                 var faviconUrl = webViewTab.webViewModel.favicon != null
                     ? webViewTab.webViewModel.favicon!.url
                     : (url != null && ["http", "https"].contains(url.scheme)
-                    ? Uri.parse(url.origin + "/favicon.ico")
-                    : null);
+                        ? Uri.parse("${url.origin}/favicon.ico")
+                        : null);
 
                 var isCurrentTab = browserModel.getCurrentTabIndex() ==
                     webViewTab.webViewModel.tabIndex;
@@ -221,73 +226,75 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
                       color: isCurrentTab
                           ? Colors.blue
                           : (webViewTab.webViewModel.isIncognitoMode
-                          ? Colors.black
-                          : Colors.white),
-                      child: Container(
-                        child: ListTile(
-                          leading: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              // CachedNetworkImage(
-                              //   placeholder: (context, url) =>
-                              //   url == "about:blank"
-                              //       ? Container()
-                              //       : CircularProgressIndicator(),
-                              //   imageUrl: faviconUrl,
-                              //   height: 30,
-                              // )
-                              CustomImage(url: faviconUrl, maxWidth: 30.0, height: 30.0)
-                            ],
-                          ),
-                          title: Text(
-                              webViewTab.webViewModel.title ??
-                                  webViewTab.webViewModel.url?.toString() ?? "",
-                              maxLines: 2,
-                              style: TextStyle(
-                                color:
-                                webViewTab.webViewModel.isIncognitoMode ||
-                                    isCurrentTab
-                                    ? Colors.white
-                                    : Colors.black,
-                              ),
-                              overflow: TextOverflow.ellipsis),
-                          subtitle: Text(webViewTab.webViewModel.url?.toString() ?? "",
-                              style: TextStyle(
-                                color:
-                                webViewTab.webViewModel.isIncognitoMode ||
-                                    isCurrentTab
-                                    ? Colors.white60
-                                    : Colors.black54,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis),
-                          isThreeLine: true,
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              IconButton(
-                                icon: Icon(
-                                  Icons.close,
-                                  size: 20.0,
-                                  color:
-                                  webViewTab.webViewModel.isIncognitoMode ||
+                              ? Colors.black
+                              : Colors.white),
+                      child: ListTile(
+                        leading: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            // CachedNetworkImage(
+                            //   placeholder: (context, url) =>
+                            //   url == "about:blank"
+                            //       ? Container()
+                            //       : CircularProgressIndicator(),
+                            //   imageUrl: faviconUrl,
+                            //   height: 30,
+                            // )
+                            CustomImage(
+                                url: faviconUrl, maxWidth: 30.0, height: 30.0)
+                          ],
+                        ),
+                        title: Text(
+                            webViewTab.webViewModel.title ??
+                                webViewTab.webViewModel.url?.toString() ??
+                                "",
+                            maxLines: 2,
+                            style: TextStyle(
+                              color: webViewTab.webViewModel.isIncognitoMode ||
                                       isCurrentTab
-                                      ? Colors.white60
-                                      : Colors.black54,
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
+                            overflow: TextOverflow.ellipsis),
+                        subtitle:
+                            Text(webViewTab.webViewModel.url?.toString() ?? "",
+                                style: TextStyle(
+                                  color:
+                                      webViewTab.webViewModel.isIncognitoMode ||
+                                              isCurrentTab
+                                          ? Colors.white60
+                                          : Colors.black54,
                                 ),
-                                onPressed: () {
-                                  setState(() {
-                                    if (webViewTab.webViewModel.tabIndex != null) {
-                                      browserModel.closeTab(webViewTab.webViewModel.tabIndex!);
-                                      if (browserModel.webViewTabs.length == 0) {
-                                        browserModel.showTabScroller = false;
-                                      }
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis),
+                        isThreeLine: true,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            IconButton(
+                              icon: Icon(
+                                Icons.close,
+                                size: 20.0,
+                                color:
+                                    webViewTab.webViewModel.isIncognitoMode ||
+                                            isCurrentTab
+                                        ? Colors.white60
+                                        : Colors.black54,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  if (webViewTab.webViewModel.tabIndex !=
+                                      null) {
+                                    browserModel.closeTab(
+                                        webViewTab.webViewModel.tabIndex!);
+                                    if (browserModel.webViewTabs.isEmpty) {
+                                      browserModel.showTabScroller = false;
                                     }
-                                  });
-                                },
-                              )
-                            ],
-                          ),
+                                  }
+                                });
+                              },
+                            )
+                          ],
                         ),
                       ),
                     ),
@@ -299,10 +306,8 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
               }).toList(),
               onTap: (index) async {
                 browserModel.showTabScroller = false;
-                browserModel
-                    .showTab(index);
+                browserModel.showTab(index);
               },
-            )
-        ));
+            )));
   }
 }

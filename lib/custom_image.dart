@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CustomImage extends StatelessWidget {
@@ -13,37 +12,47 @@ class CustomImage extends StatelessWidget {
   final double minHeight;
   final Uri? url;
 
-  CustomImage({Key? key, this.url, this.width, this.height,
-    this.maxWidth = double.infinity, this.maxHeight = double.infinity,
-    this.minWidth = 0.0, this.minHeight = 0.0}) : super(key: key);
+  const CustomImage(
+      {Key? key,
+      this.url,
+      this.width,
+      this.height,
+      this.maxWidth = double.infinity,
+      this.maxHeight = double.infinity,
+      this.minWidth = 0.0,
+      this.minHeight = 0.0})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       constraints: BoxConstraints(
-        maxWidth: this.maxWidth,
-        maxHeight: this.maxHeight,
-        minHeight: this.minHeight,
-        minWidth: this.minWidth
-      ),
-      width: this.width,
-      height: this.height,
+          maxWidth: maxWidth,
+          maxHeight: maxHeight,
+          minHeight: minHeight,
+          minWidth: minWidth),
+      width: width,
+      height: height,
       child: getImage(),
     );
-
   }
 
   Widget? getImage() {
     if (url != null) {
       if (url!.scheme == "data") {
-        Uint8List bytes = Base64Decoder().convert(url.toString().replaceFirst("data:image/png;base64,", ""));
-        return Image.memory(bytes,
+        Uint8List bytes = const Base64Decoder()
+            .convert(url.toString().replaceFirst("data:image/png;base64,", ""));
+        return Image.memory(
+          bytes,
           fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) => getBrokenImageIcon(),);
+          errorBuilder: (context, error, stackTrace) => getBrokenImageIcon(),
+        );
       }
-      return Image.network(url.toString(),
-          fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => getBrokenImageIcon(),);
+      return Image.network(
+        url.toString(),
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => getBrokenImageIcon(),
+      );
     }
     return getBrokenImageIcon();
   }
@@ -51,7 +60,7 @@ class CustomImage extends StatelessWidget {
   Widget getBrokenImageIcon() {
     return Icon(
       Icons.broken_image,
-      size: this.width ?? this.height ?? this.maxWidth,
+      size: width ?? height ?? maxWidth,
     );
   }
 }

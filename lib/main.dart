@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
@@ -11,18 +10,24 @@ import 'package:provider/provider.dart';
 
 import 'browser.dart';
 
-late final WEB_ARCHIVE_DIR;
-
-late final TAB_VIEWER_BOTTOM_OFFSET_1;
-late final TAB_VIEWER_BOTTOM_OFFSET_2;
-late final TAB_VIEWER_BOTTOM_OFFSET_3;
-
-const TAB_VIEWER_TOP_OFFSET_1 = 0.0;
-const TAB_VIEWER_TOP_OFFSET_2 = 10.0;
-const TAB_VIEWER_TOP_OFFSET_3 = 20.0;
-
-const TAB_VIEWER_TOP_SCALE_TOP_OFFSET = 250.0;
-const TAB_VIEWER_TOP_SCALE_BOTTOM_OFFSET = 230.0;
+// ignore: non_constant_identifier_names
+late final String WEB_ARCHIVE_DIR;
+// ignore: non_constant_identifier_names
+late final double TAB_VIEWER_BOTTOM_OFFSET_1;
+// ignore: non_constant_identifier_names
+late final double TAB_VIEWER_BOTTOM_OFFSET_2;
+// ignore: non_constant_identifier_names
+late final double TAB_VIEWER_BOTTOM_OFFSET_3;
+// ignore: constant_identifier_names
+const double TAB_VIEWER_TOP_OFFSET_1 = 0.0;
+// ignore: constant_identifier_names
+const double TAB_VIEWER_TOP_OFFSET_2 = 10.0;
+// ignore: constant_identifier_names
+const double TAB_VIEWER_TOP_OFFSET_3 = 20.0;
+// ignore: constant_identifier_names
+const double TAB_VIEWER_TOP_SCALE_TOP_OFFSET = 250.0;
+// ignore: constant_identifier_names
+const double TAB_VIEWER_TOP_SCALE_BOTTOM_OFFSET = 230.0;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,8 +45,8 @@ void main() async {
   }
 
   await FlutterDownloader.initialize(
-    debug: true // optional: set false to disable printing logs to console
-  );
+      debug: true // optional: set false to disable printing logs to console
+      );
 
   await Permission.camera.request();
   await Permission.microphone.request();
@@ -58,26 +63,29 @@ void main() async {
             browserModel!.setCurrentWebViewModel(webViewModel);
             return browserModel;
           },
-          create: (BuildContext context) => BrowserModel(null),
+          create: (BuildContext context) => BrowserModel(),
         ),
       ],
-      child: FlutterBrowserApp(),
+      child: const FlutterBrowserApp(),
     ),
   );
 }
 
 class FlutterBrowserApp extends StatelessWidget {
+  const FlutterBrowserApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Flutter Browser',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
-        initialRoute: '/',
-        routes: {
-          '/': (context) => Browser(),
-        });
+      title: 'Flutter Browser',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const Browser(),
+      },
+    );
   }
 }
