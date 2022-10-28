@@ -213,7 +213,9 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
     return ListTile(
       title: const Text("Copy address link"),
       onTap: () {
-        Clipboard.setData(ClipboardData(text: widget.hitTestResult.extra));
+        Clipboard.setData(ClipboardData(
+            text: widget.requestFocusNodeHrefResult?.url.toString() ??
+                widget.hitTestResult.extra));
         Navigator.pop(context);
       },
     );
@@ -236,7 +238,8 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
           ]),
       onTap: () {
         if (widget.hitTestResult.extra != null) {
-          Share.share(widget.hitTestResult.extra!);
+          Share.share(widget.requestFocusNodeHrefResult?.url.toString() ??
+              widget.hitTestResult.extra!);
         }
         Navigator.pop(context);
       },

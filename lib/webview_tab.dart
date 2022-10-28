@@ -372,6 +372,11 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
             action: ServerTrustAuthResponseAction.PROCEED);
       },
       onReceivedError: (controller, request, error) async {
+        var isForMainFrame = request.isForMainFrame ?? false;
+        if (!isForMainFrame) {
+          return;
+        }
+
         _pullToRefreshController?.endRefreshing();
 
         if (Util.isIOS() && error.type == WebResourceErrorType.CANCELLED) {
