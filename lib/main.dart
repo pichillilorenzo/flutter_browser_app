@@ -34,15 +34,9 @@ void main() async {
 
   WEB_ARCHIVE_DIR = (await getApplicationSupportDirectory()).path;
 
-  if (Util.isIOS()) {
-    TAB_VIEWER_BOTTOM_OFFSET_1 = 130.0;
-    TAB_VIEWER_BOTTOM_OFFSET_2 = 140.0;
-    TAB_VIEWER_BOTTOM_OFFSET_3 = 150.0;
-  } else {
-    TAB_VIEWER_BOTTOM_OFFSET_1 = 110.0;
-    TAB_VIEWER_BOTTOM_OFFSET_2 = 120.0;
-    TAB_VIEWER_BOTTOM_OFFSET_3 = 130.0;
-  }
+  TAB_VIEWER_BOTTOM_OFFSET_1 = 130.0;
+  TAB_VIEWER_BOTTOM_OFFSET_2 = 140.0;
+  TAB_VIEWER_BOTTOM_OFFSET_3 = 150.0;
 
   await FlutterDownloader.initialize(
     debug: kDebugMode

@@ -158,10 +158,9 @@ class _StorageManagerState extends State<StorageManager> {
                     trackingEditStatus: cookieValueTrackingEdit),
                 DataCell(IconButton(
                   icon: const Icon(Icons.cancel),
-                  onPressed: () {
-                    setState(() {
-                      _cookieManager.deleteCookie(url: url, name: cookie.name);
-                    });
+                  onPressed: () async {
+                    await _cookieManager.deleteCookie(url: url, name: cookie.name);
+                    setState(() { });
                   },
                 ))
               ]);
