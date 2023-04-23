@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:flutter_browser/empty_tab.dart';
+import 'models/open_new_tab.dart';
 
 class QRCodeScanner extends StatefulWidget {
   const QRCodeScanner({super.key});
@@ -26,7 +28,7 @@ class _QRCodeScannerState extends State<QRCodeScanner> {
   void readQr() async {
     if (result != null) {
       controller!.pauseCamera();
-      print(result!.code);
+      print('reading qr');
       controller!.dispose();
     }
   }
@@ -39,7 +41,13 @@ class _QRCodeScannerState extends State<QRCodeScanner> {
     controller.scannedDataStream.listen((scanData) {
       setState(() {
         result = scanData;
-        print('RESULT IS: ${result!.code}');
+        dispose();
+      });
+      print('RESULT IS: ${result!.code}');
+      print(result!.code.runtimeType);
+      Future.delayed(Duration(milliseconds: 300)).then((val) {
+        openNewTab(result!.code, context);
+        Navigator.pop(context);
       });
     });
   }
@@ -68,7 +76,9 @@ class _QRCodeScannerState extends State<QRCodeScanner> {
             Expanded(
               flex: 1,
               child: Center(
-                child: Text('Scan a code'),
+                child: (result != null)
+                    ? Text("${result!.code}")
+                    : Text('Scan a code'),
               ),
             ),
             Expanded(
