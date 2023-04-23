@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'models/browser_model.dart';
 import 'models/webview_model.dart';
+import 'models/open_new_tab.dart';
 
 class EmptyTab extends StatefulWidget {
   const EmptyTab({Key? key}) : super(key: key);
@@ -39,7 +40,7 @@ class _EmptyTabState extends State<EmptyTab> {
                     child: TextField(
                   controller: _controller,
                   onSubmitted: (value) {
-                    openNewTab(value);
+                    openNewTab(value, context);
                   },
                   textInputAction: TextInputAction.go,
                   decoration: const InputDecoration(
@@ -55,7 +56,7 @@ class _EmptyTabState extends State<EmptyTab> {
                   icon: const Icon(Icons.search,
                       color: Colors.black54, size: 25.0),
                   onPressed: () {
-                    openNewTab(_controller.text);
+                    openNewTab(_controller.text, context);
                     FocusScope.of(context).unfocus();
                   },
                 )
@@ -65,18 +66,5 @@ class _EmptyTabState extends State<EmptyTab> {
         ),
       ),
     );
-  }
-
-  void openNewTab(value) {
-    var browserModel = Provider.of<BrowserModel>(context, listen: false);
-    var settings = browserModel.getSettings();
-
-    browserModel.addTab(WebViewTab(
-      key: GlobalKey(),
-      webViewModel: WebViewModel(
-          url: WebUri(value.startsWith("http")
-              ? value
-              : settings.searchEngine.searchUrl + value)),
-    ));
   }
 }
