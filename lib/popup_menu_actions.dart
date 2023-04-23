@@ -21,6 +21,8 @@ class PopupMenuActions {
   static const String DEVELOPERS = "Developers";
   // ignore: constant_identifier_names
   static const String INAPPWEBVIEW_PROJECT = "InAppWebView Project";
+  // ignore: constant_identifier_names
+  static const String QRCODE = "QR Code";
 
   static const List<String> choices = <String>[
     NEW_TAB,
@@ -34,5 +36,6 @@ class PopupMenuActions {
     SETTINGS,
     DEVELOPERS,
     INAPPWEBVIEW_PROJECT,
+    QRCODE
   ];
 }
