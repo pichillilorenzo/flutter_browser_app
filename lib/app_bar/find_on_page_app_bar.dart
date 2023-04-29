@@ -1,6 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/models/browser_model.dart';
 import 'package:provider/provider.dart';
+import '../InputDoneView.dart';
+
+class KeyboardOverlay {
+  static OverlayEntry? _overlayEntry;
+
+  static showOverlay(BuildContext context) {
+    if (_overlayEntry != null) {
+      return;
+    }
+
+    OverlayState? overlayState = Overlay.of(context);
+    _overlayEntry = OverlayEntry(builder: (context) {
+      return Positioned(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          right: 0.0,
+          left: 0.0,
+          child: const InputDoneView());
+    });
+
+    overlayState.insert(_overlayEntry!);
+  }
+
+  static removeOverlay() {
+    if (_overlayEntry != null) {
+      _overlayEntry!.remove();
+      _overlayEntry = null;
+    }
+  }
+}
 
 class FindOnPageAppBar extends StatefulWidget {
   final void Function()? hideFindOnPage;
@@ -13,6 +42,19 @@ class FindOnPageAppBar extends StatefulWidget {
 
 class _FindOnPageAppBarState extends State<FindOnPageAppBar> {
   final TextEditingController _finOnPageController = TextEditingController();
+  FocusNode numberFocusNode = FocusNode();
+  @override
+  void initState() {
+    super.initState();
+    numberFocusNode.addListener(() {
+      bool hasFocus = numberFocusNode.hasFocus;
+      if (hasFocus) {
+        KeyboardOverlay.showOverlay(context);
+      } else {
+        KeyboardOverlay.removeOverlay();
+      }
+    });
+  }
 
   OutlineInputBorder outlineBorder = const OutlineInputBorder(
     borderSide: BorderSide(color: Colors.transparent, width: 0.0),
@@ -23,6 +65,7 @@ class _FindOnPageAppBarState extends State<FindOnPageAppBar> {
 
   @override
   void dispose() {
+    numberFocusNode.dispose();
     _finOnPageController.dispose();
     super.dispose();
   }
@@ -38,6 +81,7 @@ class _FindOnPageAppBarState extends State<FindOnPageAppBar> {
       title: SizedBox(
           height: 40.0,
           child: TextField(
+            focusNode: numberFocusNode,
             onSubmitted: (value) {
               findInteractionController?.findAll(find: value);
             },
