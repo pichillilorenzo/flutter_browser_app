@@ -54,7 +54,7 @@ android {
 
     defaultConfig {
         applicationId "com.pichillilorenzo.flutter_browser"
-        minSdkVersion 21
+        minSdkVersion 20
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
