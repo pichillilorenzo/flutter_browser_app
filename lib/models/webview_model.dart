@@ -24,6 +24,7 @@ class WebViewModel extends ChangeNotifier {
   FindInteractionController? findInteractionController;
   Uint8List? screenshot;
   bool needsToCompleteInitialLoad;
+  final keepAlive = InAppWebViewKeepAlive();
 
   WebViewModel(
       {int? tabIndex,

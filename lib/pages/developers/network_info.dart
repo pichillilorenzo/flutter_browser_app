@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 // import 'package:charts_flutter/flutter.dart' as charts;
 
 class NetworkInfo extends StatefulWidget {
-  const NetworkInfo({Key? key}) : super(key: key);
+  const NetworkInfo({super.key});
 
   @override
   State<NetworkInfo> createState() => _NetworkInfoState();
@@ -150,7 +150,7 @@ class _NetworkInfoState extends State<NetworkInfo> {
                 InkWell(
                     onTap: () {
                       Clipboard.setData(
-                          ClipboardData(text: loadedResoruce.url?.toString()));
+                          ClipboardData(text: loadedResoruce.url?.toString() ?? ''));
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(

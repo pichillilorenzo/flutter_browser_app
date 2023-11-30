@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 import 'package:collection/collection.dart';
 
 class CertificateInfoPopup extends StatefulWidget {
-  const CertificateInfoPopup({Key? key}) : super(key: key);
+  const CertificateInfoPopup({super.key});
 
   @override
   State<CertificateInfoPopup> createState() => _CertificateInfoPopupState();

@@ -158,8 +158,8 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
       SwitchListTile(
         title: const Text("Debugging Enabled"),
         subtitle: const Text(
-            "Enables debugging of web contents loaded into any WebViews of this application. On iOS the debugging mode is always enabled."),
-        value: Util.isAndroid() ? settings.debuggingEnabled : true,
+            "Enables debugging of web contents loaded into any WebViews of this application. On iOS < 16.4, the debugging mode is always enabled."),
+        value: settings.debuggingEnabled,
         onChanged: (value) {
           setState(() {
             settings.debuggingEnabled = value;
@@ -170,6 +170,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
                 InAppWebViewController.setWebContentsDebuggingEnabled(
                     settings.debuggingEnabled);
               }
+              webViewModel?.settings?.isInspectable = settings.debuggingEnabled;
               webViewModel?.webViewController?.setSettings(
                   settings: webViewModel.settings ?? InAppWebViewSettings());
               browserModel.save();

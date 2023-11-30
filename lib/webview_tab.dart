@@ -139,6 +139,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     }
 
     var initialSettings = widget.webViewModel.settings!;
+    initialSettings.isInspectable = settings.debuggingEnabled;
     initialSettings.useOnDownloadStart = true;
     initialSettings.useOnLoadResource = true;
     initialSettings.useShouldOverrideUrlLoading = true;
@@ -161,6 +162,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     initialSettings.allowingReadAccessTo = WebUri('file://$WEB_ARCHIVE_DIR/');
 
     return InAppWebView(
+      keepAlive: widget.webViewModel.keepAlive,
       initialUrlRequest: URLRequest(url: widget.webViewModel.url),
       initialSettings: initialSettings,
       windowId: widget.webViewModel.windowId,

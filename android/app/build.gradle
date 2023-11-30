@@ -32,7 +32,7 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 33
+    compileSdk 34
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -48,9 +48,6 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
-    lintOptions {
-        disable 'InvalidPackage'
-    }
 
     defaultConfig {
         applicationId "com.pichillilorenzo.flutter_browser"
@@ -77,6 +74,10 @@ android {
                 debugSymbolLevel 'FULL'
             }
         }
+    }
+    namespace 'com.pichillilorenzo.flutter_browser'
+    lint {
+        disable 'InvalidPackage'
     }
 }
 

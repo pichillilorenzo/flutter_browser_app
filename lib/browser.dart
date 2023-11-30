@@ -144,24 +144,21 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
       return const EmptyTab();
     }
 
+    for (final webViewTab in browserModel.webViewTabs) {
+      var isCurrentTab = webViewTab.webViewModel.tabIndex ==
+          browserModel.getCurrentTabIndex();
+
+      if (isCurrentTab) {
+        Future.delayed(const Duration(milliseconds: 100), () {
+          webViewTabStateKey.currentState?.onShowTab();
+        });
+      } else {
+        webViewTabStateKey.currentState?.onHideTab();
+      }
+    }
+
     var stackChildren = <Widget>[
-      IndexedStack(
-        index: browserModel.getCurrentTabIndex(),
-        children: browserModel.webViewTabs.map((webViewTab) {
-          var isCurrentTab = webViewTab.webViewModel.tabIndex ==
-              browserModel.getCurrentTabIndex();
-
-          if (isCurrentTab) {
-            Future.delayed(const Duration(milliseconds: 100), () {
-              webViewTabStateKey.currentState?.onShowTab();
-            });
-          } else {
-            webViewTabStateKey.currentState?.onHideTab();
-          }
-
-          return webViewTab;
-        }).toList(),
-      ),
+      browserModel.getCurrentTab() ?? Container(),
       _createProgressIndicator()
     ];
 

@@ -292,9 +292,8 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
           if (browserModel.webViewTabs.isNotEmpty) {
             var webViewModel = browserModel.getCurrentTab()?.webViewModel;
             var webViewController = webViewModel?.webViewController;
-            var widgetsBingind = WidgetsBinding.instance;
 
-            if (widgetsBingind.window.viewInsets.bottom > 0.0) {
+            if (View.of(context).viewInsets.bottom > 0.0) {
               SystemChannels.textInput.invokeMethod('TextInput.hide');
               if (FocusManager.instance.primaryFocus != null) {
                 FocusManager.instance.primaryFocus!.unfocus();
