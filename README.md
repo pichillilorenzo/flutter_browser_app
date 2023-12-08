@@ -12,13 +12,6 @@ It will be soon available on the **App Store** [https://www.apple.com/au/app-sto
 Article: [Let's learn about accessiblity](https://github.com/javadtaghia/web-accessibility-plugin-adee/wiki).
 
 
-## Features
-- **Change **, with custom on long-press link/image preview, and how to move from one tab to another without losing the WebView state;
-- **Browser App Bar** with the current URL and all popup menu actions such as opening a new tab, a new incognito tab, saving the current URL to the favorite list, saving a page to offline usage, viewing the SSL Certificate used by the website, enable Desktop Mode, etc. (features similar to the Google Chrome App);
-- **Developer console**, where you can execute JavaScript code, see some network info, manage the browser storage such as cookies, window.localStorage , etc;
-- **Settings page**, where you can update the browser general settings and enable/disable all the features offered by the flutter_inappwebview for each WebView Tab, such as enabling/disabling JavaScript, caching, scrollbars, setting custom user-agent, etc., and all the Android and iOS-specific features;
-- **Save** and **restore** the current Browser state.
-
 
 Support Adee mission to create accessiblity support tools and products join this project and give a star to these projects, thanks!
 
