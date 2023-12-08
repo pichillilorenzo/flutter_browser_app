@@ -1,4 +1,4 @@
-# Flutter Browser App
+# Adee Browser
 
 ![flutter-browser-article-logo](https://avatars.githubusercontent.com/u/9975274?s=96&v=4)
 
