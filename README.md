@@ -11,7 +11,6 @@ It will be soon available on the **App Store** [https://www.apple.com/au/app-sto
 ## Introduction
 Article: [Let's learn about accessiblity](https://github.com/javadtaghia/web-accessibility-plugin-adee/wiki).
 
-.
 
 ## Features
 - **Change **, with custom on long-press link/image preview, and how to move from one tab to another without losing the WebView state;
@@ -25,7 +24,7 @@ Support Adee mission to create accessiblity support tools and products join this
 
 ## Contributors ✨
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+Thanks goes to these wonderful people.
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
