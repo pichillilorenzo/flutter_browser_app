@@ -3,11 +3,12 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -156,7 +157,7 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                         children: <Widget>[
                           Expanded(
                             child: Text(
-                              "Flutter Browser has verified that ${_topMainCertificate?.issuer(dn: ASN1DistinguishedNames.COMMON_NAME)} has emitted the web site certificate.",
+                              "Adee Browser has verified that ${_topMainCertificate?.issuer(dn: ASN1DistinguishedNames.COMMON_NAME)} has emitted the web site certificate.",
                               softWrap: true,
                               style: const TextStyle(fontSize: 12.0),
                             ),
@@ -170,7 +171,7 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                         text: TextSpan(
                             text: "Certificate info",
                             style: const TextStyle(
-                                color: Colors.blue, fontSize: 12.0),
+                                color: Colors.deepPurple, fontSize: 12.0),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 showDialog(
@@ -1310,6 +1311,9 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
 
     if (cRLDistributionPoints?.crls != null &&
         cRLDistributionPoints!.crls!.isNotEmpty) {
+      if (kDebugMode) {
+        print("javad 2");
+      }
       for (var i = 0; i < cRLDistributionPoints.crls!.length; i++) {
         cRLDistributionPointsSection.addAll(<Widget>[
           RichText(
@@ -1322,13 +1326,14 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                       color: Colors.black)),
               TextSpan(
                   text: cRLDistributionPoints.crls![i],
-                  style: const TextStyle(fontSize: 12.0, color: Colors.blue),
+                  style:
+                      const TextStyle(fontSize: 12.0, color: Colors.deepPurple),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () async {
                       Directory? directory =
                           await getExternalStorageDirectory();
                       await FlutterDownloader.enqueue(
-                        url: cRLDistributionPoints.crls![i],
+                        url: cRLDistributionPoints.crls![i].toString(),
                         savedDir: directory!.path,
                         showNotification:
                             true, // show download progress in status bar (for Android)
@@ -1427,13 +1432,14 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                       color: Colors.black)),
               TextSpan(
                   text: value,
-                  style: const TextStyle(fontSize: 12.0, color: Colors.blue),
+                  style:
+                      const TextStyle(fontSize: 12.0, color: Colors.deepPurple),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () async {
                       Directory? directory =
                           await getExternalStorageDirectory();
                       await FlutterDownloader.enqueue(
-                        url: value,
+                        url: value.toString(),
                         savedDir: directory!.path,
                         showNotification:
                             true, // show download progress in status bar (for Android)

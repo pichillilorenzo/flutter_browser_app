@@ -1,20 +1,24 @@
 import 'dart:async';
 
 // import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_browser/accessiblity/floating_action_button.dart';
 import 'package:flutter_browser/custom_image.dart';
 import 'package:flutter_browser/tab_viewer.dart';
 import 'package:flutter_browser/app_bar/browser_app_bar.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/util.dart';
 import 'package:flutter_browser/webview_tab.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_font_icons/flutter_font_icons.dart';
+import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
 import 'package:provider/provider.dart';
 
 import 'app_bar/tab_viewer_app_bar.dart';
 import 'empty_tab.dart';
 import 'models/browser_model.dart';
+import 'pages/settings/main.dart';
 
 class Browser extends StatefulWidget {
   const Browser({Key? key}) : super(key: key);
@@ -24,8 +28,7 @@ class Browser extends StatefulWidget {
 }
 
 class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
-  static const platform =
-      MethodChannel('com.pichillilorenzo.flutter_browser.intent_data');
+  static const platform = MethodChannel('co.zew.deebrowser.intent_data');
 
   var _isRestored = false;
 
@@ -39,11 +42,17 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
     if (Util.isAndroid()) {
       String? url = await platform.invokeMethod("getIntentData");
       if (url != null) {
+        if (kDebugMode) {
+          print("*********** Url in getIntendData is: $url");
+        }
+
         if (mounted) {
           var browserModel = Provider.of<BrowserModel>(context, listen: false);
           browserModel.addTab(WebViewTab(
             key: GlobalKey(),
-            webViewModel: WebViewModel(url: WebUri(url)),
+            webViewModel: WebViewModel(
+                url: WebUri(url),
+                settings: browserModel.getDefaultTabSettings()),
           ));
         }
       }
@@ -133,7 +142,17 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
             }
           },
           child: Scaffold(
-              appBar: const BrowserAppBar(), body: _buildWebViewTabsContent()),
+            appBar: const BrowserAppBar(),
+            body: _buildWebViewTabsContent(),
+            floatingActionButton: MovableAccessibilityFAB(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const SettingsPage()));
+              },
+            ),
+          ),
         ));
   }
 
@@ -190,6 +209,131 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
   Widget _buildWebViewTabsViewer() {
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
 
+    // ignore: sized_box_for_whitespace
+    return Container(
+      width: double.infinity,
+      child: Drawer(
+        child: Column(
+          children: [
+            AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  browserModel.showTabScroller = false;
+                  browserModel.showTab(browserModel.getCurrentTabIndex());
+                },
+              ),
+              title:
+                  Text('Tabs [${browserModel.webViewTabs.length.toString()}]'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () {
+                    browserModel.addTab(WebViewTab(
+                      key: GlobalKey(),
+                      webViewModel: WebViewModel(
+                          url: WebUri(''),
+                          settings: browserModel.getDefaultTabSettings()),
+                    ));
+                  },
+                ),
+              ],
+            ),
+            Expanded(
+              child: Container(
+                color: Colors.deepPurpleAccent.shade100,
+                child: ListView(
+                  children: browserModel.webViewTabs.map((webViewTab) {
+                    var isCurrentTab = browserModel.getCurrentTabIndex() ==
+                        webViewTab.webViewModel.tabIndex;
+
+                    // Change here: Check if the tab is in incognito mode
+                    var leadingWidget = webViewTab.webViewModel.isIncognitoMode
+                        ? const Icon(MaterialCommunityIcons.incognito,
+                            color: Colors.black) // Incognito icon
+                        : (webViewTab.webViewModel.favicon != null
+                            ? CustomImage(
+                                url: webViewTab.webViewModel.favicon!.url,
+                                maxWidth: 30.0,
+                                height: 30.0,
+                              )
+                            : const Icon(Icons.web,
+                                color: Colors
+                                    .black)); // Default icon if no favicon
+
+                    return ListTile(
+                      leading: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[leadingWidget],
+                      ),
+                      title: Text(
+                        webViewTab.webViewModel.isIncognitoMode
+                            ? (webViewTab.webViewModel.title ??
+                                webViewTab.webViewModel.url?.toString() ??
+                                "")
+                            : webViewTab.webViewModel.title ??
+                                webViewTab.webViewModel.url?.toString() ??
+                                "",
+                        maxLines: 2,
+                        style: TextStyle(
+                          color: isCurrentTab ? Colors.white : Colors.black,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        webViewTab.webViewModel.url?.toString() ?? "",
+                        style: TextStyle(
+                          color: isCurrentTab ? Colors.white60 : Colors.black54,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      isThreeLine: true,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          IconButton(
+                            icon: Icon(
+                              Icons.close,
+                              size: 20.0,
+                              color: isCurrentTab ? Colors.white : Colors.black,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                if (webViewTab.webViewModel.tabIndex != null) {
+                                  browserModel.closeTab(
+                                      webViewTab.webViewModel.tabIndex!);
+                                  if (browserModel.webViewTabs.isEmpty) {
+                                    browserModel.showTabScroller = false;
+                                  }
+                                }
+                              });
+                            },
+                          )
+                        ],
+                      ),
+                      onTap: () {
+                        // Check if tabIndex is not null before using it
+                        if (webViewTab.webViewModel.tabIndex != null) {
+                          browserModel.showTabScroller = false;
+                          browserModel.showTab(webViewTab.webViewModel
+                              .tabIndex!); // Use the non-null assertion operator (!) after checking for null
+                        }
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWebViewTabsViewer_old() {
+    var browserModel = Provider.of<BrowserModel>(context, listen: true);
+
     return WillPopScope(
         onWillPop: () async {
           browserModel.showTabScroller = false;
@@ -225,7 +369,7 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
                   children: <Widget>[
                     Material(
                       color: isCurrentTab
-                          ? Colors.blue
+                          ? Colors.deepPurple
                           : (webViewTab.webViewModel.isIncognitoMode
                               ? Colors.black
                               : Colors.white),

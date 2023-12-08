@@ -1,10 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/main.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/util.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -43,9 +45,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     _pullToRefreshController = kIsWeb
         ? null
         : PullToRefreshController(
-            settings: PullToRefreshSettings(
-              color: Colors.blue
-            ),
+            settings: PullToRefreshSettings(color: Colors.deepPurple),
             onRefresh: () async {
               if (defaultTargetPlatform == TargetPlatform.android) {
                 _webViewController?.reload();
@@ -130,7 +130,9 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
   InAppWebView _buildWebView() {
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
+
     var settings = browserModel.getSettings();
+
     var currentWebViewModel = Provider.of<WebViewModel>(context, listen: true);
 
     if (Util.isAndroid()) {
@@ -173,7 +175,8 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         _webViewController = controller;
         widget.webViewModel.webViewController = controller;
         widget.webViewModel.pullToRefreshController = _pullToRefreshController;
-        widget.webViewModel.findInteractionController = _findInteractionController;
+        widget.webViewModel.findInteractionController =
+            _findInteractionController;
 
         if (Util.isAndroid()) {
           controller.startSafeBrowsing();
@@ -299,9 +302,9 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           consoleIconData = Icons.report_problem;
           consoleIconColor = Colors.red;
         } else if (consoleMessage.messageLevel == ConsoleMessageLevel.TIP) {
-          consoleTextColor = Colors.blue;
+          consoleTextColor = Colors.deepPurple;
           consoleIconData = Icons.info;
-          consoleIconColor = Colors.blueAccent;
+          consoleIconColor = Colors.deepPurple;
         } else if (consoleMessage.messageLevel == ConsoleMessageLevel.WARNING) {
           consoleBackgroundColor = const Color.fromRGBO(255, 251, 227, 1);
           consoleIconData = Icons.report_problem;
@@ -349,10 +352,25 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         String path = url.url.path;
         String fileName = path.substring(path.lastIndexOf('/') + 1);
 
+        Directory? directory = await getExternalStorageDirectory();
+        String _dir = "";
+        if (directory!.path.contains("/storage/emulated/0/") &&
+            Util.isAndroid()) {
+          _dir = '/storage/emulated/0/Download';
+        } else {
+          _dir = directory!.path;
+        }
+
+        if (kDebugMode) {
+          // ignore: prefer_interpolation_to_compose_strings
+          print("***** URL: " + url.url.toString());
+          print("******* Path: ${directory!.path}  and _dir: ${_dir}");
+        }
+
         await FlutterDownloader.enqueue(
-          url: url.toString(),
+          url: url.url.toString(),
           fileName: fileName,
-          savedDir: (await getTemporaryDirectory()).path,
+          savedDir: _dir,
           showNotification: true,
           openFileFromNotification: true,
         );
@@ -438,6 +456,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         var webViewTab = WebViewTab(
           key: GlobalKey(),
           webViewModel: WebViewModel(
+              settings: browserModel.getDefaultTabSettings(),
               url: WebUri("about:blank"),
               windowId: createWindowRequest.windowId),
         );

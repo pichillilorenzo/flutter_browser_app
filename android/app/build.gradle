@@ -1,3 +1,5 @@
+
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -32,7 +34,7 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -53,9 +55,9 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.pichillilorenzo.flutter_browser"
+        applicationId "co.zew.deebrowser"
         minSdkVersion 20
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true

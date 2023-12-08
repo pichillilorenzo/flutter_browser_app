@@ -5,6 +5,7 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_adeeinappwebview_platform_interface/src/in_app_webview/in_app_webview_settings.dart';
 import 'package:flutter_browser/models/web_archive_model.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -65,15 +66,107 @@ class BrowserSettings {
   }
 }
 
+class WebViewSettings {
+  int? minimumFontSize;
+  String? standardFontFamily;
+  bool? mediaPlaybackRequiresUserGesture;
+  bool? supportZoom;
+  bool? blockNetworkImage;
+
+  WebViewSettings(
+      {this.minimumFontSize = 8,
+      this.supportZoom = false,
+      this.standardFontFamily = "sans-serif",
+      this.mediaPlaybackRequiresUserGesture = true,
+      this.blockNetworkImage = false});
+
+  WebViewSettings copy() {
+    return WebViewSettings(
+        minimumFontSize: minimumFontSize,
+        supportZoom: supportZoom,
+        standardFontFamily: standardFontFamily,
+        mediaPlaybackRequiresUserGesture: mediaPlaybackRequiresUserGesture,
+        blockNetworkImage: blockNetworkImage);
+  }
+
+  static WebViewSettings? fromMap(Map<String, dynamic>? map) {
+    return map != null
+        ? WebViewSettings(
+            minimumFontSize: map["minimumFontSize"],
+            supportZoom: map["supportZoom"],
+            standardFontFamily: map["standardFontFamily"],
+            mediaPlaybackRequiresUserGesture:
+                map["mediaPlaybackRequiresUserGesture"],
+            blockNetworkImage: map["blockNetworkImage"])
+        : null;
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "minimumFontSize": minimumFontSize,
+      "supportZoom": supportZoom,
+      "standardFontFamily": standardFontFamily,
+      "mediaPlaybackRequiresUserGesture": mediaPlaybackRequiresUserGesture,
+      "blockNetworkImage": blockNetworkImage
+    };
+  }
+
+  Map<String, dynamic> toJson() {
+    return toMap();
+  }
+
+  @override
+  String toString() {
+    return toMap().toString();
+  }
+}
+
 class BrowserModel extends ChangeNotifier {
   final List<FavoriteModel> _favorites = [];
   final List<WebViewTab> _webViewTabs = [];
   final Map<String, WebArchiveModel> _webArchives = {};
   int _currentTabIndex = -1;
   BrowserSettings _settings = BrowserSettings();
+  WebViewSettings _webViewSettings = WebViewSettings();
   late WebViewModel _currentWebViewModel;
+  WebViewModel? _defaultTabSettings;
 
   bool _showTabScroller = false;
+
+  getDefaultTabSettings() {
+    // _currentWebViewModel.settings?.minimumFontSize = 64; // javad
+    //return _defaultTabSettings?.settings;
+    return _defaultTabSettings?.settings;
+  }
+
+  castWebViewSettingsFrom(var model) {
+    if (model != null) {
+      _webViewSettings.minimumFontSize = model.settings?.minimumFontSize;
+      _webViewSettings.supportZoom = model.settings?.supportZoom;
+      _webViewSettings.standardFontFamily = model.settings?.standardFontFamily;
+      _webViewSettings.mediaPlaybackRequiresUserGesture =
+          model.settings?.mediaPlaybackRequiresUserGesture;
+      _webViewSettings.blockNetworkImage = model.settings?.blockNetworkImage;
+    }
+  }
+
+  castWebViewSettingsTo(var settings) {
+    if (settings != null) {
+      _currentWebViewModel.settings?.minimumFontSize = settings.minimumFontSize;
+      _currentWebViewModel.settings?.supportZoom = settings.supportZoom;
+      _currentWebViewModel.settings?.standardFontFamily =
+          settings.standardFontFamily;
+      _currentWebViewModel.settings?.mediaPlaybackRequiresUserGesture =
+          settings.mediaPlaybackRequiresUserGesture;
+      _currentWebViewModel.settings?.blockNetworkImage =
+          settings.blockNetworkImage;
+    }
+    _defaultTabSettings = _currentWebViewModel;
+  }
+
+  setDefaultTabSettings(var settings) {
+    castWebViewSettingsFrom(settings);
+  }
 
   bool get showTabScroller => _showTabScroller;
 
@@ -86,6 +179,7 @@ class BrowserModel extends ChangeNotifier {
 
   BrowserModel() {
     _currentWebViewModel = WebViewModel();
+    castWebViewSettingsTo(_webViewSettings);
   }
 
   UnmodifiableListView<WebViewTab> get webViewTabs =>
@@ -246,6 +340,16 @@ class BrowserModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  WebViewSettings getWebViewSettings() {
+    return _webViewSettings.copy();
+  }
+
+  void updateWebViewSettings(WebViewSettings settings) {
+    _webViewSettings = settings;
+    castWebViewSettingsTo(_webViewSettings);
+    notifyListeners();
+  }
+
   void setCurrentWebViewModel(WebViewModel webViewModel) {
     _currentWebViewModel = webViewModel;
   }
@@ -298,6 +402,11 @@ class BrowserModel extends ChangeNotifier {
         BrowserSettings settings = BrowserSettings.fromMap(
                 browserData["settings"]?.cast<String, dynamic>()) ??
             BrowserSettings();
+
+        WebViewSettings webviewsettings = WebViewSettings.fromMap(
+                browserData["webviewsettings"]?.cast<String, dynamic>()) ??
+            WebViewSettings();
+
         List<Map<String, dynamic>> webViewTabList =
             browserData["webViewTabs"]?.cast<Map<String, dynamic>>() ?? [];
         List<WebViewTab> webViewTabs = webViewTabList
@@ -312,6 +421,7 @@ class BrowserModel extends ChangeNotifier {
         addFavorites(favorites);
         addWebArchives(webArchives);
         updateSettings(settings);
+        updateWebViewSettings(webviewsettings);
         addTabs(webViewTabs);
 
         int currentTabIndex =
@@ -338,6 +448,7 @@ class BrowserModel extends ChangeNotifier {
           _webArchives.map((key, value) => MapEntry(key, value.toMap())),
       "currentTabIndex": _currentTabIndex,
       "settings": _settings.toMap(),
+      "webviewsettings": _webViewSettings.toMap(),
       "currentWebViewModel": _currentWebViewModel.toMap(),
     };
   }

@@ -6,9 +6,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_browser/custom_image.dart';
+import 'package:flutter_browser/util.dart';
 import 'package:flutter_browser/webview_tab.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -184,8 +185,9 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
       onTap: () {
         browserModel.addTab(WebViewTab(
           key: GlobalKey(),
-          webViewModel:
-              WebViewModel(url: widget.requestFocusNodeHrefResult?.url),
+          webViewModel: WebViewModel(
+              url: widget.requestFocusNodeHrefResult?.url,
+              settings: browserModel.getDefaultTabSettings()),
         ));
         Navigator.pop(context);
       },
@@ -202,6 +204,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
           key: GlobalKey(),
           webViewModel: WebViewModel(
               url: widget.requestFocusNodeHrefResult?.url,
+              settings: browserModel.getDefaultTabSettings(),
               isIncognitoMode: true),
         ));
         Navigator.pop(context);
@@ -215,7 +218,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
       onTap: () {
         Clipboard.setData(ClipboardData(
             text: widget.requestFocusNodeHrefResult?.url.toString() ??
-                widget.hitTestResult.extra));
+                widget.hitTestResult.extra.toString()));
         Navigator.pop(context);
       },
     );
@@ -278,10 +281,17 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
           String path = uri.path;
           String fileName = path.substring(path.lastIndexOf('/') + 1);
           Directory? directory = await getExternalStorageDirectory();
+          String _dir = "";
+          if (directory!.path.contains("/storage/emulated/0/") &&
+              Util.isAndroid()) {
+            _dir = '/storage/emulated/0/Download';
+          } else {
+            _dir = directory!.path;
+          }
           await FlutterDownloader.enqueue(
-            url: url,
+            url: url.toString(),
             fileName: fileName,
-            savedDir: directory!.path,
+            savedDir: _dir,
             showNotification: true,
             openFileFromNotification: true,
           );
@@ -326,7 +336,8 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
         browserModel.addTab(WebViewTab(
           key: GlobalKey(),
           webViewModel: WebViewModel(
-              url: WebUri(widget.hitTestResult.extra ?? "about:blank")),
+              url: WebUri(widget.hitTestResult.extra ?? "about:blank"),
+              settings: browserModel.getDefaultTabSettings()),
         ));
         Navigator.pop(context);
       },
@@ -344,7 +355,9 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
               "http://images.google.com/searchbyimage?image_url=${widget.hitTestResult.extra!}";
           browserModel.addTab(WebViewTab(
             key: GlobalKey(),
-            webViewModel: WebViewModel(url: WebUri(url)),
+            webViewModel: WebViewModel(
+                url: WebUri(url),
+                settings: browserModel.getDefaultTabSettings()),
           ));
         }
         Navigator.pop(context);

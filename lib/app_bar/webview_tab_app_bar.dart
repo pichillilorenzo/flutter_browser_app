@@ -1,6 +1,7 @@
 // import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_browser/app_bar/url_info_popup.dart';
@@ -15,7 +16,7 @@ import 'package:flutter_browser/pages/settings/main.dart';
 import 'package:flutter_browser/tab_popup_menu_actions.dart';
 import 'package:flutter_browser/util.dart';
 import 'package:flutter_font_icons/flutter_font_icons.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_extend/share_extend.dart';
@@ -27,6 +28,28 @@ import '../custom_popup_menu_item.dart';
 import '../popup_menu_actions.dart';
 import '../project_info_popup.dart';
 import '../webview_tab.dart';
+
+String formatUrl(String url) {
+  if (kDebugMode) {
+    print('*****************$url');
+  }
+  // Regular expression pattern to check for a domain-like structure
+  var domainPattern = RegExp(r'^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}$');
+
+  // Check if the URL starts with http:// or https://
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  } else if (domainPattern.hasMatch(url)) {
+    // If the URL is a domain but doesn't start with http:// or https://, prepend 'https://'
+    if (kDebugMode) {
+      print('https://$url');
+    }
+    return 'https://$url';
+  } else {
+    // If the URL is not a domain-like string, return it as is
+    return url;
+  }
+}
 
 class WebViewTabAppBar extends StatefulWidget {
   final void Function()? showFindOnPage;
@@ -60,6 +83,11 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     super.initState();
     _focusNode = FocusNode();
     _focusNode?.addListener(() async {
+      _searchController!.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _searchController!.text.length,
+      );
+
       if (_focusNode != null &&
           !_focusNode!.hasFocus &&
           _searchController != null &&
@@ -101,16 +129,18 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
               builder: (context, isIncognitoMode, child) {
                 return leading != null
                     ? AppBar(
-                        backgroundColor:
-                            isIncognitoMode ? Colors.black87 : Colors.blue,
+                        backgroundColor: isIncognitoMode
+                            ? Colors.black87
+                            : Colors.deepPurple,
                         leading: _buildAppBarHomePageWidget(),
                         titleSpacing: 0.0,
                         title: _buildSearchTextField(),
                         actions: _buildActionsMenu(),
                       )
                     : AppBar(
-                        backgroundColor:
-                            isIncognitoMode ? Colors.black87 : Colors.blue,
+                        backgroundColor: isIncognitoMode
+                            ? Colors.black87
+                            : Colors.deepPurple,
                         titleSpacing: 10.0,
                         title: _buildSearchTextField(),
                         actions: _buildActionsMenu(),
@@ -159,7 +189,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         children: <Widget>[
           TextField(
             onSubmitted: (value) {
-              var url = WebUri(value.trim());
+              var url = WebUri(formatUrl(value.trim()));
               if (!url.scheme.startsWith("http") &&
                   !Util.isLocalizedContent(url)) {
                 url = WebUri(settings.searchEngine.searchUrl + value);
@@ -390,11 +420,11 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                         child: IconButton(
                             padding: const EdgeInsets.all(0.0),
                             icon: const Icon(
-                              Icons.arrow_forward,
+                              Icons.arrow_back,
                               color: Colors.black,
                             ),
                             onPressed: () {
-                              webViewController?.goForward();
+                              webViewController?.goBack();
                               Navigator.pop(popupMenuContext);
                             })),
                     SizedBox(
@@ -418,65 +448,65 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                                 }
                               });
                             })),
+                    // SizedBox(
+                    //     width: 35.0,
+                    //     child: IconButton(
+                    //         padding: const EdgeInsets.all(0.0),
+                    //         icon: const Icon(
+                    //           Icons.file_download,
+                    //           color: Colors.black,
+                    //         ),
+                    //         onPressed: () async {
+                    //           Navigator.pop(popupMenuContext);
+                    //           if (webViewModel.url != null &&
+                    //               webViewModel.url!.scheme.startsWith("http")) {
+                    //             var url = webViewModel.url;
+                    //             if (url == null) {
+                    //               return;
+                    //             }
+
+                    //             String webArchivePath =
+                    //                 "$WEB_ARCHIVE_DIR${Platform.pathSeparator}${url.scheme}-${url.host}${url.path.replaceAll("/", "-")}${DateTime.now().microsecondsSinceEpoch}.${Util.isAndroid() ? WebArchiveFormat.MHT.toValue() : WebArchiveFormat.WEBARCHIVE.toValue()}";
+
+                    //             String? savedPath =
+                    //                 (await webViewController?.saveWebArchive(
+                    //                     filePath: webArchivePath,
+                    //                     autoname: false));
+
+                    //             var webArchiveModel = WebArchiveModel(
+                    //                 url: url,
+                    //                 path: savedPath,
+                    //                 title: webViewModel.title,
+                    //                 favicon: webViewModel.favicon,
+                    //                 timestamp: DateTime.now());
+
+                    //             if (savedPath != null) {
+                    //               browserModel.addWebArchive(
+                    //                   url.toString(), webArchiveModel);
+                    //               if (mounted) {
+                    //                 ScaffoldMessenger.of(context)
+                    //                     .showSnackBar(SnackBar(
+                    //                   content: Text(
+                    //                       "${webViewModel.url} saved offline!"),
+                    //                 ));
+                    //               }
+                    //               browserModel.save();
+                    //             } else {
+                    //               if (mounted) {
+                    //                 ScaffoldMessenger.of(context)
+                    //                     .showSnackBar(const SnackBar(
+                    //                   content: Text("Unable to save!"),
+                    //                 ));
+                    //               }
+                    //             }
+                    //           }
+                    //         })),
                     SizedBox(
                         width: 35.0,
                         child: IconButton(
                             padding: const EdgeInsets.all(0.0),
                             icon: const Icon(
-                              Icons.file_download,
-                              color: Colors.black,
-                            ),
-                            onPressed: () async {
-                              Navigator.pop(popupMenuContext);
-                              if (webViewModel.url != null &&
-                                  webViewModel.url!.scheme.startsWith("http")) {
-                                var url = webViewModel.url;
-                                if (url == null) {
-                                  return;
-                                }
-
-                                String webArchivePath =
-                                    "$WEB_ARCHIVE_DIR${Platform.pathSeparator}${url.scheme}-${url.host}${url.path.replaceAll("/", "-")}${DateTime.now().microsecondsSinceEpoch}.${Util.isAndroid() ? WebArchiveFormat.MHT.toValue() : WebArchiveFormat.WEBARCHIVE.toValue()}";
-
-                                String? savedPath =
-                                    (await webViewController?.saveWebArchive(
-                                        filePath: webArchivePath,
-                                        autoname: false));
-
-                                var webArchiveModel = WebArchiveModel(
-                                    url: url,
-                                    path: savedPath,
-                                    title: webViewModel.title,
-                                    favicon: webViewModel.favicon,
-                                    timestamp: DateTime.now());
-
-                                if (savedPath != null) {
-                                  browserModel.addWebArchive(
-                                      url.toString(), webArchiveModel);
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(SnackBar(
-                                      content: Text(
-                                          "${webViewModel.url} saved offline!"),
-                                    ));
-                                  }
-                                  browserModel.save();
-                                } else {
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(const SnackBar(
-                                      content: Text("Unable to save!"),
-                                    ));
-                                  }
-                                }
-                              }
-                            })),
-                    SizedBox(
-                        width: 35.0,
-                        child: IconButton(
-                            padding: const EdgeInsets.all(0.0),
-                            icon: const Icon(
-                              Icons.info_outline,
+                              Icons.settings_applications_rounded,
                               color: Colors.black,
                             ),
                             onPressed: () async {
@@ -510,6 +540,18 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                             ),
                             onPressed: () {
                               webViewController?.reload();
+                              Navigator.pop(popupMenuContext);
+                            })),
+                    SizedBox(
+                        width: 35.0,
+                        child: IconButton(
+                            padding: const EdgeInsets.all(0.0),
+                            icon: const Icon(
+                              Icons.arrow_forward,
+                              color: Colors.black,
+                            ),
+                            onPressed: () {
+                              webViewController?.goForward();
                               Navigator.pop(popupMenuContext);
                             })),
                   ]);
@@ -578,7 +620,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                         Text(choice),
                         const Icon(
                           Icons.offline_pin,
-                          color: Colors.blue,
+                          color: Colors.deepPurple,
                         )
                       ]),
                 );
@@ -627,7 +669,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                       children: [
                         Text(choice),
                         const Icon(
-                          Ionicons.logo_whatsapp,
+                          Ionicons.share,
                           color: Colors.green,
                         )
                       ]),
@@ -690,6 +732,35 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                         )
                       ]),
                 );
+              case PopupMenuActions.EXIT_APP:
+                return CustomPopupMenuItem<String>(
+                  enabled: browserModel.getCurrentTab() != null,
+                  value: choice,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(choice),
+                        const Icon(
+                          Icons.exit_to_app,
+                          color: Colors.black,
+                        )
+                      ]),
+                );
+
+              case PopupMenuActions.COPY_CURRENT_URL:
+                return CustomPopupMenuItem<String>(
+                  enabled: browserModel.getCurrentTab() != null,
+                  value: choice,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(choice),
+                        const Icon(
+                          Icons.copy,
+                          color: Colors.black,
+                        )
+                      ]),
+                );
               default:
                 return CustomPopupMenuItem<String>(
                   value: choice,
@@ -724,9 +795,13 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         showWebArchives();
         break;
       case PopupMenuActions.FIND_ON_PAGE:
-        var isFindInteractionEnabled = currentWebViewModel.settings?.isFindInteractionEnabled ?? false;
-        var findInteractionController = currentWebViewModel.findInteractionController;
-        if (Util.isIOS() && isFindInteractionEnabled && findInteractionController != null) {
+        var isFindInteractionEnabled =
+            currentWebViewModel.settings?.isFindInteractionEnabled ?? false;
+        var findInteractionController =
+            currentWebViewModel.findInteractionController;
+        if (Util.isIOS() &&
+            isFindInteractionEnabled &&
+            findInteractionController != null) {
           await findInteractionController.presentFindNavigator();
         } else if (widget.showFindOnPage != null) {
           widget.showFindOnPage!();
@@ -753,12 +828,28 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
           openProjectPopup();
         });
         break;
+      case PopupMenuActions.EXIT_APP:
+        Future.delayed(const Duration(milliseconds: 300), () {
+          SystemNavigator.pop();
+        });
+        break;
+      case PopupMenuActions.COPY_CURRENT_URL:
+        Future.delayed(const Duration(milliseconds: 300), () {
+          copyUrl();
+        });
+        break;
     }
   }
 
   void addNewTab({WebUri? url}) {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
+
     var settings = browserModel.getSettings();
+    var tabSettings = browserModel.getCurrentTab()?.webViewModel.settings;
+    if (kDebugMode) {
+      print(
+          "########## setting2${browserModel.getDefaultTabSettings()!.minimumFontSize}");
+    }
 
     url ??= settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
         ? WebUri(settings.customUrlHomePage)
@@ -766,7 +857,8 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
     browserModel.addTab(WebViewTab(
       key: GlobalKey(),
-      webViewModel: WebViewModel(url: url),
+      webViewModel: WebViewModel(
+          url: url, settings: browserModel.getDefaultTabSettings()),
     ));
   }
 
@@ -780,7 +872,10 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
     browserModel.addTab(WebViewTab(
       key: GlobalKey(),
-      webViewModel: WebViewModel(url: url, isIncognitoMode: true),
+      webViewModel: WebViewModel(
+          url: url,
+          isIncognitoMode: true,
+          settings: browserModel.getDefaultTabSettings()),
     ));
   }
 
@@ -994,6 +1089,21 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     }
   }
 
+  void copyUrl() {
+    var browserModel = Provider.of<BrowserModel>(context, listen: false);
+    var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+    var url = webViewModel?.url;
+
+    if (url != null) {
+      Clipboard.setData(ClipboardData(text: url.toString()));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('URL copied to clipboard'),
+        ),
+      );
+    }
+  }
+
   void toggleDesktopMode() async {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var webViewModel = browserModel.getCurrentTab()?.webViewModel;
@@ -1007,9 +1117,10 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
       var currentSettings = await webViewController.getSettings();
       if (currentSettings != null) {
-        currentSettings.preferredContentMode = webViewModel?.isDesktopMode ?? false
-            ? UserPreferredContentMode.DESKTOP
-            : UserPreferredContentMode.RECOMMENDED;
+        currentSettings.preferredContentMode =
+            webViewModel?.isDesktopMode ?? false
+                ? UserPreferredContentMode.DESKTOP
+                : UserPreferredContentMode.RECOMMENDED;
         await webViewController.setSettings(settings: currentSettings);
       }
       await webViewController.reload();

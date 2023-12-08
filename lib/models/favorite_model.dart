@@ -1,4 +1,4 @@
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
 
 class FavoriteModel {
   WebUri? url;

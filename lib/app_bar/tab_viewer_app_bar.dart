@@ -1,10 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/pages/settings/main.dart';
 import 'package:flutter_browser/webview_tab.dart';
 import 'package:flutter_font_icons/flutter_font_icons.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
 import 'package:provider/provider.dart';
 
 import '../custom_popup_menu_item.dart';
@@ -191,10 +192,15 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
         : WebUri(settings.searchEngine.url);
 
     browserModel.showTabScroller = false;
-
+    if (kDebugMode) {
+      print("########## setting");
+    }
+    var setval = browserModel.getDefaultTabSettings()?.settings;
+    setval?.minimumFontSize = 64;
     browserModel.addTab(WebViewTab(
       key: GlobalKey(),
-      webViewModel: WebViewModel(url: url),
+      webViewModel: WebViewModel(
+          url: url, settings: browserModel.getDefaultTabSettings()),
     ));
   }
 
@@ -210,7 +216,10 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
 
     browserModel.addTab(WebViewTab(
       key: GlobalKey(),
-      webViewModel: WebViewModel(url: url, isIncognitoMode: true),
+      webViewModel: WebViewModel(
+          url: url,
+          isIncognitoMode: true,
+          settings: browserModel.getDefaultTabSettings()),
     ));
   }
 

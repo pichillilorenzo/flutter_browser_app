@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
+import 'package:flutter_browser/pages/settings/accessibility_settings.dart';
 import 'package:flutter_browser/pages/settings/android_settings.dart';
 import 'package:flutter_browser/pages/settings/cross_platform_settings.dart';
 import 'package:flutter_browser/pages/settings/ios_settings.dart';
 import 'package:flutter_font_icons/flutter_font_icons.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
 import 'package:provider/provider.dart';
 
 import '../../custom_popup_menu_item.dart';
@@ -42,26 +43,15 @@ class _SettingsPageState extends State<SettingsPage> {
                 },
                 tabs: const [
                   Tab(
-                    text: "Cross-Platform",
-                    icon: SizedBox(
-                      width: 25,
-                      height: 25,
-                      child: CircleAvatar(
-                        backgroundImage: AssetImage("assets/icon/icon.png"),
-                      ),
-                    ),
+                    text: "",
                   ),
-                  Tab(
-                    text: "Android",
-                    icon: Icon(
-                      Icons.android,
-                      color: Colors.green,
-                    ),
-                  ),
-                  Tab(
-                    text: "iOS",
-                    icon: Icon(AntDesign.apple1),
-                  ),
+                  // Tab(
+                  //   text: "General",
+                  // ),
+                  // Tab(
+                  //   text: "iOS",
+                  //   icon: Icon(AntDesign.apple1),
+                  // ),
                 ]),
             title: const Text(
               "Settings",
@@ -109,9 +99,10 @@ class _SettingsPageState extends State<SettingsPage> {
           body: const TabBarView(
             physics: NeverScrollableScrollPhysics(),
             children: [
-              CrossPlatformSettings(),
-              AndroidSettings(),
-              IOSSettings(),
+              // AndroidSettings(),
+              // IOSSettings(),
+              AccessibilitySettings(),
+              // CrossPlatformSettings(),
             ],
           ),
         ));

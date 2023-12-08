@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_browser/custom_image.dart';
 import 'package:flutter_browser/models/webview_model.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mime/mime.dart';
 import 'package:provider/provider.dart';
@@ -149,8 +149,8 @@ class _NetworkInfoState extends State<NetworkInfo> {
               return Row(children: <Widget>[
                 InkWell(
                     onTap: () {
-                      Clipboard.setData(
-                          ClipboardData(text: loadedResoruce.url?.toString()));
+                      Clipboard.setData(ClipboardData(
+                          text: loadedResoruce.url?.toString() ?? ''));
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(

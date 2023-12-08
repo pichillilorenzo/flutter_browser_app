@@ -105,7 +105,7 @@ class _UrlInfoPopupState extends State<UrlInfoPopup> {
               ),
               TextSpan(
                 text: "Details",
-                style: const TextStyle(color: Colors.blue),
+                style: const TextStyle(color: Colors.deepPurple),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () async {
                     Navigator.maybePop(context);
@@ -132,7 +132,7 @@ class _UrlInfoPopupState extends State<UrlInfoPopup> {
           alignment: Alignment.centerRight,
           child: ElevatedButton(
             child: const Text(
-              "WebView Tab Settings",
+              "Tab Settings",
             ),
             onPressed: () async {
               Navigator.maybePop(context);

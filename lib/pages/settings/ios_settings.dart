@@ -3,7 +3,7 @@ import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/multiselect_dialog.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
 import 'package:provider/provider.dart';
 
 class IOSSettings extends StatefulWidget {
@@ -473,13 +473,14 @@ class _IOSSettingsState extends State<IOSSettings> {
       ),
       ListTile(
         title: const Text("Under Page Background Color"),
-        subtitle: const Text("Sets the color the web view displays behind the active page, visible when the user scrolls beyond the bounds of the page."),
+        subtitle: const Text(
+            "Sets the color the web view displays behind the active page, visible when the user scrolls beyond the bounds of the page."),
         trailing: SizedBox(
             width: 140.0,
             child: ElevatedButton(
               child: Text(
                 currentWebViewModel.settings?.underPageBackgroundColor
-                    ?.toString() ??
+                        ?.toString() ??
                     'Pick a color!',
                 style: const TextStyle(fontSize: 12.5),
               ),
@@ -492,13 +493,13 @@ class _IOSSettingsState extends State<IOSSettings> {
                         child: ColorPicker(
                           pickerColor: const Color(0xffffffff),
                           onColorChanged: (value) async {
-                            currentWebViewModel.settings
-                                ?.underPageBackgroundColor = value;
+                            currentWebViewModel
+                                .settings?.underPageBackgroundColor = value;
                             webViewController?.setSettings(
                                 settings: currentWebViewModel.settings ??
                                     InAppWebViewSettings());
                             currentWebViewModel.settings =
-                            await webViewController?.getSettings();
+                                await webViewController?.getSettings();
                             browserModel.save();
                             setState(() {});
                           },
@@ -518,8 +519,8 @@ class _IOSSettingsState extends State<IOSSettings> {
       ),
       SwitchListTile(
         title: const Text("Text Interaction Enabled"),
-        subtitle: const Text(
-            "Indicates whether text interaction is enabled or not."),
+        subtitle:
+            const Text("Indicates whether text interaction is enabled or not."),
         value: currentWebViewModel.settings?.isTextInteractionEnabled ?? false,
         onChanged: (value) {
           currentWebViewModel.settings?.isTextInteractionEnabled = value;
@@ -533,7 +534,8 @@ class _IOSSettingsState extends State<IOSSettings> {
         title: const Text("Site Specific Quirks Mode Enabled"),
         subtitle: const Text(
             "Indicates whether WebKit will apply built-in workarounds (quirks) to improve compatibility with certain known websites. You can disable site-specific quirks to help test your website without these workarounds."),
-        value: currentWebViewModel.settings?.isSiteSpecificQuirksModeEnabled ?? false,
+        value: currentWebViewModel.settings?.isSiteSpecificQuirksModeEnabled ??
+            false,
         onChanged: (value) {
           currentWebViewModel.settings?.isSiteSpecificQuirksModeEnabled = value;
           webViewController?.setSettings(
@@ -557,9 +559,10 @@ class _IOSSettingsState extends State<IOSSettings> {
       ),
       SwitchListTile(
         title: const Text("Element Fullscreen Enabled"),
-        subtitle: const Text(
-            "Indicates whether fullscreen API is enabled or not."),
-        value: currentWebViewModel.settings?.isElementFullscreenEnabled ?? false,
+        subtitle:
+            const Text("Indicates whether fullscreen API is enabled or not."),
+        value:
+            currentWebViewModel.settings?.isElementFullscreenEnabled ?? false,
         onChanged: (value) {
           currentWebViewModel.settings?.isElementFullscreenEnabled = value;
           webViewController?.setSettings(

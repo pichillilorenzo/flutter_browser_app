@@ -21,18 +21,22 @@ class PopupMenuActions {
   static const String DEVELOPERS = "Developers";
   // ignore: constant_identifier_names
   static const String INAPPWEBVIEW_PROJECT = "InAppWebView Project";
+  // ignore: constant_identifier_names
+  static const String COPY_CURRENT_URL = "Copy URL";
+  // ignore: constant_identifier_names
+  static const String EXIT_APP = "Exit";
 
   static const List<String> choices = <String>[
     NEW_TAB,
     NEW_INCOGNITO_TAB,
-    FAVORITES,
+    // FAVORITES,
     HISTORY,
-    WEB_ARCHIVES,
     SHARE,
     FIND_ON_PAGE,
+    // WEB_ARCHIVES,
+    // SETTINGS,
     DESKTOP_MODE,
-    SETTINGS,
-    DEVELOPERS,
-    INAPPWEBVIEW_PROJECT,
+    COPY_CURRENT_URL,
+    EXIT_APP,
   ];
 }

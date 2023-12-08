@@ -4,7 +4,7 @@ import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/util.dart';
 import 'package:flutter_browser/webview_tab.dart';
 import 'package:flutter_font_icons/flutter_font_icons.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
 import 'package:provider/provider.dart';
 
 import 'animated_flutter_browser_logo.dart';
@@ -49,17 +49,18 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
           text: const TextSpan(children: [
             TextSpan(text: "Github: ", style: TextStyle(color: Colors.black)),
             TextSpan(
-                text: "pichillilorenzo/flutter_inappwebview",
-                style: TextStyle(color: Colors.blue))
+                text: "adee/flutter_adeeinappwebview",
+                style: TextStyle(color: Colors.deepPurple))
           ]),
         ),
         onPressed: () {
-          var browserModel = Provider.of<BrowserModel>(context, listen: false);
+          var browserModel = Provider.of<BrowserModel>(context, listen: true);
           browserModel.addTab(WebViewTab(
             key: GlobalKey(),
             webViewModel: WebViewModel(
-                url: WebUri(
-                    "https://github.com/pichillilorenzo/flutter_inappwebview")),
+                settings: browserModel.getDefaultTabSettings(),
+                url:
+                    WebUri("https://github.com/adee/flutter_adeeinappwebview")),
           ));
           Navigator.pop(context);
         },
@@ -81,8 +82,8 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
           text: const TextSpan(children: [
             TextSpan(text: "Github: ", style: TextStyle(color: Colors.black)),
             TextSpan(
-                text: "pichillilorenzo/flutter_browser_app",
-                style: TextStyle(color: Colors.blue))
+                text: "adee/flutter_browser_app",
+                style: TextStyle(color: Colors.deepPurple))
           ]),
         ),
         onPressed: () {
@@ -90,8 +91,8 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
           browserModel.addTab(WebViewTab(
             key: GlobalKey(),
             webViewModel: WebViewModel(
-                url: WebUri(
-                    "https://github.com/pichillilorenzo/flutter_browser_app")),
+                settings: browserModel.getDefaultTabSettings(),
+                url: WebUri("https://github.com/adee/flutter_browser_app")),
           ));
           Navigator.pop(context);
         },

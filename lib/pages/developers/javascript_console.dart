@@ -65,8 +65,8 @@ class _JavaScriptConsoleState extends State<JavaScriptConsole> {
                   maxLines: null,
                   decoration: const InputDecoration(
                       hintText: "document.querySelector('body') ...",
-                      prefixIcon:
-                          Icon(Icons.keyboard_arrow_right, color: Colors.blue),
+                      prefixIcon: Icon(Icons.keyboard_arrow_right,
+                          color: Colors.deepPurple),
                       border: InputBorder.none),
                 ),
               ),
