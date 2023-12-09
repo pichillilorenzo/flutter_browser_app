@@ -29,3 +29,15 @@ Thanks goes to these wonderful people.
           </tr>
   </tbody>
 </table>
+
+## Build for Android
+Build release version:
+First set the version: 2.0.0+31 in pubspec.yaml
+Then
+```bash
+flutter build apk --release
+```
+Note: To debug run:
+```bash
+flutter run
+```
