@@ -1234,7 +1234,14 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
       ),
     );
 
-    Scaffold.of(context).showBottomSheet((context) => drawerContent);
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return drawerContent;
+      },
+      isScrollControlled:
+          false, // Set to true if you want the sheet to take the full screen height
+    );
   }
 
   void showWebArchives() async {

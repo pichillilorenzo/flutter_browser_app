@@ -34,7 +34,7 @@ class PopupMenuActions {
     SHARE,
     FIND_ON_PAGE,
     // WEB_ARCHIVES,
-    // SETTINGS,
+    SETTINGS,
     DESKTOP_MODE,
     COPY_CURRENT_URL,
     EXIT_APP,

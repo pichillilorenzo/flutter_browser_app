@@ -213,39 +213,6 @@ class _AccessibilitySettingsState extends State<AccessibilitySettings> {
           ),
         ),
       ),
-      ListTile(
-        title: const Text("Standard Font Family"),
-        subtitle: const Text("Sets the standard font family name."),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: Icon(Icons.arrow_upward),
-              onPressed: () {
-                setState(() {
-                  // Increase font family index or change font family setting
-                  // For example: currentWebViewModel.settings?.standardFontFamilyIndex++;
-                  // Apply logic to change the font family
-                });
-              },
-            ),
-            // Display the current font family or selected option here
-            Text(
-              currentWebViewModel.settings?.standardFontFamily ?? "Select Font",
-            ),
-            IconButton(
-              icon: Icon(Icons.arrow_downward),
-              onPressed: () {
-                setState(() {
-                  // Decrease font family index or change font family setting
-                  // For example: currentWebViewModel.settings?.standardFontFamilyIndex--;
-                  // Apply logic to change the font family
-                });
-              },
-            ),
-          ],
-        ),
-      ),
       SwitchListTile(
         title: const Text("Support Zoom"),
         subtitle: const Text(
