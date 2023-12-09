@@ -203,12 +203,18 @@ class BrowserModel extends ChangeNotifier {
 
   void addTabs(List<WebViewTab> webViewTabs) {
     for (var webViewTab in webViewTabs) {
+      webViewTab.webViewModel.needsToCompleteInitialLoad = true;
       _webViewTabs.add(webViewTab);
       webViewTab.webViewModel.tabIndex = _webViewTabs.length - 1;
     }
     _currentTabIndex = _webViewTabs.length - 1;
     if (_currentTabIndex >= 0) {
       _currentWebViewModel.updateWithValue(webViewTabs.last.webViewModel);
+    }
+
+    if (kDebugMode) {
+      print(
+          "######## LOADED STATUS OF THE FIRST ${_webViewTabs.first.webViewModel.needsToCompleteInitialLoad} #####");
     }
 
     notifyListeners();
@@ -233,10 +239,22 @@ class BrowserModel extends ChangeNotifier {
   }
 
   void showTab(int index) {
+    if (kDebugMode) {
+      print("**** NEEDS LOADING  1 *****");
+      print(
+          "**** NEEDS LOADING  ${_webViewTabs[index].webViewModel.needsToCompleteInitialLoad} *****");
+    }
     if (_currentTabIndex != index) {
       _currentTabIndex = index;
       _currentWebViewModel
           .updateWithValue(_webViewTabs[_currentTabIndex].webViewModel);
+
+      if (_webViewTabs[_currentTabIndex]
+          .webViewModel
+          .needsToCompleteInitialLoad) {
+        _currentWebViewModel.webViewController?.reload();
+        _currentWebViewModel.needsToCompleteInitialLoad = false;
+      }
 
       notifyListeners();
     }
@@ -388,9 +406,7 @@ class BrowserModel extends ChangeNotifier {
 
   Future<void> flush() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (kDebugMode) {
-      print("********* FLUSH **********");
-    }
+
     await prefs.setString("browser", json.encode(toJson()));
   }
 
