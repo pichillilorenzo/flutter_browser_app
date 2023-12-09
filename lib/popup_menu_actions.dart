@@ -29,8 +29,8 @@ class PopupMenuActions {
   static const List<String> choices = <String>[
     NEW_TAB,
     NEW_INCOGNITO_TAB,
-    // FAVORITES,
-    HISTORY,
+    FAVORITES,
+    //HISTORY,
     SHARE,
     FIND_ON_PAGE,
     // WEB_ARCHIVES,

@@ -241,7 +241,7 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
             ),
             Expanded(
               child: Container(
-                color: Colors.deepPurpleAccent.shade100,
+                color: Colors.white,
                 child: ListView(
                   children: browserModel.webViewTabs.map((webViewTab) {
                     var isCurrentTab = browserModel.getCurrentTabIndex() ==
@@ -276,14 +276,16 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
                                 "",
                         maxLines: 2,
                         style: TextStyle(
-                          color: isCurrentTab ? Colors.white : Colors.black,
+                          color:
+                              isCurrentTab ? Colors.deepPurple : Colors.black,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                       subtitle: Text(
                         webViewTab.webViewModel.url?.toString() ?? "",
                         style: TextStyle(
-                          color: isCurrentTab ? Colors.white60 : Colors.black54,
+                          color:
+                              isCurrentTab ? Colors.deepPurple : Colors.black54,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -296,7 +298,9 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
                             icon: Icon(
                               Icons.close,
                               size: 20.0,
-                              color: isCurrentTab ? Colors.white : Colors.black,
+                              color: isCurrentTab
+                                  ? Colors.deepPurple
+                                  : Colors.black,
                             ),
                             onPressed: () {
                               setState(() {

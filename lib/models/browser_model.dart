@@ -388,10 +388,10 @@ class BrowserModel extends ChangeNotifier {
         closeAllTabs();
         clearWebArchives();
 
+        // ignore: unused_local_variable
         List<Map<String, dynamic>> favoritesList =
-            browserData["favorites"]?.cast<Map<String, dynamic>>() ?? [];
-        List<FavoriteModel> favorites =
-            favoritesList.map((e) => FavoriteModel.fromMap(e)!).toList();
+            browserData["favorites"]?.cast<Map<String, dynamic>>() ??
+                FavoriteModel.toList();
 
         Map<String, dynamic> webArchivesMap =
             browserData["webArchives"]?.cast<String, dynamic>() ?? {};

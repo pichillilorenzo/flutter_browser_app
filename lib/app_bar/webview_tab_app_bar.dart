@@ -648,7 +648,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                 );
               case PopupMenuActions.HISTORY:
                 return CustomPopupMenuItem<String>(
-                  enabled: browserModel.getCurrentTab() != null,
+                  enabled: true,
                   value: choice,
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -734,7 +734,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                 );
               case PopupMenuActions.EXIT_APP:
                 return CustomPopupMenuItem<String>(
-                  enabled: browserModel.getCurrentTab() != null,
+                  enabled: true,
                   value: choice,
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -879,7 +879,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     ));
   }
 
-  void showFavorites() {
+  void showFavorites_old() {
     showDialog(
         context: context,
         builder: (context) {
@@ -948,7 +948,150 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         });
   }
 
-  void showHistory() {
+  void showFavorites_v1() {
+    var browserModel = Provider.of<BrowserModel>(context, listen: false);
+
+    double screenWidth = MediaQuery.of(context).size.width;
+    double drawerWidth = screenWidth * 0.75;
+
+    var drawerContent = Container(
+      width: drawerWidth,
+      child: Drawer(
+        child: Column(
+          children: [
+            AppBar(
+              // leading: IconButton(
+              //   icon: const Icon(Icons.arrow_back),
+              //   onPressed: () => Navigator.of(context).pop(),
+              // ),
+              title: const Text('Favorites'),
+            ),
+            Expanded(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return ListView(
+                    children: browserModel.favorites.map((favorite) {
+                      var url = favorite.url;
+                      Uri? faviconUrl;
+                      if (favorite.favicon != null) {
+                        faviconUrl = favorite.favicon!.url;
+                      } else if (url != null && url.origin.isNotEmpty) {
+                        faviconUrl = Uri.parse("${url.origin}/favicon.ico");
+                      } else {
+                        faviconUrl = null;
+                      }
+
+                      return ListTile(
+                        leading: CustomImage(
+                          url: faviconUrl,
+                          maxWidth: 30.0,
+                          height: 30.0,
+                        ),
+                        title: Text(
+                            favorite.title ?? favorite.url?.toString() ?? "",
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis),
+                        subtitle: Text(favorite.url?.toString() ?? "",
+                            maxLines: 2, overflow: TextOverflow.ellipsis),
+                        onTap: () {
+                          addNewTab(url: favorite.url);
+                          Navigator.of(context).pop();
+                        },
+                        trailing: IconButton(
+                          icon: const Icon(Icons.close, size: 20.0),
+                          onPressed: () {
+                            setState(() {
+                              browserModel.removeFavorite(favorite);
+                            });
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    Scaffold.of(context).showBottomSheet((context) => drawerContent);
+  }
+
+  void showFavorites() {
+    var browserModel = Provider.of<BrowserModel>(context, listen: false);
+
+    double screenWidth = MediaQuery.of(context).size.width;
+    double drawerWidth = screenWidth * 0.75;
+
+    var drawerContent = Container(
+      width: drawerWidth,
+      child: Column(
+        children: [
+          AppBar(
+            title: const Text('Favorites'),
+          ),
+          Expanded(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ListView(
+                  children: browserModel.favorites.map((favorite) {
+                    var url = favorite.url;
+                    Uri? faviconUrl;
+                    if (favorite.favicon != null) {
+                      faviconUrl = favorite.favicon!.url;
+                    } else if (url != null && url.origin.isNotEmpty) {
+                      faviconUrl = Uri.parse("${url.origin}/favicon.ico");
+                    } else {
+                      faviconUrl = null;
+                    }
+
+                    return ListTile(
+                      leading: CustomImage(
+                        url: faviconUrl,
+                        maxWidth: 30.0,
+                        height: 30.0,
+                      ),
+                      title: Text(
+                          favorite.title ?? favorite.url?.toString() ?? "",
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis),
+                      subtitle: Text(favorite.url?.toString() ?? "",
+                          maxLines: 2, overflow: TextOverflow.ellipsis),
+                      onTap: () {
+                        addNewTab(url: favorite.url);
+                        Navigator.of(context).pop();
+                      },
+                      trailing: IconButton(
+                        icon: const Icon(Icons.close, size: 20.0),
+                        onPressed: () {
+                          setState(() {
+                            browserModel.removeFavorite(favorite);
+                          });
+                        },
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return drawerContent;
+      },
+      isScrollControlled:
+          false, // Set to true if you want the sheet to take the full screen height
+    );
+  }
+
+  void showHistory_old() {
     showDialog(
         context: context,
         builder: (context) {
@@ -1007,6 +1150,91 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                 },
               ));
         });
+  }
+
+  void showHistory() {
+    var webViewModel = Provider.of<WebViewModel>(context, listen: false);
+
+    double screenWidth = MediaQuery.of(context).size.width;
+    double drawerWidth = screenWidth * 0.75;
+
+    var drawerContent = Container(
+      width: drawerWidth,
+      child: Drawer(
+        child: Column(
+          children: [
+            AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              title: const Text('History'),
+            ),
+            Expanded(
+              child: FutureBuilder(
+                future:
+                    webViewModel.webViewController?.getCopyBackForwardList(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const CircularProgressIndicator();
+                  }
+
+                  WebHistory history = snapshot.data as WebHistory;
+                  return StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                      return ListView(
+                        children: history.list?.reversed.map((historyItem) {
+                              var url = historyItem.url;
+                              Uri? faviconUrl =
+                                  (url != null && url.origin.isNotEmpty)
+                                      ? Uri.parse("${url.origin}/favicon.ico")
+                                      : null;
+
+                              return ListTile(
+                                leading: CustomImage(
+                                  url: faviconUrl,
+                                  maxWidth: 30.0,
+                                  height: 30.0,
+                                ),
+                                title: Text(
+                                  historyItem.title ?? url.toString(),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                subtitle: Text(
+                                  url?.toString() ?? "",
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                onTap: () {
+                                  webViewModel.webViewController
+                                      ?.goTo(historyItem: historyItem);
+                                  Navigator.of(context).pop();
+                                },
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.delete, size: 20.0),
+                                  onPressed: () {
+                                    setState(() {
+                                      // Assuming you have a method `moveHistoryItem` in the `WebViewModel`
+                                      history.list!.remove(historyItem);
+                                    });
+                                  },
+                                ),
+                              );
+                            }).toList() ??
+                            <Widget>[],
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    Scaffold.of(context).showBottomSheet((context) => drawerContent);
   }
 
   void showWebArchives() async {

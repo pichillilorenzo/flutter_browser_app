@@ -39,4 +39,6 @@ class FavoriteModel {
   String toString() {
     return toMap().toString();
   }
+
+  static toList() {}
 }
