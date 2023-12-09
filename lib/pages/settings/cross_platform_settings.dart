@@ -140,6 +140,98 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
             },
           );
         },
+
+      ),
+      FutureBuilder(
+        future: InAppWebViewController.getDefaultUserAgent(),
+        builder: (context, snapshot) {
+          var deafultUserAgent = "";
+          if (snapshot.hasData) {
+            deafultUserAgent = snapshot.data as String;
+          }
+
+          return ListTile(
+            title: const Text("Default User Agent"),
+            subtitle: Text(deafultUserAgent),
+            onLongPress: () {
+              Clipboard.setData(ClipboardData(text: deafultUserAgent));
+            },
+          );
+        },
+      ),
+      SwitchListTile(
+        title: const Text("Debugging Enabled"),
+        subtitle: const Text(
+            "Enables debugging of web contents loaded into any WebViews of this application. On iOS < 16.4, the debugging mode is always enabled."),
+        value: settings.debuggingEnabled,
+        onChanged: (value) {
+          setState(() {
+            settings.debuggingEnabled = value;
+            browserModel.updateSettings(settings);
+            if (browserModel.webViewTabs.isNotEmpty) {
+              var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+              if (Util.isAndroid()) {
+                InAppWebViewController.setWebContentsDebuggingEnabled(
+                    settings.debuggingEnabled);
+              }
+              webViewModel?.settings?.isInspectable = settings.debuggingEnabled;
+              webViewModel?.webViewController?.setSettings(
+                  settings: webViewModel.settings ?? InAppWebViewSettings());
+              browserModel.save();
+            }
+          });
+        },
+      ),
+      FutureBuilder(
+        future: PackageInfo.fromPlatform(),
+        builder: (context, snapshot) {
+          String packageDescription = "";
+          if (snapshot.hasData) {
+            PackageInfo packageInfo = snapshot.data as PackageInfo;
+            packageDescription =
+                "Package Name: ${packageInfo.packageName}\nVersion: ${packageInfo.version}\nBuild Number: ${packageInfo.buildNumber}";
+          }
+          return ListTile(
+            title: const Text("Flutter Browser Package Info"),
+            subtitle: Text(packageDescription),
+            onLongPress: () {
+              Clipboard.setData(ClipboardData(text: packageDescription));
+            },
+          );
+        },
+      ),
+      ListTile(
+        leading: Container(
+          height: 35,
+          width: 35,
+          margin: const EdgeInsets.only(top: 6.0, left: 6.0),
+          child: const CircleAvatar(
+              backgroundImage: AssetImage("assets/icon/icon.png")),
+        ),
+        title: const Text("Flutter InAppWebView Project"),
+        subtitle: const Text(
+            "https://github.com/pichillilorenzo/flutter_inappwebview"),
+        trailing: const Icon(Icons.arrow_forward),
+        onLongPress: () {
+          showGeneralDialog(
+            context: context,
+            barrierDismissible: false,
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return const ProjectInfoPopup();
+            },
+            transitionDuration: const Duration(milliseconds: 300),
+          );
+        },
+        onTap: () {
+          showGeneralDialog(
+            context: context,
+            barrierDismissible: false,
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return const ProjectInfoPopup();
+            },
+            transitionDuration: const Duration(milliseconds: 300),
+          );
+        },
       )
     ];
 

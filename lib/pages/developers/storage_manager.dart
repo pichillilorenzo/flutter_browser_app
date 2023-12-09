@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/util.dart';
-import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
-import 'package:flutter_adeeinappwebview/flutter_adeeinappwebview.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
 class StorageManager extends StatefulWidget {
-  const StorageManager({Key? key}) : super(key: key);
+  const StorageManager({super.key});
 
   @override
   State<StorageManager> createState() => _StorageManagerState();
@@ -287,15 +286,13 @@ class _StorageManagerState extends State<StorageManager> {
                                               : "Select a date ..."),
                                       onTap: () async {
                                         FocusScope.of(context).unfocus();
-                                        DatePicker.showDateTimePicker(context,
-                                            showTitleActions: true,
-                                            minTime: DateTime.now(),
-                                            maxTime: DateTime(9999),
-                                            onConfirm: (expiresDate) {
-                                          setState(() {
-                                            _newCookieExpiresDate = expiresDate;
-                                          });
-                                        }, currentTime: _newCookieExpiresDate);
+                                        _newCookieExpiresDate = await showDatePicker(
+                                            context: context,
+                                            initialDate: _newCookieExpiresDate,
+                                            firstDate: DateTime.now(),
+                                            lastDate: DateTime(9999),
+                                        );
+                                        setState(() { });
                                       },
                                     ),
                                   ),
@@ -332,11 +329,7 @@ class _StorageManagerState extends State<StorageManager> {
                                 if (_newCookieFormKey.currentState != null &&
                                     _newCookieFormKey.currentState!
                                         .validate()) {
-                                  final expiresDate =
-                                      _newCookieExpiresDate != null
-                                          ? _newCookieExpiresDate!
-                                              .millisecondsSinceEpoch
-                                          : null;
+                                  final expiresDate = _newCookieExpiresDate?.millisecondsSinceEpoch;
 
                                   await _cookieManager.setCookie(
                                       url: url,
@@ -724,7 +717,7 @@ class _StorageManagerState extends State<StorageManager> {
                 child: Text("", style: textStyle, softWrap: true),
               ),
               onTap: () {
-                Clipboard.setData(ClipboardData(text: ''));
+                Clipboard.setData(ClipboardData(text: dataRecord.displayName ?? ''));
               },
             ),
             DataCell(
@@ -842,8 +835,9 @@ class _StorageManagerState extends State<StorageManager> {
                         style: textStyle, softWrap: true),
                   ),
                   onTap: () {
-                    Clipboard.setData(ClipboardData(
-                        text: httpAuthCredential.username.toString()));
+
+                    Clipboard.setData(
+                        ClipboardData(text: httpAuthCredential.username ?? ''));
                   },
                 ),
                 DataCell(
@@ -853,8 +847,8 @@ class _StorageManagerState extends State<StorageManager> {
                         style: textStyle, softWrap: true),
                   ),
                   onTap: () {
-                    Clipboard.setData(ClipboardData(
-                        text: httpAuthCredential.password.toString()));
+                    Clipboard.setData(
+                        ClipboardData(text: httpAuthCredential.password ?? ''));
                   },
                 ),
                 DataCell(IconButton(

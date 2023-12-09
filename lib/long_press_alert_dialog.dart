@@ -25,11 +25,10 @@ class LongPressAlertDialog extends StatefulWidget {
   ];
 
   const LongPressAlertDialog(
-      {Key? key,
+      {super.key,
       required this.webViewModel,
       required this.hitTestResult,
-      this.requestFocusNodeHrefResult})
-      : super(key: key);
+      this.requestFocusNodeHrefResult});
 
   final WebViewModel webViewModel;
   final InAppWebViewHitTestResult hitTestResult;
@@ -218,7 +217,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
       onTap: () {
         Clipboard.setData(ClipboardData(
             text: widget.requestFocusNodeHrefResult?.url.toString() ??
-                widget.hitTestResult.extra.toString()));
+                widget.hitTestResult.extra ?? ''));
         Navigator.pop(context);
       },
     );
@@ -226,9 +225,9 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
 
   Widget _buildShareLink() {
     return ListTile(
-      title: Row(
+      title: const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
+          children: [
             Text("Share link"),
             Padding(
               padding: EdgeInsets.only(right: 12.5),
@@ -305,9 +304,9 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
 
   Widget _buildShareImage() {
     return ListTile(
-      title: Row(
+      title: const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
+          children: [
             Text("Share image"),
             Padding(
               padding: EdgeInsets.only(right: 12.5),

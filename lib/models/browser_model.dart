@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_adeeinappwebview_platform_interface/src/in_app_webview/in_app_webview_settings.dart';
 import 'package:flutter_browser/models/web_archive_model.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -221,7 +222,10 @@ class BrowserModel extends ChangeNotifier {
   }
 
   void closeTab(int index) {
+    final webViewTab = _webViewTabs[index];
     _webViewTabs.removeAt(index);
+    InAppWebViewController.disposeKeepAlive(webViewTab.webViewModel.keepAlive);
+
     _currentTabIndex = _webViewTabs.length - 1;
 
     for (int i = index; i < _webViewTabs.length; i++) {
@@ -261,6 +265,9 @@ class BrowserModel extends ChangeNotifier {
   }
 
   void closeAllTabs() {
+    for (final webViewTab in _webViewTabs) {
+      InAppWebViewController.disposeKeepAlive(webViewTab.webViewModel.keepAlive);
+    }
     _webViewTabs.clear();
     _currentTabIndex = -1;
     _currentWebViewModel.updateWithValue(WebViewModel());
