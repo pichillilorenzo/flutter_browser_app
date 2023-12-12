@@ -52,7 +52,7 @@ android {
     defaultConfig {
         applicationId "com.pichillilorenzo.flutter_browser"
         minSdkVersion 20
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
