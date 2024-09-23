@@ -17,7 +17,7 @@ import 'empty_tab.dart';
 import 'models/browser_model.dart';
 
 class Browser extends StatefulWidget {
-  const Browser({Key? key}) : super(key: key);
+  const Browser({super.key});
 
   @override
   State<Browser> createState() => _BrowserState();
@@ -48,11 +48,6 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
         }
       }
     }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   restore() async {
@@ -126,10 +121,12 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
         },
         child: Listener(
           onPointerUp: (_) {
-            FocusScopeNode currentFocus = FocusScope.of(context);
-            if (!currentFocus.hasPrimaryFocus &&
-                currentFocus.focusedChild != null) {
-              currentFocus.focusedChild!.unfocus();
+            if (Util.isIOS() || Util.isAndroid()) {
+              FocusScopeNode currentFocus = FocusScope.of(context);
+              if (!currentFocus.hasPrimaryFocus &&
+                  currentFocus.focusedChild != null) {
+                currentFocus.focusedChild!.unfocus();
+              }
             }
           },
           child: Scaffold(
@@ -145,8 +142,8 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
     }
 
     for (final webViewTab in browserModel.webViewTabs) {
-      var isCurrentTab = webViewTab.webViewModel.tabIndex ==
-          browserModel.getCurrentTabIndex();
+      var isCurrentTab =
+          webViewTab.webViewModel.tabIndex == browserModel.getCurrentTabIndex();
 
       if (isCurrentTab) {
         Future.delayed(const Duration(milliseconds: 100), () {
@@ -162,8 +159,13 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
       _createProgressIndicator()
     ];
 
-    return Stack(
-      children: stackChildren,
+    return Column(
+      children: [
+        Expanded(
+            child: Stack(
+          children: stackChildren,
+        ))
+      ],
     );
   }
 

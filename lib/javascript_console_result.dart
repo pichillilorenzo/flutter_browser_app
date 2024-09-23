@@ -9,13 +9,12 @@ class JavaScriptConsoleResult extends StatefulWidget {
   final Color? iconColor;
 
   const JavaScriptConsoleResult(
-      {Key? key,
+      {super.key,
       this.data = "",
       this.textColor = Colors.black,
       this.backgroundColor = Colors.transparent,
       this.iconData,
-      this.iconColor})
-      : super(key: key);
+      this.iconColor});
 
   @override
   State<JavaScriptConsoleResult> createState() =>

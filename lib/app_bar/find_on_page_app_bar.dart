@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 class FindOnPageAppBar extends StatefulWidget {
   final void Function()? hideFindOnPage;
 
-  const FindOnPageAppBar({Key? key, this.hideFindOnPage}) : super(key: key);
+  const FindOnPageAppBar({super.key, this.hideFindOnPage});
 
   @override
   State<FindOnPageAppBar> createState() => _FindOnPageAppBarState();

@@ -5,10 +5,10 @@ class AnimatedFlutterBrowserLogo extends StatefulWidget {
   final double size;
 
   const AnimatedFlutterBrowserLogo({
-    Key? key,
+    super.key,
     this.animationDuration = const Duration(milliseconds: 1000),
     this.size = 100.0,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() => _AnimatedFlutterBrowserLogoState();

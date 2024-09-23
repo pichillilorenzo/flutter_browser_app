@@ -7,7 +7,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
 class IOSSettings extends StatefulWidget {
-  const IOSSettings({Key? key}) : super(key: key);
+  const IOSSettings({super.key});
 
   @override
   State<IOSSettings> createState() => _IOSSettingsState();

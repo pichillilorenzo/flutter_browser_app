@@ -6,7 +6,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
 class AndroidSettings extends StatefulWidget {
-  const AndroidSettings({Key? key}) : super(key: key);
+  const AndroidSettings({super.key});
 
   @override
   State<AndroidSettings> createState() => _AndroidSettingsState();

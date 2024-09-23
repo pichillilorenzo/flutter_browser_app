@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 import '../../project_info_popup.dart';
 
 class CrossPlatformSettings extends StatefulWidget {
-  const CrossPlatformSettings({Key? key}) : super(key: key);
+  const CrossPlatformSettings({super.key});
 
   @override
   State<CrossPlatformSettings> createState() => _CrossPlatformSettingsState();

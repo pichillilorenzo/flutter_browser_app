@@ -12,11 +12,10 @@ class UrlInfoPopup extends StatefulWidget {
   final Function()? onWebViewTabSettingsClicked;
 
   const UrlInfoPopup(
-      {Key? key,
+      {super.key,
       required this.route,
       required this.transitionDuration,
-      this.onWebViewTabSettingsClicked})
-      : super(key: key);
+      this.onWebViewTabSettingsClicked});
 
   @override
   State<UrlInfoPopup> createState() => _UrlInfoPopupState();

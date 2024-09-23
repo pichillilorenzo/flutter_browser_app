@@ -11,9 +11,8 @@ import '../custom_popup_menu_item.dart';
 import '../tab_viewer_popup_menu_actions.dart';
 
 class TabViewerAppBar extends StatefulWidget implements PreferredSizeWidget {
-  const TabViewerAppBar({Key? key})
-      : preferredSize = const Size.fromHeight(kToolbarHeight),
-        super(key: key);
+  const TabViewerAppBar({super.key})
+      : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   @override
   State<TabViewerAppBar> createState() => _TabViewerAppBarState();
@@ -65,7 +64,7 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
                   left: 10.0, top: 15.0, right: 10.0, bottom: 15.0),
           child: Container(
             decoration: BoxDecoration(
-                border: Border.all(width: 2.0, color: Colors.white),
+                border: Border.all(width: 2.0),
                 shape: BoxShape.rectangle,
                 borderRadius: BorderRadius.circular(5.0)),
             constraints: const BoxConstraints(minWidth: 25.0),
@@ -73,7 +72,6 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
                 child: Text(
               browserModel.webViewTabs.length.toString(),
               style: const TextStyle(
-                  color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 14.0),
             )),

@@ -95,7 +95,7 @@ class _StorageManagerState extends State<StorageManager> {
 
         if (Util.isAndroid()) {
           entryItems.add(_buildAndroidWebStorageExpansionTile(constraints));
-        } else if (Util.isIOS()) {
+        } else if (Util.isIOS() || Util.isMacOS()) {
           entryItems.add(_buildIOSWebStorageExpansionTile(constraints));
         }
 

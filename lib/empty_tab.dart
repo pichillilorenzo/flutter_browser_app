@@ -7,7 +7,7 @@ import 'models/browser_model.dart';
 import 'models/webview_model.dart';
 
 class EmptyTab extends StatefulWidget {
-  const EmptyTab({Key? key}) : super(key: key);
+  const EmptyTab({super.key});
 
   @override
   State<EmptyTab> createState() => _EmptyTabState();

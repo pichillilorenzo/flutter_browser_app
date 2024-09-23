@@ -12,7 +12,7 @@ class MultiSelectDialogItem<V> {
 
 class MultiSelectDialog<V> extends StatefulWidget {
   const MultiSelectDialog(
-      {Key? key,
+      {super.key,
       this.title,
       this.titlePadding,
       this.titleTextStyle,
@@ -29,8 +29,7 @@ class MultiSelectDialog<V> extends StatefulWidget {
       this.clipBehavior = Clip.none,
       this.shape,
       this.items,
-      this.initialSelectedValues})
-      : super(key: key);
+      this.initialSelectedValues});
 
   final Widget? title;
   final EdgeInsetsGeometry? titlePadding;

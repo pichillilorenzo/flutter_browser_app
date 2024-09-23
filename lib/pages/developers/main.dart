@@ -4,7 +4,7 @@ import 'package:flutter_browser/pages/developers/network_info.dart';
 import 'package:flutter_browser/pages/developers/storage_manager.dart';
 
 class DevelopersPage extends StatefulWidget {
-  const DevelopersPage({Key? key}) : super(key: key);
+  const DevelopersPage({super.key});
 
   @override
   State<DevelopersPage> createState() => _DevelopersPageState();

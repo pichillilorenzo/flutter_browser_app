@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_browser/main.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/util.dart';
@@ -16,7 +17,7 @@ import 'models/browser_model.dart';
 final webViewTabStateKey = GlobalKey<_WebViewTabState>();
 
 class WebViewTab extends StatefulWidget {
-  const WebViewTab({Key? key, required this.webViewModel}) : super(key: key);
+  const WebViewTab({super.key, required this.webViewModel});
 
   final WebViewModel webViewModel;
 
@@ -29,6 +30,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
   PullToRefreshController? _pullToRefreshController;
   FindInteractionController? _findInteractionController;
   bool _isWindowClosed = false;
+  final FocusNode _focusNode = FocusNode();
 
   final TextEditingController _httpAuthUsernameController =
       TextEditingController();
@@ -40,22 +42,21 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     super.initState();
 
-    _pullToRefreshController = kIsWeb
-        ? null
-        : PullToRefreshController(
-            settings: PullToRefreshSettings(
-              color: Colors.blue
-            ),
-            onRefresh: () async {
-              if (defaultTargetPlatform == TargetPlatform.android) {
-                _webViewController?.reload();
-              } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-                _webViewController?.loadUrl(
-                    urlRequest:
-                        URLRequest(url: await _webViewController?.getUrl()));
-              }
-            },
-          );
+    if (Util.isIOS() || Util.isAndroid()) {
+      _pullToRefreshController = PullToRefreshController(
+        settings: PullToRefreshSettings(color: Colors.blue),
+        onRefresh: () async {
+          if ([TargetPlatform.iOS, TargetPlatform.macOS]
+              .contains(defaultTargetPlatform)) {
+            _webViewController?.loadUrl(
+                urlRequest:
+                    URLRequest(url: await _webViewController?.getUrl()));
+          } else {
+            _webViewController?.reload();
+          }
+        },
+      );
+    }
 
     _findInteractionController = FindInteractionController();
   }
@@ -69,6 +70,8 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
     _httpAuthUsernameController.dispose();
     _httpAuthPasswordController.dispose();
+
+    _focusNode.dispose();
 
     WidgetsBinding.instance.removeObserver(this);
 
@@ -122,10 +125,19 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: _buildWebView(),
-    );
+    return CallbackShortcuts(
+        bindings: <ShortcutActivator, VoidCallback>{
+          LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyR): () {
+            _webViewController?.reload();
+          }
+        },
+        child: Focus(
+            autofocus: true,
+            focusNode: _focusNode,
+            child: Container(
+              color: Colors.white,
+              child: _buildWebView(),
+            )));
   }
 
   InAppWebView _buildWebView() {
@@ -144,8 +156,10 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     initialSettings.useOnLoadResource = true;
     initialSettings.useShouldOverrideUrlLoading = true;
     initialSettings.javaScriptCanOpenWindowsAutomatically = true;
-    initialSettings.userAgent =
-        "Mozilla/5.0 (Linux; Android 9; LG-H870 Build/PKQ1.190522.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36";
+    if (Util.isIOS() || Util.isAndroid()) {
+      initialSettings.userAgent =
+          "Mozilla/5.0 (Linux; Android 9; LG-H870 Build/PKQ1.190522.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36";
+    }
     initialSettings.transparentBackground = true;
 
     initialSettings.safeBrowsingEnabled = true;
@@ -175,7 +189,8 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         _webViewController = controller;
         widget.webViewModel.webViewController = controller;
         widget.webViewModel.pullToRefreshController = _pullToRefreshController;
-        widget.webViewModel.findInteractionController = _findInteractionController;
+        widget.webViewModel.findInteractionController =
+            _findInteractionController;
 
         if (Util.isAndroid()) {
           controller.startSafeBrowsing();
@@ -362,7 +377,8 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
       onReceivedServerTrustAuthRequest: (controller, challenge) async {
         var sslError = challenge.protectionSpace.sslError;
         if (sslError != null && (sslError.code != null)) {
-          if (Util.isIOS() && sslError.code == SslErrorType.UNSPECIFIED) {
+          if ((Util.isIOS() || Util.isMacOS()) &&
+              sslError.code == SslErrorType.UNSPECIFIED) {
             return ServerTrustAuthResponse(
                 action: ServerTrustAuthResponseAction.PROCEED);
           }
@@ -384,7 +400,8 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
         _pullToRefreshController?.endRefreshing();
 
-        if (Util.isIOS() && error.type == WebResourceErrorType.CANCELLED) {
+        if ((Util.isIOS() || Util.isMacOS()) &&
+            error.type == WebResourceErrorType.CANCELLED) {
           // NSURLErrorDomain
           return;
         }

@@ -31,7 +31,7 @@ import '../webview_tab.dart';
 class WebViewTabAppBar extends StatefulWidget {
   final void Function()? showFindOnPage;
 
-  const WebViewTabAppBar({Key? key, this.showFindOnPage}) : super(key: key);
+  const WebViewTabAppBar({super.key, this.showFindOnPage});
 
   @override
   State<WebViewTabAppBar> createState() => _WebViewTabAppBarState();
@@ -323,17 +323,14 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
           margin: const EdgeInsets.only(
               left: 10.0, top: 15.0, right: 10.0, bottom: 15.0),
           decoration: BoxDecoration(
-              border: Border.all(width: 2.0, color: Colors.white),
+              border: Border.all(width: 2.0),
               shape: BoxShape.rectangle,
               borderRadius: BorderRadius.circular(5.0)),
           constraints: const BoxConstraints(minWidth: 25.0),
           child: Center(
               child: Text(
             browserModel.webViewTabs.length.toString(),
-            style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 14.0),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.0),
           )),
         ),
       ),
@@ -366,7 +363,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
                   var children = <Widget>[];
 
-                  if (Util.isIOS()) {
+                  if (Util.isIOS() || Util.isMacOS()) {
                     children.add(
                       SizedBox(
                           width: 35.0,
@@ -723,9 +720,13 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         showWebArchives();
         break;
       case PopupMenuActions.FIND_ON_PAGE:
-        var isFindInteractionEnabled = currentWebViewModel.settings?.isFindInteractionEnabled ?? false;
-        var findInteractionController = currentWebViewModel.findInteractionController;
-        if (Util.isIOS() && isFindInteractionEnabled && findInteractionController != null) {
+        var isFindInteractionEnabled =
+            currentWebViewModel.settings?.isFindInteractionEnabled ?? false;
+        var findInteractionController =
+            currentWebViewModel.findInteractionController;
+        if ((Util.isIOS() || Util.isMacOS()) &&
+            isFindInteractionEnabled &&
+            findInteractionController != null) {
           await findInteractionController.presentFindNavigator();
         } else if (widget.showFindOnPage != null) {
           widget.showFindOnPage!();
@@ -1006,9 +1007,10 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
       var currentSettings = await webViewController.getSettings();
       if (currentSettings != null) {
-        currentSettings.preferredContentMode = webViewModel?.isDesktopMode ?? false
-            ? UserPreferredContentMode.DESKTOP
-            : UserPreferredContentMode.RECOMMENDED;
+        currentSettings.preferredContentMode =
+            webViewModel?.isDesktopMode ?? false
+                ? UserPreferredContentMode.DESKTOP
+                : UserPreferredContentMode.RECOMMENDED;
         await webViewController.setSettings(settings: currentSettings);
       }
       await webViewController.reload();

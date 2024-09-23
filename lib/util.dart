@@ -20,4 +20,12 @@ class Util {
   static bool isIOS() {
     return !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
   }
+
+  static bool isMacOS() {
+    return !kIsWeb && defaultTargetPlatform == TargetPlatform.macOS;
+  }
+
+  static bool isWindows() {
+    return !kIsWeb && defaultTargetPlatform == TargetPlatform.windows;
+  }
 }

@@ -7,13 +7,12 @@ class CustomPopupDialogPageRoute<T> extends MaterialTransparentPageRoute<T> {
   bool isPopped = false;
 
   CustomPopupDialogPageRoute({
-    required WidgetBuilder builder,
+    required super.builder,
     Duration? transitionDuration,
     Color? overlayColor,
-    RouteSettings? settings,
+    super.settings,
   })  : overlayColor = overlayColor ?? Colors.black.withOpacity(0.5),
-        customTransitionDuration = transitionDuration,
-        super(builder: builder, settings: settings);
+        customTransitionDuration = transitionDuration;
 
   @override
   Duration get transitionDuration => customTransitionDuration != null
@@ -60,10 +59,9 @@ class CustomPopupDialog extends StatefulWidget {
   final Duration transitionDuration;
 
   const CustomPopupDialog(
-      {Key? key,
+      {super.key,
       required this.child,
-      this.transitionDuration = const Duration(milliseconds: 300)})
-      : super(key: key);
+      this.transitionDuration = const Duration(milliseconds: 300)});
 
   @override
   State<StatefulWidget> createState() => _CustomPopupDialogState();

@@ -5,7 +5,7 @@ import 'package:flutter_browser/models/webview_model.dart';
 import 'package:provider/provider.dart';
 
 class JavaScriptConsole extends StatefulWidget {
-  const JavaScriptConsole({Key? key}) : super(key: key);
+  const JavaScriptConsole({super.key});
 
   @override
   State<JavaScriptConsole> createState() => _JavaScriptConsoleState();

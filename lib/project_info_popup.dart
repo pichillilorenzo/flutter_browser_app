@@ -114,7 +114,7 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
       ),
     ];
 
-    if (Util.isIOS()) {
+    if (Util.isIOS() || Util.isMacOS()) {
       children.addAll(<Widget>[
         const SizedBox(
           height: 20.0,
