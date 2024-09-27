@@ -7,6 +7,7 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'browser.dart';
 
@@ -29,6 +30,8 @@ const double TAB_VIEWER_TOP_SCALE_TOP_OFFSET = 250.0;
 // ignore: constant_identifier_names
 const double TAB_VIEWER_TOP_SCALE_BOTTOM_OFFSET = 230.0;
 
+WebViewEnvironment? webViewEnvironment;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -38,13 +41,22 @@ void main() async {
   TAB_VIEWER_BOTTOM_OFFSET_2 = 140.0;
   TAB_VIEWER_BOTTOM_OFFSET_3 = 150.0;
 
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
+    final availableVersion = await WebViewEnvironment.getAvailableVersion();
+    assert(availableVersion != null,
+    'Failed to find an installed WebView2 Runtime or non-stable Microsoft Edge installation.');
+
+    webViewEnvironment = await WebViewEnvironment.create(
+        settings: WebViewEnvironmentSettings(userDataFolder: 'flutter_browser_app'));
+  }
+
   if (Util.isAndroid() || Util.isIOS()) {
     await FlutterDownloader.initialize(
         debug: kDebugMode
     );
   }
 
-  if (Util.isAndroid() || Util.isIOS() || Util.isWindows()) {
+  if (Util.isAndroid() || Util.isIOS()) {
     await Permission.camera.request();
     await Permission.microphone.request();
     await Permission.storage.request();

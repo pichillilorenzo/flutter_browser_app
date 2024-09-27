@@ -46,7 +46,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
       _pullToRefreshController = PullToRefreshController(
         settings: PullToRefreshSettings(color: Colors.blue),
         onRefresh: () async {
-          if ([TargetPlatform.iOS, TargetPlatform.macOS]
+          if ([TargetPlatform.iOS]
               .contains(defaultTargetPlatform)) {
             _webViewController?.loadUrl(
                 urlRequest:
@@ -58,7 +58,9 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
       );
     }
 
-    _findInteractionController = FindInteractionController();
+    if (Util.isIOS() || Util.isAndroid() || Util.isMacOS()) {
+      _findInteractionController = FindInteractionController();
+    }
   }
 
   @override
@@ -177,6 +179,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
     return InAppWebView(
       keepAlive: widget.webViewModel.keepAlive,
+      webViewEnvironment: webViewEnvironment,
       initialUrlRequest: URLRequest(url: widget.webViewModel.url),
       initialSettings: initialSettings,
       windowId: widget.webViewModel.windowId,
@@ -226,14 +229,28 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         var titleFuture = _webViewController?.getTitle();
         var faviconsFuture = _webViewController?.getFavicons();
 
-        var sslCertificate = await sslCertificateFuture;
+        SslCertificate? sslCertificate;
+        try {
+          sslCertificate = await sslCertificateFuture;
+        } catch (e) {
+          if (kDebugMode) {
+            print(e);
+          }
+        }
         if (sslCertificate == null && !Util.isLocalizedContent(url!)) {
           widget.webViewModel.isSecure = false;
         }
 
         widget.webViewModel.title = await titleFuture;
 
-        List<Favicon>? favicons = await faviconsFuture;
+        List<Favicon>? favicons;
+        try {
+          favicons = await faviconsFuture;
+        } catch (e) {
+          if (kDebugMode) {
+            print(e);
+          }
+        }
         if (favicons != null && favicons.isNotEmpty) {
           for (var fav in favicons) {
             if (widget.webViewModel.favicon == null) {
@@ -400,7 +417,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
         _pullToRefreshController?.endRefreshing();
 
-        if ((Util.isIOS() || Util.isMacOS()) &&
+        if ((Util.isIOS() || Util.isMacOS() || Util.isWindows()) &&
             error.type == WebResourceErrorType.CANCELLED) {
           // NSURLErrorDomain
           return;

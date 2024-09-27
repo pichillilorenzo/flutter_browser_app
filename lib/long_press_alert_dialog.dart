@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'main.dart';
 import 'models/browser_model.dart';
 import 'models/webview_model.dart';
 
@@ -154,6 +155,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
                   () => EagerGestureRecognizer(),
                 ),
               },
+              webViewEnvironment: webViewEnvironment,
               initialUrlRequest:
                   URLRequest(url: widget.requestFocusNodeHrefResult?.url),
               initialSettings: InAppWebViewSettings(

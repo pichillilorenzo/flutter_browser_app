@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_browser/main.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/util.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -13,10 +14,9 @@ class StorageManager extends StatefulWidget {
 }
 
 class _StorageManagerState extends State<StorageManager> {
-  final CookieManager _cookieManager = CookieManager.instance();
-  final WebStorageManager _webStorageManager = WebStorageManager.instance();
-  final HttpAuthCredentialDatabase _httpAuthCredentialDatabase =
-      HttpAuthCredentialDatabase.instance();
+  final CookieManager _cookieManager = CookieManager.instance(webViewEnvironment: webViewEnvironment);
+  final WebStorageManager? _webStorageManager = !Util.isWindows() ? WebStorageManager.instance() : null;
+  final HttpAuthCredentialDatabase? _httpAuthCredentialDatabase = !Util.isWindows() ? HttpAuthCredentialDatabase.instance() : null;
 
   var cookieNameTrackingEdit = <bool>[];
   var cookieValueTrackingEdit = <bool>[];
@@ -90,8 +90,12 @@ class _StorageManagerState extends State<StorageManager> {
           _buildCookiesExpansionTile(constraints),
           _buildWebLocalStorageExpansionTile(constraints),
           _buildWebSessionStorageExpansionTile(constraints),
-          _buildHttpAuthCredentialDatabaseExpansionTile(constraints),
         ];
+
+        if (!Util.isWindows()) {
+          entryItems.add(
+            _buildHttpAuthCredentialDatabaseExpansionTile(constraints));
+        }
 
         if (Util.isAndroid()) {
           entryItems.add(_buildAndroidWebStorageExpansionTile(constraints));
@@ -653,7 +657,7 @@ class _StorageManagerState extends State<StorageManager> {
           builder: (context, url, child) {
             return FutureBuilder(
               future: _webStorageManager
-                  .getQuotaForOrigin(origin: url.origin),
+                  ?.getQuotaForOrigin(origin: url.origin),
               builder: (context, snapshot) {
                 return Text(snapshot.hasData ? snapshot.data.toString() : "");
               },
@@ -668,7 +672,7 @@ class _StorageManagerState extends State<StorageManager> {
               title: const Text("Usage"),
               subtitle: FutureBuilder(
                 future: _webStorageManager
-                    .getUsageForOrigin(origin: url.origin),
+                    ?.getUsageForOrigin(origin: url.origin),
                 builder: (context, snapshot) {
                   return Text(snapshot.hasData ? snapshot.data.toString() : "");
                 },
@@ -677,7 +681,7 @@ class _StorageManagerState extends State<StorageManager> {
                 icon: const Icon(Icons.clear),
                 onPressed: () async {
                   await _webStorageManager
-                      .deleteOrigin(origin: url.origin);
+                      ?.deleteOrigin(origin: url.origin);
                   setState(() {});
                 },
               ),
@@ -700,7 +704,7 @@ class _StorageManagerState extends State<StorageManager> {
   Widget _buildIOSWebStorageExpansionTile(BoxConstraints constraints) {
     return FutureBuilder(
       future: _webStorageManager
-          .fetchDataRecords(dataTypes: WebsiteDataType.ALL),
+          ?.fetchDataRecords(dataTypes: WebsiteDataType.ALL),
       builder: (context, snapshot) {
         List<WebsiteDataRecord> dataRecords = snapshot.hasData
             ? (snapshot.data as List<WebsiteDataRecord>)
@@ -744,7 +748,7 @@ class _StorageManagerState extends State<StorageManager> {
               icon: const Icon(Icons.cancel),
               onPressed: () async {
                 if (dataRecord.dataTypes != null) {
-                  await _webStorageManager.removeDataFor(
+                  await _webStorageManager?.removeDataFor(
                       dataTypes: dataRecord.dataTypes!,
                       dataRecords: [dataRecord]);
                 }
@@ -798,7 +802,7 @@ class _StorageManagerState extends State<StorageManager> {
                 child: TextButton(
                   child: const Text("Clear all"),
                   onPressed: () async {
-                    await _webStorageManager.removeDataModifiedSince(
+                    await _webStorageManager?.removeDataModifiedSince(
                         dataTypes: WebsiteDataType.ALL,
                         date: DateTime.fromMillisecondsSinceEpoch(0));
                     setState(() {});
@@ -813,7 +817,7 @@ class _StorageManagerState extends State<StorageManager> {
   Widget _buildHttpAuthCredentialDatabaseExpansionTile(
       BoxConstraints constraints) {
     return FutureBuilder(
-      future: _httpAuthCredentialDatabase.getAllAuthCredentials(),
+      future: _httpAuthCredentialDatabase?.getAllAuthCredentials(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Container();
@@ -864,7 +868,7 @@ class _StorageManagerState extends State<StorageManager> {
                   onPressed: () async {
                     if (protectionSpace != null) {
                       await _httpAuthCredentialDatabase
-                          .removeHttpAuthCredential(
+                          ?.removeHttpAuthCredential(
                               protectionSpace: protectionSpace,
                               credential: httpAuthCredential);
                     }
@@ -925,7 +929,7 @@ class _StorageManagerState extends State<StorageManager> {
           TextButton(
             child: const Text("Clear all"),
             onPressed: () async {
-              await _httpAuthCredentialDatabase.clearAllAuthCredentials();
+              await _httpAuthCredentialDatabase?.clearAllAuthCredentials();
               setState(() {});
             },
           ),
