@@ -234,10 +234,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_inappwebview_windows
-      sha256: "583f7b2b050cf0f14f4f4b326f0829c81f0fcae37e408085b9a765ce8f8e6b14"
+      sha256: "1a9b2d5b6999b402dafbad801dc1adbce5bfb9e289ae5e572b26a46dfd505d8e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.0"
+    version: "0.2.0+1"
   flutter_lints:
     dependency: "direct dev"
     description:

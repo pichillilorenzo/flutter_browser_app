@@ -363,7 +363,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
                   var children = <Widget>[];
 
-                  if (Util.isIOS() || Util.isMacOS()) {
+                  if (Util.isIOS() || Util.isMacOS() || Util.isWindows()) {
                     children.add(
                       SizedBox(
                           width: 35.0,
