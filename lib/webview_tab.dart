@@ -46,8 +46,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
       _pullToRefreshController = PullToRefreshController(
         settings: PullToRefreshSettings(color: Colors.blue),
         onRefresh: () async {
-          if ([TargetPlatform.iOS]
-              .contains(defaultTargetPlatform)) {
+          if ([TargetPlatform.iOS].contains(defaultTargetPlatform)) {
             _webViewController?.loadUrl(
                 urlRequest:
                     URLRequest(url: await _webViewController?.getUrl()));
@@ -221,6 +220,8 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         } else if (widget.webViewModel.needsToCompleteInitialLoad) {
           controller.stopLoading();
         }
+
+        browserModel.notifyWebViewTabUpdated();
       },
       onLoadStop: (controller, url) async {
         _pullToRefreshController?.endRefreshing();
@@ -229,9 +230,9 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         widget.webViewModel.favicon = null;
         widget.webViewModel.loaded = true;
 
-        var sslCertificateFuture = _webViewController?.getCertificate();
-        var titleFuture = _webViewController?.getTitle();
-        var faviconsFuture = _webViewController?.getFavicons();
+        var sslCertificateFuture = controller.getCertificate();
+        var titleFuture = controller.getTitle();
+        var faviconsFuture = controller.getFavicons();
 
         var sslCertificate = await sslCertificateFuture;
         if (sslCertificate == null && !Util.isLocalizedContent(url!)) {
@@ -270,8 +271,8 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           widget.webViewModel.needsToCompleteInitialLoad = false;
           currentWebViewModel.updateWithValue(widget.webViewModel);
 
-          var screenshotData = _webViewController
-              ?.takeScreenshot(
+          var screenshotData = controller
+              .takeScreenshot(
                   screenshotConfiguration: ScreenshotConfiguration(
                       compressFormat: CompressFormat.JPEG, quality: 20))
               .timeout(
@@ -280,6 +281,8 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
               );
           widget.webViewModel.screenshot = await screenshotData;
         }
+
+        browserModel.notifyWebViewTabUpdated();
       },
       onProgressChanged: (controller, progress) {
         if (progress == 100) {
@@ -294,17 +297,18 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
       },
       onUpdateVisitedHistory: (controller, url, androidIsReload) async {
         widget.webViewModel.url = url;
-        widget.webViewModel.title = await _webViewController?.getTitle();
+        widget.webViewModel.title = await controller.getTitle();
 
         if (isCurrentTab(currentWebViewModel)) {
           currentWebViewModel.updateWithValue(widget.webViewModel);
         }
+        browserModel.notifyWebViewTabUpdated();
       },
       onLongPressHitTestResult: (controller, hitTestResult) async {
         if (LongPressAlertDialog.hitTestResultSupported
             .contains(hitTestResult.type)) {
           var requestFocusNodeHrefResult =
-              await _webViewController?.requestFocusNodeHref();
+              await controller.requestFocusNodeHref();
 
           if (requestFocusNodeHrefResult != null) {
             showDialog(
@@ -419,7 +423,8 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           // NSURLErrorDomain
           return;
         }
-        if (Util.isWindows() && error.type == WebResourceErrorType.CONNECTION_ABORTED) {
+        if (Util.isWindows() &&
+            error.type == WebResourceErrorType.CONNECTION_ABORTED) {
           // CONNECTION_ABORTED
           return;
         }
@@ -470,6 +475,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         if (isCurrentTab(currentWebViewModel)) {
           currentWebViewModel.updateWithValue(widget.webViewModel);
         }
+        browserModel.notifyWebViewTabUpdated();
       },
       onCreateWindow: (controller, createWindowRequest) async {
         var webViewTab = WebViewTab(

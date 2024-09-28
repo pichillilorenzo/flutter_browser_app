@@ -1,3 +1,4 @@
+import 'package:context_menus/context_menus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/models/browser_model.dart';
@@ -8,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'browser.dart';
 
@@ -35,6 +37,22 @@ WebViewEnvironment? webViewEnvironment;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  if (Util.isDesktop()) {
+    await windowManager.ensureInitialized();
+
+    WindowOptions windowOptions = const WindowOptions(
+        center: true,
+        backgroundColor: Colors.transparent,
+        titleBarStyle: TitleBarStyle.hidden,
+        minimumSize: Size(800, 600));
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.setAsFrameless();
+      await windowManager.setHasShadow(true);
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
+
   WEB_ARCHIVE_DIR = (await getApplicationSupportDirectory()).path;
 
   TAB_VIEWER_BOTTOM_OFFSET_1 = 130.0;
@@ -44,19 +62,18 @@ void main() async {
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
     final availableVersion = await WebViewEnvironment.getAvailableVersion();
     assert(availableVersion != null,
-    'Failed to find an installed WebView2 Runtime or non-stable Microsoft Edge installation.');
+        'Failed to find an installed WebView2 Runtime or non-stable Microsoft Edge installation.');
 
     webViewEnvironment = await WebViewEnvironment.create(
-        settings: WebViewEnvironmentSettings(userDataFolder: 'flutter_browser_app'));
+        settings:
+            WebViewEnvironmentSettings(userDataFolder: 'flutter_browser_app'));
   }
 
-  if (Util.isAndroid() || Util.isIOS()) {
-    await FlutterDownloader.initialize(
-        debug: kDebugMode
-    );
+  if (Util.isMobile()) {
+    await FlutterDownloader.initialize(debug: kDebugMode);
   }
 
-  if (Util.isAndroid() || Util.isIOS()) {
+  if (Util.isMobile()) {
     await Permission.camera.request();
     await Permission.microphone.request();
     await Permission.storage.request();
@@ -81,13 +98,32 @@ void main() async {
   );
 }
 
-class FlutterBrowserApp extends StatelessWidget {
+class FlutterBrowserApp extends StatefulWidget {
   const FlutterBrowserApp({super.key});
 
   @override
+  State<FlutterBrowserApp> createState() => _FlutterBrowserAppState();
+}
+
+class _FlutterBrowserAppState extends State<FlutterBrowserApp>
+    with WindowListener {
+  @override
+  void initState() {
+    super.initState();
+    windowManager.addListener(this);
+  }
+
+  @override
+  void dispose() {
+    windowManager.removeListener(this);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    final materialApp = MaterialApp(
       title: 'Flutter Browser',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -97,5 +133,22 @@ class FlutterBrowserApp extends StatelessWidget {
         '/': (context) => const Browser(),
       },
     );
+
+    return Util.isMobile()
+        ? materialApp
+        : ContextMenuOverlay(
+            child: materialApp,
+          );
+  }
+
+  @override
+  void onWindowFocus() {
+    setState(() {});
+    windowManager.setMovable(false);
+  }
+
+  @override
+  void onWindowBlur() {
+    windowManager.setMovable(true);
   }
 }

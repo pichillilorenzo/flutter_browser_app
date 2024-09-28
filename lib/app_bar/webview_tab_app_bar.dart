@@ -1,8 +1,11 @@
 // import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_browser/app_bar/certificates_info_popup.dart';
 import 'package:flutter_browser/app_bar/url_info_popup.dart';
 import 'package:flutter_browser/custom_image.dart';
 import 'package:flutter_browser/main.dart';
@@ -103,7 +106,8 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                     ? AppBar(
                         backgroundColor:
                             isIncognitoMode ? Colors.black87 : Colors.blue,
-                        leading: _buildAppBarHomePageWidget(),
+                        leading: leading,
+                        leadingWidth: 130,
                         titleSpacing: 0.0,
                         title: _buildSearchTextField(),
                         actions: _buildActionsMenu(),
@@ -126,23 +130,101 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     var webViewModel = Provider.of<WebViewModel>(context, listen: true);
     var webViewController = webViewModel.webViewController;
 
-    if (!settings.homePageEnabled) {
+    if (Util.isMobile() && !settings.homePageEnabled) {
       return null;
     }
 
-    return IconButton(
-      icon: const Icon(Icons.home),
-      onPressed: () {
-        if (webViewController != null) {
-          var url =
-              settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
-                  ? WebUri(settings.customUrlHomePage)
-                  : WebUri(settings.searchEngine.url);
-          webViewController.loadUrl(urlRequest: URLRequest(url: url));
-        } else {
-          addNewTab();
-        }
-      },
+    final children = <Widget>[];
+    if (Util.isDesktop()) {
+      children.addAll([
+        IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            size: 20,
+          ),
+          constraints: const BoxConstraints(
+            maxWidth: 30,
+            minWidth: 30,
+            maxHeight: 30,
+            minHeight: 30,
+          ),
+          padding: EdgeInsets.zero,
+          onPressed: () async {
+            if (webViewController != null) {
+              webViewController.goBack();
+            }
+          },
+        ),
+        IconButton(
+          icon: const Icon(
+            Icons.arrow_forward,
+            size: 20,
+          ),
+          constraints: const BoxConstraints(
+            maxWidth: 30,
+            minWidth: 30,
+            maxHeight: 30,
+            minHeight: 30,
+          ),
+          padding: EdgeInsets.zero,
+          onPressed: () async {
+            if (webViewController != null) {
+              webViewController.goForward();
+            }
+          },
+        ),
+        IconButton(
+          icon: const Icon(
+            Icons.refresh,
+            size: 20,
+          ),
+          constraints: const BoxConstraints(
+            maxWidth: 30,
+            minWidth: 30,
+            maxHeight: 30,
+            minHeight: 30,
+          ),
+          padding: EdgeInsets.zero,
+          onPressed: () async {
+            if (webViewController != null) {
+              webViewController.reload();
+            }
+          },
+        )
+      ]);
+    }
+    if (settings.homePageEnabled || Util.isDesktop()) {
+      children.add(IconButton(
+        icon: const Icon(
+          Icons.home,
+          size: 20,
+        ),
+        constraints: const BoxConstraints(
+          maxWidth: 30,
+          minWidth: 30,
+          maxHeight: 30,
+          minHeight: 30,
+        ),
+        padding: EdgeInsets.zero,
+        onPressed: () {
+          if (webViewController != null) {
+            var url = settings.homePageEnabled &&
+                    settings.customUrlHomePage.isNotEmpty
+                ? WebUri(settings.customUrlHomePage)
+                : WebUri(settings.searchEngine.url);
+            webViewController.loadUrl(urlRequest: URLRequest(url: url));
+          } else {
+            addNewTab();
+          }
+        },
+      ));
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 5),
+      child: Row(
+        children: children,
+      ),
     );
   }
 
@@ -225,115 +307,120 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
     var settings = browserModel.getSettings();
 
-    return <Widget>[
+    return [
       settings.homePageEnabled
           ? const SizedBox(
               width: 10.0,
             )
           : Container(),
-      InkWell(
-        key: tabInkWellKey,
-        onLongPress: () {
-          final RenderBox? box =
-              tabInkWellKey.currentContext!.findRenderObject() as RenderBox?;
-          if (box == null) {
-            return;
-          }
+      Util.isDesktop()
+          ? null
+          : InkWell(
+              key: tabInkWellKey,
+              onLongPress: () {
+                final RenderBox? box = tabInkWellKey.currentContext!
+                    .findRenderObject() as RenderBox?;
+                if (box == null) {
+                  return;
+                }
 
-          Offset position = box.localToGlobal(Offset.zero);
+                Offset position = box.localToGlobal(Offset.zero);
 
-          showMenu(
-                  context: context,
-                  position: RelativeRect.fromLTRB(position.dx,
-                      position.dy + box.size.height, box.size.width, 0),
-                  items: TabPopupMenuActions.choices.map((tabPopupMenuAction) {
-                    IconData? iconData;
-                    switch (tabPopupMenuAction) {
-                      case TabPopupMenuActions.CLOSE_TABS:
-                        iconData = Icons.cancel;
-                        break;
-                      case TabPopupMenuActions.NEW_TAB:
-                        iconData = Icons.add;
-                        break;
-                      case TabPopupMenuActions.NEW_INCOGNITO_TAB:
-                        iconData = MaterialCommunityIcons.incognito;
-                        break;
+                showMenu(
+                        context: context,
+                        position: RelativeRect.fromLTRB(position.dx,
+                            position.dy + box.size.height, box.size.width, 0),
+                        items: TabPopupMenuActions.choices
+                            .map((tabPopupMenuAction) {
+                          IconData? iconData;
+                          switch (tabPopupMenuAction) {
+                            case TabPopupMenuActions.CLOSE_TABS:
+                              iconData = Icons.cancel;
+                              break;
+                            case TabPopupMenuActions.NEW_TAB:
+                              iconData = Icons.add;
+                              break;
+                            case TabPopupMenuActions.NEW_INCOGNITO_TAB:
+                              iconData = MaterialCommunityIcons.incognito;
+                              break;
+                          }
+
+                          return PopupMenuItem<String>(
+                            value: tabPopupMenuAction,
+                            child: Row(children: [
+                              Icon(
+                                iconData,
+                                color: Colors.black,
+                              ),
+                              Container(
+                                padding: const EdgeInsets.only(left: 10.0),
+                                child: Text(tabPopupMenuAction),
+                              )
+                            ]),
+                          );
+                        }).toList())
+                    .then((value) {
+                  switch (value) {
+                    case TabPopupMenuActions.CLOSE_TABS:
+                      browserModel.closeAllTabs();
+                      break;
+                    case TabPopupMenuActions.NEW_TAB:
+                      addNewTab();
+                      break;
+                    case TabPopupMenuActions.NEW_INCOGNITO_TAB:
+                      addNewIncognitoTab();
+                      break;
+                  }
+                });
+              },
+              onTap: () async {
+                if (browserModel.webViewTabs.isNotEmpty) {
+                  var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+                  var webViewController = webViewModel?.webViewController;
+
+                  if (View.of(context).viewInsets.bottom > 0.0) {
+                    SystemChannels.textInput.invokeMethod('TextInput.hide');
+                    if (FocusManager.instance.primaryFocus != null) {
+                      FocusManager.instance.primaryFocus!.unfocus();
                     }
+                    if (webViewController != null) {
+                      await webViewController.evaluateJavascript(
+                          source: "document.activeElement.blur();");
+                    }
+                    await Future.delayed(const Duration(milliseconds: 300));
+                  }
 
-                    return PopupMenuItem<String>(
-                      value: tabPopupMenuAction,
-                      child: Row(children: [
-                        Icon(
-                          iconData,
-                          color: Colors.black,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.only(left: 10.0),
-                          child: Text(tabPopupMenuAction),
-                        )
-                      ]),
-                    );
-                  }).toList())
-              .then((value) {
-            switch (value) {
-              case TabPopupMenuActions.CLOSE_TABS:
-                browserModel.closeAllTabs();
-                break;
-              case TabPopupMenuActions.NEW_TAB:
-                addNewTab();
-                break;
-              case TabPopupMenuActions.NEW_INCOGNITO_TAB:
-                addNewIncognitoTab();
-                break;
-            }
-          });
-        },
-        onTap: () async {
-          if (browserModel.webViewTabs.isNotEmpty) {
-            var webViewModel = browserModel.getCurrentTab()?.webViewModel;
-            var webViewController = webViewModel?.webViewController;
+                  if (webViewModel != null && webViewController != null) {
+                    webViewModel.screenshot = await webViewController
+                        .takeScreenshot(
+                            screenshotConfiguration: ScreenshotConfiguration(
+                                compressFormat: CompressFormat.JPEG,
+                                quality: 20))
+                        .timeout(
+                          const Duration(milliseconds: 1500),
+                          onTimeout: () => null,
+                        );
+                  }
 
-            if (View.of(context).viewInsets.bottom > 0.0) {
-              SystemChannels.textInput.invokeMethod('TextInput.hide');
-              if (FocusManager.instance.primaryFocus != null) {
-                FocusManager.instance.primaryFocus!.unfocus();
-              }
-              if (webViewController != null) {
-                await webViewController.evaluateJavascript(
-                    source: "document.activeElement.blur();");
-              }
-              await Future.delayed(const Duration(milliseconds: 300));
-            }
-
-            if (webViewModel != null && webViewController != null) {
-              webViewModel.screenshot = await webViewController
-                  .takeScreenshot(
-                      screenshotConfiguration: ScreenshotConfiguration(
-                          compressFormat: CompressFormat.JPEG, quality: 20))
-                  .timeout(
-                    const Duration(milliseconds: 1500),
-                    onTimeout: () => null,
-                  );
-            }
-
-            browserModel.showTabScroller = true;
-          }
-        },
-        child: Container(
-          margin: const EdgeInsets.only(
-              left: 10.0, top: 15.0, right: 10.0, bottom: 15.0),
-          decoration: BoxDecoration(
-              border: Border.all(width: 2.0),
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(5.0)),
-          constraints: const BoxConstraints(minWidth: 25.0),
-          child: Center(
-              child: Text(
-            browserModel.webViewTabs.length.toString(),
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.0),
-          )),
-        ),
-      ),
+                  browserModel.showTabScroller = true;
+                }
+              },
+              child: Container(
+                margin: const EdgeInsets.only(
+                    left: 10.0, top: 15.0, right: 10.0, bottom: 15.0),
+                decoration: BoxDecoration(
+                    border: Border.all(width: 2.0),
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.circular(5.0)),
+                constraints: const BoxConstraints(minWidth: 25.0),
+                child: Center(
+                    child: Text(
+                  browserModel.webViewTabs.length.toString(),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14.0),
+                )),
+              ),
+            ),
       PopupMenuButton<String>(
         onSelected: _popupMenuChoiceAction,
         itemBuilder: (popupMenuContext) {
@@ -697,7 +784,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
           return items;
         },
       )
-    ];
+    ].whereNotNull().toList();
   }
 
   void _popupMenuChoiceAction(String choice) async {

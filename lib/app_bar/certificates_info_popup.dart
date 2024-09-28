@@ -12,6 +12,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:collection/collection.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CertificateInfoPopup extends StatefulWidget {
   const CertificateInfoPopup({super.key});
@@ -1325,16 +1326,24 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                   style: const TextStyle(fontSize: 12.0, color: Colors.blue),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () async {
-                      Directory? directory =
-                          await getExternalStorageDirectory();
-                      await FlutterDownloader.enqueue(
-                        url: cRLDistributionPoints.crls![i],
-                        savedDir: directory!.path,
-                        showNotification:
-                            true, // show download progress in status bar (for Android)
-                        openFileFromNotification:
-                            true, // click on notification to open downloaded file (for Android)
-                      );
+                      final crlUrl = cRLDistributionPoints.crls![i];
+                      try {
+                        Directory? directory =
+                            await getExternalStorageDirectory();
+                        await FlutterDownloader.enqueue(
+                          url: crlUrl,
+                          savedDir: directory!.path,
+                          showNotification: true,
+                          // show download progress in status bar (for Android)
+                          openFileFromNotification:
+                              true, // click on notification to open downloaded file (for Android)
+                        );
+                      } catch (e) {
+                        final crlUri = Uri.tryParse(crlUrl);
+                        if (crlUri != null && await canLaunchUrl(crlUri)) {
+                          launchUrl(crlUri);
+                        }
+                      }
                     })
             ]),
           ),
@@ -1435,8 +1444,8 @@ class _CertificateInfoPopupState extends State<CertificateInfoPopup> {
                       await FlutterDownloader.enqueue(
                         url: value,
                         savedDir: directory!.path,
-                        showNotification:
-                            true, // show download progress in status bar (for Android)
+                        showNotification: true,
+                        // show download progress in status bar (for Android)
                         openFileFromNotification:
                             true, // click on notification to open downloaded file (for Android)
                       );

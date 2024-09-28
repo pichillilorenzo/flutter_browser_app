@@ -253,6 +253,10 @@ class BrowserModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void notifyWebViewTabUpdated() {
+    notifyListeners();
+  }
+
   void setCurrentWebViewModel(WebViewModel webViewModel) {
     _currentWebViewModel = webViewModel;
   }
