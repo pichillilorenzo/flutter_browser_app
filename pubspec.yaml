@@ -36,7 +36,7 @@ dependencies:
   # For material you.
   dynamic_color: ^1.7.0
 
-  flutter_inappwebview: ^6.1.1
+  flutter_inappwebview: ^6.1.2
   flutter_downloader: ^1.11.8
   path_provider: ^2.1.4
   permission_handler: ^11.3.1

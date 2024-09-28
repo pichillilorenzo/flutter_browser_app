@@ -82,7 +82,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (_webViewController != null && Util.isAndroid()) {
+    if (_webViewController != null && (Util.isAndroid() || Util.isWindows())) {
       if (state == AppLifecycleState.paused) {
         pauseAll();
       } else {
@@ -92,37 +92,41 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
   }
 
   void pauseAll() {
-    if (Util.isAndroid()) {
+    if (Util.isAndroid() || Util.isWindows()) {
       _webViewController?.pause();
     }
     pauseTimers();
   }
 
   void resumeAll() {
-    if (Util.isAndroid()) {
+    if (Util.isAndroid() || Util.isWindows()) {
       _webViewController?.resume();
     }
     resumeTimers();
   }
 
   void pause() {
-    if (Util.isAndroid()) {
+    if (Util.isAndroid() || Util.isWindows()) {
       _webViewController?.pause();
     }
   }
 
   void resume() {
-    if (Util.isAndroid()) {
+    if (Util.isAndroid() || Util.isWindows()) {
       _webViewController?.resume();
     }
   }
 
   void pauseTimers() {
-    _webViewController?.pauseTimers();
+    if (!Util.isWindows()) {
+      _webViewController?.pauseTimers();
+    }
   }
 
   void resumeTimers() {
-    _webViewController?.resumeTimers();
+    if (!Util.isWindows()) {
+      _webViewController?.resumeTimers();
+    }
   }
 
   @override
@@ -229,14 +233,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         var titleFuture = _webViewController?.getTitle();
         var faviconsFuture = _webViewController?.getFavicons();
 
-        SslCertificate? sslCertificate;
-        try {
-          sslCertificate = await sslCertificateFuture;
-        } catch (e) {
-          if (kDebugMode) {
-            print(e);
-          }
-        }
+        var sslCertificate = await sslCertificateFuture;
         if (sslCertificate == null && !Util.isLocalizedContent(url!)) {
           widget.webViewModel.isSecure = false;
         }
@@ -420,6 +417,10 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         if ((Util.isIOS() || Util.isMacOS() || Util.isWindows()) &&
             error.type == WebResourceErrorType.CANCELLED) {
           // NSURLErrorDomain
+          return;
+        }
+        if (Util.isWindows() && error.type == WebResourceErrorType.CONNECTION_ABORTED) {
+          // CONNECTION_ABORTED
           return;
         }
 
