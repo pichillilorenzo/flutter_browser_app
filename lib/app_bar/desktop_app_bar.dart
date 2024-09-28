@@ -7,6 +7,7 @@ import 'package:window_manager/window_manager.dart';
 import '../custom_image.dart';
 import '../models/browser_model.dart';
 import '../models/webview_model.dart';
+import '../util.dart';
 import '../webview_tab.dart';
 
 class DesktopAppBar extends StatefulWidget {
@@ -47,6 +48,101 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
           ));
     }).toList();
 
+    final windowActions = [];
+    if (!Util.isWindows()) {
+      windowActions.addAll([
+        const SizedBox(
+          width: 8,
+        ),
+        IconButton(
+            onPressed: () {
+              windowManager.close();
+            },
+            constraints: const BoxConstraints(
+              maxWidth: 13,
+              minWidth: 13,
+              maxHeight: 13,
+              minHeight: 13,
+            ),
+            padding: EdgeInsets.zero,
+            style: ButtonStyle(
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                backgroundColor: const WidgetStatePropertyAll(Colors.red),
+                iconColor: WidgetStateProperty.resolveWith(
+                      (states) => states.contains(WidgetState.hovered)
+                      ? Colors.black45
+                      : Colors.red,
+                )),
+            color: Colors.red,
+            icon: const Icon(
+              Icons.close,
+              size: 10,
+            )),
+        const SizedBox(
+          width: 8,
+        ),
+        IconButton(
+            onPressed: () async {
+              if (!(await windowManager.isFullScreen())) {
+                windowManager.minimize();
+              }
+            },
+            constraints: const BoxConstraints(
+              maxWidth: 13,
+              minWidth: 13,
+              maxHeight: 13,
+              minHeight: 13,
+            ),
+            padding: EdgeInsets.zero,
+            style: ButtonStyle(
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                backgroundColor:
+                const WidgetStatePropertyAll(Colors.amber),
+                iconColor: WidgetStateProperty.resolveWith(
+                      (states) => states.contains(WidgetState.hovered)
+                      ? Colors.black45
+                      : Colors.amber,
+                )),
+            color: Colors.amber,
+            icon: const Icon(
+              Icons.remove,
+              size: 10,
+            )),
+        const SizedBox(
+          width: 8,
+        ),
+        IconButton(
+            onPressed: () async {
+              windowManager
+                  .setFullScreen(!(await windowManager.isFullScreen()));
+            },
+            constraints: const BoxConstraints(
+              maxWidth: 13,
+              minWidth: 13,
+              maxHeight: 13,
+              minHeight: 13,
+            ),
+            padding: EdgeInsets.zero,
+            style: ButtonStyle(
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                backgroundColor:
+                const WidgetStatePropertyAll(Colors.green),
+                iconColor: WidgetStateProperty.resolveWith(
+                      (states) => states.contains(WidgetState.hovered)
+                      ? Colors.black45
+                      : Colors.green,
+                )),
+            color: Colors.green,
+            icon: const Icon(
+              Icons.open_in_full,
+              size: 10,
+            )),
+        const SizedBox(
+          width: 8,
+        ),
+      ]);
+    }
+
     final children = [
       Container(
         constraints:
@@ -54,95 +150,7 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
         child: IntrinsicWidth(
           child: Row(
             children: [
-              const SizedBox(
-                width: 8,
-              ),
-              IconButton(
-                  onPressed: () {
-                    windowManager.close();
-                  },
-                  constraints: const BoxConstraints(
-                    maxWidth: 13,
-                    minWidth: 13,
-                    maxHeight: 13,
-                    minHeight: 13,
-                  ),
-                  padding: EdgeInsets.zero,
-                  style: ButtonStyle(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      backgroundColor: const WidgetStatePropertyAll(Colors.red),
-                      iconColor: WidgetStateProperty.resolveWith(
-                        (states) => states.contains(WidgetState.hovered)
-                            ? Colors.black45
-                            : Colors.red,
-                      )),
-                  color: Colors.red,
-                  icon: const Icon(
-                    Icons.close,
-                    size: 10,
-                  )),
-              const SizedBox(
-                width: 8,
-              ),
-              IconButton(
-                  onPressed: () async {
-                    if (!(await windowManager.isFullScreen())) {
-                      windowManager.minimize();
-                    }
-                  },
-                  constraints: const BoxConstraints(
-                    maxWidth: 13,
-                    minWidth: 13,
-                    maxHeight: 13,
-                    minHeight: 13,
-                  ),
-                  padding: EdgeInsets.zero,
-                  style: ButtonStyle(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      backgroundColor:
-                          const WidgetStatePropertyAll(Colors.amber),
-                      iconColor: WidgetStateProperty.resolveWith(
-                        (states) => states.contains(WidgetState.hovered)
-                            ? Colors.black45
-                            : Colors.amber,
-                      )),
-                  color: Colors.amber,
-                  icon: const Icon(
-                    Icons.remove,
-                    size: 10,
-                  )),
-              const SizedBox(
-                width: 8,
-              ),
-              IconButton(
-                  onPressed: () async {
-                    windowManager
-                        .setFullScreen(!(await windowManager.isFullScreen()));
-                  },
-                  constraints: const BoxConstraints(
-                    maxWidth: 13,
-                    minWidth: 13,
-                    maxHeight: 13,
-                    minHeight: 13,
-                  ),
-                  padding: EdgeInsets.zero,
-                  style: ButtonStyle(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      backgroundColor:
-                          const WidgetStatePropertyAll(Colors.green),
-                      iconColor: WidgetStateProperty.resolveWith(
-                        (states) => states.contains(WidgetState.hovered)
-                            ? Colors.black45
-                            : Colors.green,
-                      )),
-                  color: Colors.green,
-                  icon: const Icon(
-                    Icons.open_in_full,
-                    size: 10,
-                  )),
-              const SizedBox(
-                width: 8,
-              ),
+              ...windowActions,
               Flexible(
                   child: Container(
                 padding: const EdgeInsets.only(top: 4.0),
@@ -180,10 +188,14 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
           child: MouseRegion(
               hitTestBehavior: HitTestBehavior.opaque,
               onEnter: (details) {
-                windowManager.setMovable(true);
+                if (!Util.isWindows()) {
+                  windowManager.setMovable(true);
+                }
               },
               onExit: (details) {
-                windowManager.setMovable(false);
+                if (!Util.isWindows()) {
+                  windowManager.setMovable(false);
+                }
               },
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,

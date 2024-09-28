@@ -40,14 +40,16 @@ void main() async {
   if (Util.isDesktop()) {
     await windowManager.ensureInitialized();
 
-    WindowOptions windowOptions = const WindowOptions(
+    WindowOptions windowOptions = WindowOptions(
         center: true,
         backgroundColor: Colors.transparent,
-        titleBarStyle: TitleBarStyle.hidden,
-        minimumSize: Size(800, 600));
+        titleBarStyle: Util.isWindows() ? TitleBarStyle.normal : TitleBarStyle.hidden,
+        minimumSize: const Size(800, 600));
     windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.setAsFrameless();
-      await windowManager.setHasShadow(true);
+      if (!Util.isWindows()) {
+        await windowManager.setAsFrameless();
+        await windowManager.setHasShadow(true);
+      }
       await windowManager.show();
       await windowManager.focus();
     });
@@ -144,11 +146,15 @@ class _FlutterBrowserAppState extends State<FlutterBrowserApp>
   @override
   void onWindowFocus() {
     setState(() {});
-    windowManager.setMovable(false);
+    if (!Util.isWindows()) {
+      windowManager.setMovable(false);
+    }
   }
 
   @override
   void onWindowBlur() {
-    windowManager.setMovable(true);
+    if (!Util.isWindows()) {
+      windowManager.setMovable(true);
+    }
   }
 }
