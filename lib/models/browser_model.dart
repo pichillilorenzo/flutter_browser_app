@@ -4,10 +4,9 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_browser/util.dart';
+import '../main.dart';
 import 'web_archive_model.dart';
 import 'window_model.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'favorite_model.dart';
 
@@ -97,54 +96,47 @@ class BrowserModel extends ChangeNotifier {
       await window.flushInfo();
     }
 
+    final resolvedExecutable = Util.isMacOS() ? Platform.resolvedExecutable
+        .replaceFirst('/Contents/MacOS/flutter_browser_app', '') : Platform.resolvedExecutable;
+    if (kDebugMode) {
+      print('Resolved executable: $resolvedExecutable');
+    }
+
     if (Util.isMacOS()) {
       await Process.run('open', [
         '-n',
         '-a',
-        Platform.resolvedExecutable
-            .replaceFirst('/Contents/MacOS/flutter_browser_app', '')
+        resolvedExecutable
       ]).then(
         (value) {
           if (kDebugMode) {
-            print(value.pid);
+            print('PID ${value.pid}');
             print(value.stdout);
             print(value.stderr);
           }
         },
       );
     } else if (Util.isWindows()) {
-      // TODO: Implement Windows
+      await Process.start('cmd', ['/c', 'start', resolvedExecutable]).then(
+            (value) {
+          if (kDebugMode) {
+            print('PID ${value.pid}');
+          }
+        },
+      );
     }
 
     notifyListeners();
   }
 
   Future<void> removeWindow(WindowModel window) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.reload();
-    final removed = await prefs.remove(window.id);
-    if (!removed && kDebugMode) {
-      print("Failed to remove window '${window.id}'");
-    }
+    await window.removeInfo();
   }
 
   Future<void> removeAllWindows() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.reload();
-    final List<WindowModel> windows = [];
-    try {
-      for (final k in prefs.getKeys()) {
-        if (k.startsWith('window_')) {
-          final removed = await prefs.remove(k);
-          if (!removed && kDebugMode) {
-            print("Failed to remove window '$k'");
-          }
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+    final count = await db?.rawDelete('DELETE FROM windows');
+    if (count == null && kDebugMode) {
+      print("Cannot delete windows");
     }
   }
 
@@ -231,24 +223,21 @@ class BrowserModel extends ChangeNotifier {
   }
 
   Future<List<WindowModel>> getWindows() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.reload();
     final List<WindowModel> windows = [];
-    try {
-      for (final k in prefs.getKeys()) {
-        if (k.startsWith('window_')) {
-          final source = prefs.getString(k);
-          if (source != null) {
-            Map<String, dynamic> browserData = json.decode(source);
-            windows.add(WindowModel.fromMap(browserData));
-          }
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print(e);
+    final windowsMap = await db?.rawQuery('SELECT * FROM windows');
+    if (windowsMap == null) {
+      return windows;
+    }
+
+    for (final w in windowsMap) {
+      final wId = w['id'] as String;
+      if (wId.startsWith('window_')) {
+        final source = w['json'] as String;
+        Map<String, dynamic> wBrowserData = json.decode(source);
+        windows.add(WindowModel.fromMap(wBrowserData));
       }
     }
+
     return windows;
   }
 
@@ -271,19 +260,31 @@ class BrowserModel extends ChangeNotifier {
   }
 
   Future<void> flush() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.reload();
-    await prefs.setString("browser", json.encode(toJson()));
+    final browser = await db?.rawQuery('SELECT * FROM browser WHERE id = ?', [1]);
+    int? count;
+    if (browser == null || browser.length == 0) {
+      count = await db?.rawInsert(
+          'INSERT INTO browser(id, json) VALUES(?, ?)',
+          [1, json.encode(toJson())]);
+    } else {
+      count = await db?.rawUpdate(
+          'UPDATE browser SET json = ? WHERE id = ?',
+          [json.encode(toJson()), 1]);
+    }
+
+    if ((count == null || count == 0) && kDebugMode) {
+      print("Cannot insert/update browser 1");
+    }
   }
 
   Future<void> restore() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.reload();
-    Map<String, dynamic> browserData;
+    final browsers = await db?.rawQuery('SELECT * FROM browser WHERE id = ?', [1]);
+    if (browsers == null || browsers.length == 0) {
+      return;
+    }
+    final browser = browsers[0];
+    Map<String, dynamic> browserData = json.decode(browser['json'] as String);
     try {
-      String? source = prefs.getString("browser");
-      if (source != null) {
-        browserData = await json.decode(source);
 
         clearFavorites();
         clearWebArchives();
@@ -306,7 +307,7 @@ class BrowserModel extends ChangeNotifier {
         addFavorites(favorites);
         addWebArchives(webArchives);
         updateSettings(settings);
-      }
+
     } catch (e) {
       if (kDebugMode) {
         print(e);

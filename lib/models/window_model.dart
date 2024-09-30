@@ -4,10 +4,10 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_browser/main.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/webview_tab.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:collection/collection.dart';
 
@@ -192,9 +192,10 @@ class WindowModel extends ChangeNotifier {
   }
 
   Future<void> removeInfo() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.reload();
-    await prefs.remove(id);
+    final count = await db?.rawDelete('DELETE FROM windows WHERE id = ?', [id]);
+    if ((count == null || count == 0) && kDebugMode) {
+      print("Cannot delete window $id");
+    }
   }
 
   Future<void> flushInfo() async {
@@ -202,76 +203,78 @@ class WindowModel extends ChangeNotifier {
       return;
     }
     _updatedTime = DateTime.now();
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.reload();
-    await prefs.setString(id, json.encode(toJson()));
+    final window = await db?.rawQuery('SELECT * FROM windows WHERE id = ?', [id]);
+    int? count;
+    if (window == null || window.length == 0) {
+      count = await db?.rawInsert(
+          'INSERT INTO windows(id, json) VALUES(?, ?)',
+          [id, json.encode(toJson())]);
+    } else {
+      count = await db?.rawUpdate(
+          'UPDATE windows SET json = ? WHERE id = ?',
+          [json.encode(toJson()), id]);
+    }
+    if ((count == null || count == 0) && kDebugMode) {
+      print("Cannot insert/update window $id");
+    }
   }
 
   Future<void> restoreInfo() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.reload();
+    String? id;
+    Map<String, dynamic>? browserData;
     try {
-      final windowIds = [];
-      var key = prefs.getKeys().firstWhereOrNull(
-        (k) {
-          if (k.startsWith('window_')) {
-            windowIds.add(k);
-            final source = prefs.getString(k);
-            if (source != null) {
-              Map<String, dynamic> browserData = json.decode(source);
-              return browserData['waitingToBeOpened'];
-            }
-          }
-          return false;
-        },
-      );
-
-      if (Util.isMobile()) {
-        if (windowIds.isEmpty) {
-          return;
-        } else {
-          key ??= windowIds.first;
-        }
-      }
-
-      if (key == null) {
+      final windows = await db?.rawQuery('SELECT * FROM windows');
+      if (windows == null) {
         return;
       }
 
-      String? source = prefs.getString(key);
-      if (source != null) {
-        _id = key;
-        _waitingToBeOpened = false;
-
-        Map<String, dynamic> browserData = json.decode(source);
-
-        _shouldSave = browserData["shouldSave"] ?? false;
-
-        closeAllTabs();
-
-        List<Map<String, dynamic>> webViewTabList =
-            browserData["webViewTabs"]?.cast<Map<String, dynamic>>() ?? [];
-        List<WebViewTab> webViewTabs = webViewTabList
-            .map((e) => WebViewTab(
-                  key: GlobalKey(),
-                  webViewModel: WebViewModel.fromMap(e)!,
-                ))
-            .toList();
-        webViewTabs.sort((a, b) =>
-            a.webViewModel.tabIndex!.compareTo(b.webViewModel.tabIndex!));
-
-        addTabs(webViewTabs);
-
-        int currentTabIndex =
-            browserData["currentTabIndex"] ?? _currentTabIndex;
-        currentTabIndex = min(currentTabIndex, _webViewTabs.length - 1);
-
-        if (currentTabIndex >= 0) {
-          showTab(currentTabIndex);
+      for (final w in windows) {
+        final wId = w['id'] as String;
+        if (wId.startsWith('window_')) {
+          final source = w['json'] as String;
+          Map<String, dynamic> wBrowserData = json.decode(source);
+          if (Util.isMobile() || wBrowserData['waitingToBeOpened']) {
+            id = wId;
+            browserData = wBrowserData;
+            break;
+          }
         }
-
-        await flushInfo();
       }
+
+      if (id == null || browserData == null) {
+        return;
+      }
+
+      _id = id;
+      _waitingToBeOpened = false;
+
+      _shouldSave = browserData["shouldSave"] ?? false;
+
+      closeAllTabs();
+
+      List<Map<String, dynamic>> webViewTabList =
+          browserData["webViewTabs"]?.cast<Map<String, dynamic>>() ?? [];
+      List<WebViewTab> webViewTabs = webViewTabList
+          .map((e) => WebViewTab(
+                key: GlobalKey(),
+                webViewModel: WebViewModel.fromMap(e)!,
+              ))
+          .toList();
+      webViewTabs.sort((a, b) =>
+          a.webViewModel.tabIndex!.compareTo(b.webViewModel.tabIndex!));
+
+      addTabs(webViewTabs);
+
+      int currentTabIndex =
+          browserData["currentTabIndex"] ?? _currentTabIndex;
+      currentTabIndex = min(currentTabIndex, _webViewTabs.length - 1);
+
+      if (currentTabIndex >= 0) {
+        showTab(currentTabIndex);
+      }
+
+      await flushInfo();
+
     } catch (e) {
       if (kDebugMode) {
         print(e);

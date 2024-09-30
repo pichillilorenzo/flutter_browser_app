@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,12 +6,14 @@ import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/models/window_model.dart';
 import 'package:flutter_browser/util.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:multi_window/multi_window.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:path/path.dart' as p;
 
 import 'browser.dart';
 
@@ -38,9 +37,24 @@ const double TAB_VIEWER_TOP_SCALE_TOP_OFFSET = 250.0;
 const double TAB_VIEWER_TOP_SCALE_BOTTOM_OFFSET = 230.0;
 
 WebViewEnvironment? webViewEnvironment;
+Database? db;
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final appDocumentsDir = await getApplicationDocumentsDirectory();
+  
+  if (Util.isDesktop()) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
+  db = await databaseFactory.openDatabase(p.join(appDocumentsDir.path, "databases", "myDb.db"), options: OpenDatabaseOptions(version: 1,
+      onCreate: (Database db, int version) async {
+        await db.execute(
+            'CREATE TABLE browser (id INTEGER PRIMARY KEY, json TEXT)');
+        await db.execute(
+            'CREATE TABLE windows (id TEXT PRIMARY KEY, json TEXT)');
+      }));
 
   if (Util.isDesktop()) {
     await windowManager.ensureInitialized();
@@ -50,7 +64,7 @@ void main(List<String> args) async {
         backgroundColor: Colors.transparent,
         titleBarStyle:
             Util.isWindows() ? TitleBarStyle.normal : TitleBarStyle.hidden,
-        minimumSize: const Size(800, 600));
+        minimumSize: const Size(1280, 720));
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       if (!Util.isWindows()) {
         await windowManager.setAsFrameless();
