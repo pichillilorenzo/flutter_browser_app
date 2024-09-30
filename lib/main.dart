@@ -1,10 +1,15 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
+import 'package:flutter_browser/models/window_model.dart';
 import 'package:flutter_browser/util.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:multi_window/multi_window.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -34,7 +39,7 @@ const double TAB_VIEWER_TOP_SCALE_BOTTOM_OFFSET = 230.0;
 
 WebViewEnvironment? webViewEnvironment;
 
-void main() async {
+void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Util.isDesktop()) {
@@ -43,7 +48,8 @@ void main() async {
     WindowOptions windowOptions = WindowOptions(
         center: true,
         backgroundColor: Colors.transparent,
-        titleBarStyle: Util.isWindows() ? TitleBarStyle.normal : TitleBarStyle.hidden,
+        titleBarStyle:
+            Util.isWindows() ? TitleBarStyle.normal : TitleBarStyle.hidden,
         minimumSize: const Size(800, 600));
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       if (!Util.isWindows()) {
@@ -57,9 +63,9 @@ void main() async {
 
   WEB_ARCHIVE_DIR = (await getApplicationSupportDirectory()).path;
 
-  TAB_VIEWER_BOTTOM_OFFSET_1 = 130.0;
-  TAB_VIEWER_BOTTOM_OFFSET_2 = 140.0;
-  TAB_VIEWER_BOTTOM_OFFSET_3 = 150.0;
+  TAB_VIEWER_BOTTOM_OFFSET_1 = 150.0;
+  TAB_VIEWER_BOTTOM_OFFSET_2 = 160.0;
+  TAB_VIEWER_BOTTOM_OFFSET_3 = 170.0;
 
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
     final availableVersion = await WebViewEnvironment.getAvailableVersion();
@@ -85,14 +91,17 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
+          create: (context) => BrowserModel(),
+        ),
+        ChangeNotifierProvider(
           create: (context) => WebViewModel(),
         ),
-        ChangeNotifierProxyProvider<WebViewModel, BrowserModel>(
-          update: (context, webViewModel, browserModel) {
-            browserModel!.setCurrentWebViewModel(webViewModel);
-            return browserModel;
+        ChangeNotifierProxyProvider<WebViewModel, WindowModel>(
+          update: (context, webViewModel, windowModel) {
+            windowModel!.setCurrentWebViewModel(webViewModel);
+            return windowModel;
           },
-          create: (BuildContext context) => BrowserModel(),
+          create: (BuildContext context) => WindowModel(id: null, waitingToBeOpened: true),
         ),
       ],
       child: const FlutterBrowserApp(),
@@ -127,7 +136,6 @@ class _FlutterBrowserAppState extends State<FlutterBrowserApp>
       title: 'Flutter Browser',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       initialRoute: '/',

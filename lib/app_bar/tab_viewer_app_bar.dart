@@ -8,6 +8,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
 import '../custom_popup_menu_item.dart';
+import '../models/window_model.dart';
 import '../tab_viewer_popup_menu_actions.dart';
 
 class TabViewerAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -43,14 +44,15 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
   }
 
   List<Widget> _buildActionsMenu() {
-    var browserModel = Provider.of<BrowserModel>(context, listen: true);
-    var settings = browserModel.getSettings();
+    final browserModel = Provider.of<BrowserModel>(context, listen: true);
+    final windowModel = Provider.of<WindowModel>(context, listen: true);
+    final settings = browserModel.getSettings();
 
     return <Widget>[
       InkWell(
         key: tabInkWellKey,
         onTap: () {
-          if (browserModel.webViewTabs.isNotEmpty) {
+          if (windowModel.webViewTabs.isNotEmpty) {
             browserModel.showTabScroller = !browserModel.showTabScroller;
           } else {
             browserModel.showTabScroller = false;
@@ -70,7 +72,7 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
             constraints: const BoxConstraints(minWidth: 25.0),
             child: Center(
                 child: Text(
-              browserModel.webViewTabs.length.toString(),
+                  windowModel.webViewTabs.length.toString(),
               style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14.0),
@@ -115,7 +117,7 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
                 );
               case TabViewerPopupMenuActions.CLOSE_ALL_TABS:
                 return CustomPopupMenuItem<String>(
-                  enabled: browserModel.webViewTabs.isNotEmpty,
+                  enabled: windowModel.webViewTabs.isNotEmpty,
                   value: choice,
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -181,8 +183,9 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
   }
 
   void addNewTab({WebUri? url}) {
-    var browserModel = Provider.of<BrowserModel>(context, listen: false);
-    var settings = browserModel.getSettings();
+    final browserModel = Provider.of<BrowserModel>(context, listen: false);
+    final windowModel = Provider.of<WindowModel>(context, listen: false);
+    final settings = browserModel.getSettings();
 
     url ??= settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
         ? WebUri(settings.customUrlHomePage)
@@ -190,15 +193,16 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
 
     browserModel.showTabScroller = false;
 
-    browserModel.addTab(WebViewTab(
+    windowModel.addTab(WebViewTab(
       key: GlobalKey(),
       webViewModel: WebViewModel(url: url),
     ));
   }
 
   void addNewIncognitoTab({WebUri? url}) {
-    var browserModel = Provider.of<BrowserModel>(context, listen: false);
-    var settings = browserModel.getSettings();
+    final browserModel = Provider.of<BrowserModel>(context, listen: false);
+    final windowModel = Provider.of<WindowModel>(context, listen: false);
+    final settings = browserModel.getSettings();
 
     url ??= settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
         ? WebUri(settings.customUrlHomePage)
@@ -206,18 +210,19 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
 
     browserModel.showTabScroller = false;
 
-    browserModel.addTab(WebViewTab(
+    windowModel.addTab(WebViewTab(
       key: GlobalKey(),
       webViewModel: WebViewModel(url: url, isIncognitoMode: true),
     ));
   }
 
   void closeAllTabs() {
-    var browserModel = Provider.of<BrowserModel>(context, listen: false);
+    final browserModel = Provider.of<BrowserModel>(context, listen: false);
+    final windowModel = Provider.of<WindowModel>(context, listen: false);
 
     browserModel.showTabScroller = false;
 
-    browserModel.closeAllTabs();
+    windowModel.closeAllTabs();
   }
 
   void goToSettingsPage() {

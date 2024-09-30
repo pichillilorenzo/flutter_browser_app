@@ -13,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'javascript_console_result.dart';
 import 'long_press_alert_dialog.dart';
 import 'models/browser_model.dart';
+import 'models/window_model.dart';
 
 final webViewTabStateKey = GlobalKey<_WebViewTabState>();
 
@@ -147,6 +148,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
   InAppWebView _buildWebView() {
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
+    var windowModel = Provider.of<WindowModel>(context, listen: true);
     var settings = browserModel.getSettings();
     var currentWebViewModel = Provider.of<WebViewModel>(context, listen: true);
 
@@ -221,7 +223,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           controller.stopLoading();
         }
 
-        browserModel.notifyWebViewTabUpdated();
+        windowModel.notifyWebViewTabUpdated();
       },
       onLoadStop: (controller, url) async {
         _pullToRefreshController?.endRefreshing();
@@ -282,7 +284,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           widget.webViewModel.screenshot = await screenshotData;
         }
 
-        browserModel.notifyWebViewTabUpdated();
+        windowModel.notifyWebViewTabUpdated();
       },
       onProgressChanged: (controller, progress) {
         if (progress == 100) {
@@ -302,7 +304,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         if (isCurrentTab(currentWebViewModel)) {
           currentWebViewModel.updateWithValue(widget.webViewModel);
         }
-        browserModel.notifyWebViewTabUpdated();
+        windowModel.notifyWebViewTabUpdated();
       },
       onLongPressHitTestResult: (controller, hitTestResult) async {
         if (LongPressAlertDialog.hitTestResultSupported
@@ -475,7 +477,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         if (isCurrentTab(currentWebViewModel)) {
           currentWebViewModel.updateWithValue(widget.webViewModel);
         }
-        browserModel.notifyWebViewTabUpdated();
+        windowModel.notifyWebViewTabUpdated();
       },
       onCreateWindow: (controller, createWindowRequest) async {
         var webViewTab = WebViewTab(
@@ -485,7 +487,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
               windowId: createWindowRequest.windowId),
         );
 
-        browserModel.addTab(webViewTab);
+        windowModel.addTab(webViewTab);
 
         return true;
       },
@@ -495,7 +497,7 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         }
         _isWindowClosed = true;
         if (widget.webViewModel.tabIndex != null) {
-          browserModel.closeTab(widget.webViewModel.tabIndex!);
+          windowModel.closeTab(widget.webViewModel.tabIndex!);
         }
       },
       onPermissionRequest: (controller, permissionRequest) async {

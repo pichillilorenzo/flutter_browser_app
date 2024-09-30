@@ -8,6 +8,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/window_model.dart';
 import '../../project_info_popup.dart';
 
 class CrossPlatformSettings extends StatefulWidget {
@@ -32,9 +33,9 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
 
   @override
   Widget build(BuildContext context) {
-    var browserModel = Provider.of<BrowserModel>(context, listen: true);
-    var children = _buildBaseSettings();
-    if (browserModel.webViewTabs.isNotEmpty) {
+    final windowModel = Provider.of<WindowModel>(context, listen: true);
+    final children = _buildBaseSettings();
+    if (windowModel.webViewTabs.isNotEmpty) {
       children.addAll(_buildWebViewTabSettings());
     }
 
@@ -44,8 +45,9 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
   }
 
   List<Widget> _buildBaseSettings() {
-    var browserModel = Provider.of<BrowserModel>(context, listen: true);
-    var settings = browserModel.getSettings();
+    final browserModel = Provider.of<BrowserModel>(context, listen: true);
+    final windowModel = Provider.of<WindowModel>(context, listen: true);
+    final settings = browserModel.getSettings();
 
     var widgets = <Widget>[
       const ListTile(
@@ -164,8 +166,8 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
           setState(() {
             settings.debuggingEnabled = value;
             browserModel.updateSettings(settings);
-            if (browserModel.webViewTabs.isNotEmpty) {
-              var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+            if (windowModel.webViewTabs.isNotEmpty) {
+              var webViewModel = windowModel.getCurrentTab()?.webViewModel;
               if (Util.isAndroid()) {
                 InAppWebViewController.setWebContentsDebuggingEnabled(
                     settings.debuggingEnabled);
@@ -173,7 +175,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
               webViewModel?.settings?.isInspectable = settings.debuggingEnabled;
               webViewModel?.webViewController?.setSettings(
                   settings: webViewModel.settings ?? InAppWebViewSettings());
-              browserModel.save();
+              windowModel.saveInfo();
             }
           });
         },
@@ -259,7 +261,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
   }
 
   List<Widget> _buildWebViewTabSettings() {
-    var browserModel = Provider.of<BrowserModel>(context, listen: true);
+    var windowModel = Provider.of<WindowModel>(context, listen: true);
     var currentWebViewModel = Provider.of<WebViewModel>(context, listen: true);
     var webViewController = currentWebViewModel.webViewController;
 
@@ -278,7 +280,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
           webViewController?.setSettings(
               settings: currentWebViewModel.settings ?? InAppWebViewSettings());
           currentWebViewModel.settings = await webViewController?.getSettings();
-          browserModel.save();
+          windowModel.saveInfo();
           setState(() {});
         },
       ),
@@ -292,7 +294,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
           webViewController?.setSettings(
               settings: currentWebViewModel.settings ?? InAppWebViewSettings());
           currentWebViewModel.settings = await webViewController?.getSettings();
-          browserModel.save();
+          windowModel.saveInfo();
           setState(() {});
         },
       ),
@@ -331,7 +333,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
                                                 InAppWebViewSettings());
                                     currentWebViewModel.settings =
                                         await webViewController?.getSettings();
-                                    browserModel.save();
+                                    windowModel.saveInfo();
                                     setState(() {
                                       Navigator.pop(context);
                                     });
@@ -366,7 +368,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
           webViewController?.setSettings(
               settings: currentWebViewModel.settings ?? InAppWebViewSettings());
           currentWebViewModel.settings = await webViewController?.getSettings();
-          browserModel.save();
+          windowModel.saveInfo();
           setState(() {});
         },
       ),
@@ -382,7 +384,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
           webViewController?.setSettings(
               settings: currentWebViewModel.settings ?? InAppWebViewSettings());
           currentWebViewModel.settings = await webViewController?.getSettings();
-          browserModel.save();
+          windowModel.saveInfo();
           setState(() {});
         },
       ),
@@ -396,7 +398,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
           webViewController?.setSettings(
               settings: currentWebViewModel.settings ?? InAppWebViewSettings());
           currentWebViewModel.settings = await webViewController?.getSettings();
-          browserModel.save();
+          windowModel.saveInfo();
           setState(() {});
         },
       ),
@@ -410,7 +412,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
           webViewController?.setSettings(
               settings: currentWebViewModel.settings ?? InAppWebViewSettings());
           currentWebViewModel.settings = await webViewController?.getSettings();
-          browserModel.save();
+          windowModel.saveInfo();
           setState(() {});
         },
       ),
@@ -424,7 +426,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
           webViewController?.setSettings(
               settings: currentWebViewModel.settings ?? InAppWebViewSettings());
           currentWebViewModel.settings = await webViewController?.getSettings();
-          browserModel.save();
+          windowModel.saveInfo();
           setState(() {});
         },
       ),
@@ -438,7 +440,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
           webViewController?.setSettings(
               settings: currentWebViewModel.settings ?? InAppWebViewSettings());
           currentWebViewModel.settings = await webViewController?.getSettings();
-          browserModel.save();
+          windowModel.saveInfo();
           setState(() {});
         },
       ),
@@ -452,7 +454,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
           webViewController?.setSettings(
               settings: currentWebViewModel.settings ?? InAppWebViewSettings());
           currentWebViewModel.settings = await webViewController?.getSettings();
-          browserModel.save();
+          windowModel.saveInfo();
           setState(() {});
         },
       ),
@@ -472,7 +474,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
                       currentWebViewModel.settings ?? InAppWebViewSettings());
               currentWebViewModel.settings =
                   await webViewController?.getSettings();
-              browserModel.save();
+              windowModel.saveInfo();
               setState(() {});
             },
           ),
@@ -489,7 +491,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
           webViewController?.setSettings(
               settings: currentWebViewModel.settings ?? InAppWebViewSettings());
           currentWebViewModel.settings = await webViewController?.getSettings();
-          browserModel.save();
+          windowModel.saveInfo();
           setState(() {});
         },
       ),
@@ -505,7 +507,7 @@ class _CrossPlatformSettingsState extends State<CrossPlatformSettings> {
           webViewController?.setSettings(
               settings: currentWebViewModel.settings ?? InAppWebViewSettings());
           currentWebViewModel.settings = await webViewController?.getSettings();
-          browserModel.save();
+          windowModel.saveInfo();
           setState(() {});
         },
       ),

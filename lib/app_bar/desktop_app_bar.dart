@@ -7,6 +7,7 @@ import 'package:window_manager/window_manager.dart';
 import '../custom_image.dart';
 import '../models/browser_model.dart';
 import '../models/webview_model.dart';
+import '../models/window_model.dart';
 import '../util.dart';
 import '../webview_tab.dart';
 
@@ -21,10 +22,11 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
   @override
   Widget build(BuildContext context) {
     final browserModel = Provider.of<BrowserModel>(context, listen: true);
+    final windowModel = Provider.of<WindowModel>(context, listen: true);
 
-    final tabSelectors = browserModel.webViewTabs.map((webViewTab) {
-      final index = browserModel.webViewTabs.indexOf(webViewTab);
-      final currentIndex = browserModel.getCurrentTabIndex();
+    final tabSelectors = windowModel.webViewTabs.map((webViewTab) {
+      final index = windowModel.webViewTabs.indexOf(webViewTab);
+      final currentIndex = windowModel.getCurrentTabIndex();
 
       return Flexible(
           flex: 1,
@@ -69,7 +71,7 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 backgroundColor: const WidgetStatePropertyAll(Colors.red),
                 iconColor: WidgetStateProperty.resolveWith(
-                      (states) => states.contains(WidgetState.hovered)
+                  (states) => states.contains(WidgetState.hovered)
                       ? Colors.black45
                       : Colors.red,
                 )),
@@ -96,10 +98,9 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
             padding: EdgeInsets.zero,
             style: ButtonStyle(
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                backgroundColor:
-                const WidgetStatePropertyAll(Colors.amber),
+                backgroundColor: const WidgetStatePropertyAll(Colors.amber),
                 iconColor: WidgetStateProperty.resolveWith(
-                      (states) => states.contains(WidgetState.hovered)
+                  (states) => states.contains(WidgetState.hovered)
                       ? Colors.black45
                       : Colors.amber,
                 )),
@@ -125,10 +126,9 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
             padding: EdgeInsets.zero,
             style: ButtonStyle(
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                backgroundColor:
-                const WidgetStatePropertyAll(Colors.green),
+                backgroundColor: const WidgetStatePropertyAll(Colors.green),
                 iconColor: WidgetStateProperty.resolveWith(
-                      (states) => states.contains(WidgetState.hovered)
+                  (states) => states.contains(WidgetState.hovered)
                       ? Colors.black45
                       : Colors.green,
                 )),
@@ -179,7 +179,7 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
                     minHeight: 25,
                   ),
                   padding: EdgeInsets.zero,
-                  icon: const Icon(Icons.add, size: 15)),
+                  icon: const Icon(Icons.add, size: 15, color: Colors.white,)),
             ],
           ),
         ),
@@ -191,6 +191,7 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
                 if (!Util.isWindows()) {
                   windowManager.setMovable(true);
                 }
+                setState(() {});
               },
               onExit: (details) {
                 if (!Util.isWindows()) {
@@ -215,7 +216,7 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
                         ContextMenuButtonConfig(
                           "Close All",
                           onPressed: () {
-                            browserModel.closeAllTabs();
+                            windowModel.closeAllTabs();
                           },
                         ),
                       ],
@@ -227,17 +228,21 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
               ))),
     ];
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.max,
-      children: children,
+    return Container(
+      color: Theme.of(context).colorScheme.primary,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        children: children,
+      ),
     );
   }
 
   void _addNewTab() {
     final browserModel = Provider.of<BrowserModel>(context, listen: false);
+    final windowModel = Provider.of<WindowModel>(context, listen: false);
     final settings = browserModel.getSettings();
-    browserModel.addTab(WebViewTab(
+    windowModel.addTab(WebViewTab(
       key: GlobalKey(),
       webViewModel: WebViewModel(url: WebUri(settings.searchEngine.url)),
     ));
@@ -264,8 +269,8 @@ class _WebViewTabSelectorState extends State<WebViewTabSelector> {
 
   @override
   Widget build(BuildContext context) {
-    final browserModel = Provider.of<BrowserModel>(context, listen: true);
-    final isCurrentTab = browserModel.getCurrentTabIndex() == widget.index;
+    final windowModel = Provider.of<WindowModel>(context, listen: true);
+    final isCurrentTab = windowModel.getCurrentTabIndex() == widget.index;
 
     final tab = widget.tab;
     final url = tab.webViewModel.url;
@@ -291,7 +296,7 @@ class _WebViewTabSelectorState extends State<WebViewTabSelector> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
-          browserModel.showTab(widget.index);
+          windowModel.showTab(widget.index);
         },
         child: ContextMenuRegion(
             contextMenu: GenericContextMenu(
@@ -305,10 +310,8 @@ class _WebViewTabSelectorState extends State<WebViewTabSelector> {
                 ContextMenuButtonConfig(
                   "Duplicate",
                   onPressed: () {
-                    final browserModel =
-                        Provider.of<BrowserModel>(context, listen: false);
                     if (tab.webViewModel.url != null) {
-                      browserModel.addTab(WebViewTab(
+                      windowModel.addTab(WebViewTab(
                         key: GlobalKey(),
                         webViewModel: WebViewModel(url: tab.webViewModel.url),
                       ));
@@ -318,7 +321,7 @@ class _WebViewTabSelectorState extends State<WebViewTabSelector> {
                 ContextMenuButtonConfig(
                   "Close",
                   onPressed: () {
-                    browserModel.closeTab(widget.index);
+                    windowModel.closeTab(widget.index);
                   },
                 ),
               ],
@@ -330,10 +333,10 @@ class _WebViewTabSelectorState extends State<WebViewTabSelector> {
               padding: const EdgeInsets.only(right: 5.0),
               decoration: !isCurrentTab
                   ? null
-                  : const BoxDecoration(
-                      color: Colors.black45,
+                  : BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
                       borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(5))),
+                          const BorderRadius.vertical(top: Radius.circular(5))),
               child: Tooltip(
                 decoration: const BoxDecoration(
                     color: Colors.black,
@@ -370,13 +373,12 @@ class _WebViewTabSelectorState extends State<WebViewTabSelector> {
                                 softWrap: false,
                                 style: TextStyle(
                                     fontSize: 12,
-                                    color:
-                                        isCurrentTab ? Colors.white : null))),
+                                    color: !isCurrentTab ? Colors.white : null))),
                       ],
                     )),
                     IconButton(
                         onPressed: () {
-                          browserModel.closeTab(widget.index);
+                          windowModel.closeTab(widget.index);
                         },
                         constraints: const BoxConstraints(
                           maxWidth: 20,
@@ -387,7 +389,7 @@ class _WebViewTabSelectorState extends State<WebViewTabSelector> {
                         padding: EdgeInsets.zero,
                         icon: Icon(
                           Icons.cancel,
-                          color: isCurrentTab ? Colors.white : null,
+                          color: !isCurrentTab ? Colors.white : null,
                           size: 15,
                         )),
                   ],

@@ -59,6 +59,7 @@ dependencies:
   collection: ^1.18.0
   window_manager: ^0.4.2
   context_menus: ^2.0.0+1
+  multi_window: ^0.2.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

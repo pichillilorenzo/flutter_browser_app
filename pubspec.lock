@@ -360,6 +360,38 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.6"
+  multi_window:
+    dependency: "direct main"
+    description:
+      name: multi_window
+      sha256: "2cd5a82885ea5d336f42cd6ff69008c20728373567c7165f8a64d44a0a85ce7d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
+  multi_window_interface:
+    dependency: transitive
+    description:
+      name: multi_window_interface
+      sha256: d5b16fdae09a47d064e9f566f06aab31a0c1d03d2eb6966d897aa9ae7d654294
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
+  multi_window_linux:
+    dependency: transitive
+    description:
+      name: multi_window_linux
+      sha256: "2aa1e1df837f188f19af260e786f079960c95ab672209f496063db24317a935c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
+  multi_window_macos:
+    dependency: transitive
+    description:
+      name: multi_window_macos
+      sha256: "044a128a619fcdfafcc36029bd004c4e351b76b15cac8a3dc94fc4731d0e8830"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   nested:
     dependency: transitive
     description:

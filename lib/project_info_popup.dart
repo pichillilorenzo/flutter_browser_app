@@ -8,6 +8,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
 import 'animated_flutter_browser_logo.dart';
+import 'models/window_model.dart';
 
 class ProjectInfoPopup extends StatefulWidget {
   const ProjectInfoPopup({super.key});
@@ -54,8 +55,8 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
           ]),
         ),
         onPressed: () {
-          var browserModel = Provider.of<BrowserModel>(context, listen: false);
-          browserModel.addTab(WebViewTab(
+          final windowModel = Provider.of<WindowModel>(context, listen: false);
+          windowModel.addTab(WebViewTab(
             key: GlobalKey(),
             webViewModel: WebViewModel(
                 url: WebUri(
@@ -86,8 +87,8 @@ class _ProjectInfoPopupState extends State<ProjectInfoPopup> {
           ]),
         ),
         onPressed: () {
-          var browserModel = Provider.of<BrowserModel>(context, listen: false);
-          browserModel.addTab(WebViewTab(
+          final windowModel = Provider.of<WindowModel>(context, listen: false);
+          windowModel.addTab(WebViewTab(
             key: GlobalKey(),
             webViewModel: WebViewModel(
                 url: WebUri(

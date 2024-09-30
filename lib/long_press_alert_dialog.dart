@@ -16,6 +16,7 @@ import 'package:share_plus/share_plus.dart';
 import 'main.dart';
 import 'models/browser_model.dart';
 import 'models/webview_model.dart';
+import 'models/window_model.dart';
 
 class LongPressAlertDialog extends StatefulWidget {
   static const List<InAppWebViewHitTestResultType> hitTestResultSupported = [
@@ -178,12 +179,12 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
   }
 
   Widget _buildOpenNewTab() {
-    var browserModel = Provider.of<BrowserModel>(context, listen: false);
+    final windowModel = Provider.of<WindowModel>(context, listen: false);
 
     return ListTile(
       title: const Text("Open in a new tab"),
       onTap: () {
-        browserModel.addTab(WebViewTab(
+        windowModel.addTab(WebViewTab(
           key: GlobalKey(),
           webViewModel:
               WebViewModel(url: widget.requestFocusNodeHrefResult?.url),
@@ -194,12 +195,12 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
   }
 
   Widget _buildOpenNewIncognitoTab() {
-    var browserModel = Provider.of<BrowserModel>(context, listen: false);
+    final windowModel = Provider.of<WindowModel>(context, listen: false);
 
     return ListTile(
       title: const Text("Open in a new incognito tab"),
       onTap: () {
-        browserModel.addTab(WebViewTab(
+        windowModel.addTab(WebViewTab(
           key: GlobalKey(),
           webViewModel: WebViewModel(
               url: widget.requestFocusNodeHrefResult?.url,
@@ -216,7 +217,8 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
       onTap: () {
         Clipboard.setData(ClipboardData(
             text: widget.requestFocusNodeHrefResult?.url.toString() ??
-                widget.hitTestResult.extra ?? ''));
+                widget.hitTestResult.extra ??
+                ''));
         Navigator.pop(context);
       },
     );
@@ -319,12 +321,12 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
   }
 
   Widget _buildOpenImageNewTab() {
-    var browserModel = Provider.of<BrowserModel>(context, listen: false);
+    final windowModel = Provider.of<WindowModel>(context, listen: false);
 
     return ListTile(
       title: const Text("Image in a new tab"),
       onTap: () {
-        browserModel.addTab(WebViewTab(
+        windowModel.addTab(WebViewTab(
           key: GlobalKey(),
           webViewModel: WebViewModel(
               url: WebUri(widget.hitTestResult.extra ?? "about:blank")),
@@ -335,7 +337,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
   }
 
   Widget _buildSearchImageOnGoogle() {
-    var browserModel = Provider.of<BrowserModel>(context, listen: false);
+    final windowModel = Provider.of<WindowModel>(context, listen: false);
 
     return ListTile(
       title: const Text("Search this image on Google"),
@@ -343,7 +345,7 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
         if (widget.hitTestResult.extra != null) {
           var url =
               "http://images.google.com/searchbyimage?image_url=${widget.hitTestResult.extra!}";
-          browserModel.addTab(WebViewTab(
+          windowModel.addTab(WebViewTab(
             key: GlobalKey(),
             webViewModel: WebViewModel(url: WebUri(url)),
           ));

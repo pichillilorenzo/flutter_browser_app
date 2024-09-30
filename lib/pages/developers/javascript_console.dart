@@ -4,6 +4,8 @@ import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/window_model.dart';
+
 class JavaScriptConsole extends StatefulWidget {
   const JavaScriptConsole({super.key});
 
@@ -126,9 +128,8 @@ class _JavaScriptConsoleState extends State<JavaScriptConsole> {
               IconButton(
                 icon: const Icon(Icons.cancel),
                 onPressed: () {
-                  var browserModel =
-                      Provider.of<BrowserModel>(context, listen: false);
-                  var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+                  final windowModel = Provider.of<WindowModel>(context, listen: false);
+                  var webViewModel = windowModel.getCurrentTab()?.webViewModel;
                   if (webViewModel != null) {
                     webViewModel.setJavaScriptConsoleResults([]);
 
@@ -146,8 +147,8 @@ class _JavaScriptConsoleState extends State<JavaScriptConsole> {
   }
 
   void evaluateJavaScript(String source) async {
-    var browserModel = Provider.of<BrowserModel>(context, listen: false);
-    var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+    final windowModel = Provider.of<WindowModel>(context, listen: false);
+    final webViewModel = windowModel.getCurrentTab()?.webViewModel;
 
     if (webViewModel != null) {
       var currentWebViewModel =

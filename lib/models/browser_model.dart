@@ -1,18 +1,15 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_browser/models/web_archive_model.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_browser/util.dart';
+import 'web_archive_model.dart';
+import 'window_model.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:flutter_browser/models/favorite_model.dart';
-import 'package:flutter_browser/models/webview_model.dart';
-import 'package:flutter_browser/webview_tab.dart';
+import 'favorite_model.dart';
 
 import 'search_engine_model.dart';
 import 'package:collection/collection.dart';
@@ -68,11 +65,8 @@ class BrowserSettings {
 
 class BrowserModel extends ChangeNotifier {
   final List<FavoriteModel> _favorites = [];
-  final List<WebViewTab> _webViewTabs = [];
   final Map<String, WebArchiveModel> _webArchives = {};
-  int _currentTabIndex = -1;
   BrowserSettings _settings = BrowserSettings();
-  late WebViewModel _currentWebViewModel;
 
   bool _showTabScroller = false;
 
@@ -85,12 +79,7 @@ class BrowserModel extends ChangeNotifier {
     }
   }
 
-  BrowserModel() {
-    _currentWebViewModel = WebViewModel();
-  }
-
-  UnmodifiableListView<WebViewTab> get webViewTabs =>
-      UnmodifiableListView(_webViewTabs);
+  BrowserModel() {}
 
   UnmodifiableListView<FavoriteModel> get favorites =>
       UnmodifiableListView(_favorites);
@@ -98,77 +87,65 @@ class BrowserModel extends ChangeNotifier {
   UnmodifiableMapView<String, WebArchiveModel> get webArchives =>
       UnmodifiableMapView(_webArchives);
 
-  void addTab(WebViewTab webViewTab) {
-    _webViewTabs.add(webViewTab);
-    _currentTabIndex = _webViewTabs.length - 1;
-    webViewTab.webViewModel.tabIndex = _currentTabIndex;
-
-    _currentWebViewModel.updateWithValue(webViewTab.webViewModel);
-
-    notifyListeners();
-  }
-
-  void addTabs(List<WebViewTab> webViewTabs) {
-    for (var webViewTab in webViewTabs) {
-      _webViewTabs.add(webViewTab);
-      webViewTab.webViewModel.tabIndex = _webViewTabs.length - 1;
-    }
-    _currentTabIndex = _webViewTabs.length - 1;
-    if (_currentTabIndex >= 0) {
-      _currentWebViewModel.updateWithValue(webViewTabs.last.webViewModel);
+  Future<void> openWindow(WindowModel? window) async {
+    if (Util.isMobile()) {
+      return;
     }
 
-    notifyListeners();
-  }
-
-  void closeTab(int index) {
-    final webViewTab = _webViewTabs[index];
-    _webViewTabs.removeAt(index);
-    InAppWebViewController.disposeKeepAlive(webViewTab.webViewModel.keepAlive);
-
-    _currentTabIndex = _webViewTabs.length - 1;
-
-    for (int i = index; i < _webViewTabs.length; i++) {
-      _webViewTabs[i].webViewModel.tabIndex = i;
+    if (window != null) {
+      window.waitingToBeOpened = true;
+      await window.flushInfo();
     }
 
-    if (_currentTabIndex >= 0) {
-      _currentWebViewModel
-          .updateWithValue(_webViewTabs[_currentTabIndex].webViewModel);
-    } else {
-      _currentWebViewModel.updateWithValue(WebViewModel());
+    if (Util.isMacOS()) {
+      await Process.run('open', [
+        '-n',
+        '-a',
+        Platform.resolvedExecutable
+            .replaceFirst('/Contents/MacOS/flutter_browser_app', '')
+      ]).then(
+        (value) {
+          if (kDebugMode) {
+            print(value.pid);
+            print(value.stdout);
+            print(value.stderr);
+          }
+        },
+      );
+    } else if (Util.isWindows()) {
+      // TODO: Implement Windows
     }
 
     notifyListeners();
   }
 
-  void showTab(int index) {
-    if (_currentTabIndex != index) {
-      _currentTabIndex = index;
-      _currentWebViewModel
-          .updateWithValue(_webViewTabs[_currentTabIndex].webViewModel);
-
-      notifyListeners();
+  Future<void> removeWindow(WindowModel window) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+    final removed = await prefs.remove(window.id);
+    if (!removed && kDebugMode) {
+      print("Failed to remove window '${window.id}'");
     }
   }
 
-  void closeAllTabs() {
-    for (final webViewTab in _webViewTabs) {
-      InAppWebViewController.disposeKeepAlive(webViewTab.webViewModel.keepAlive);
+  Future<void> removeAllWindows() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+    final List<WindowModel> windows = [];
+    try {
+      for (final k in prefs.getKeys()) {
+        if (k.startsWith('window_')) {
+          final removed = await prefs.remove(k);
+          if (!removed && kDebugMode) {
+            print("Failed to remove window '$k'");
+          }
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
     }
-    _webViewTabs.clear();
-    _currentTabIndex = -1;
-    _currentWebViewModel.updateWithValue(WebViewModel());
-
-    notifyListeners();
-  }
-
-  int getCurrentTabIndex() {
-    return _currentTabIndex;
-  }
-
-  WebViewTab? getCurrentTab() {
-    return _currentTabIndex >= 0 ? _webViewTabs[_currentTabIndex] : null;
   }
 
   bool containsFavorite(FavoriteModel favorite) {
@@ -253,16 +230,31 @@ class BrowserModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void notifyWebViewTabUpdated() {
-    notifyListeners();
-  }
-
-  void setCurrentWebViewModel(WebViewModel webViewModel) {
-    _currentWebViewModel = webViewModel;
+  Future<List<WindowModel>> getWindows() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+    final List<WindowModel> windows = [];
+    try {
+      for (final k in prefs.getKeys()) {
+        if (k.startsWith('window_')) {
+          final source = prefs.getString(k);
+          if (source != null) {
+            Map<String, dynamic> browserData = json.decode(source);
+            windows.add(WindowModel.fromMap(browserData));
+          }
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+    }
+    return windows;
   }
 
   DateTime _lastTrySave = DateTime.now();
   Timer? _timerSave;
+
   Future<void> save() async {
     _timerSave?.cancel();
 
@@ -280,11 +272,13 @@ class BrowserModel extends ChangeNotifier {
 
   Future<void> flush() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
     await prefs.setString("browser", json.encode(toJson()));
   }
 
   Future<void> restore() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
     Map<String, dynamic> browserData;
     try {
       String? source = prefs.getString("browser");
@@ -292,7 +286,6 @@ class BrowserModel extends ChangeNotifier {
         browserData = await json.decode(source);
 
         clearFavorites();
-        closeAllTabs();
         clearWebArchives();
 
         List<Map<String, dynamic>> favoritesList =
@@ -309,29 +302,10 @@ class BrowserModel extends ChangeNotifier {
         BrowserSettings settings = BrowserSettings.fromMap(
                 browserData["settings"]?.cast<String, dynamic>()) ??
             BrowserSettings();
-        List<Map<String, dynamic>> webViewTabList =
-            browserData["webViewTabs"]?.cast<Map<String, dynamic>>() ?? [];
-        List<WebViewTab> webViewTabs = webViewTabList
-            .map((e) => WebViewTab(
-                  key: GlobalKey(),
-                  webViewModel: WebViewModel.fromMap(e)!,
-                ))
-            .toList();
-        webViewTabs.sort((a, b) =>
-            a.webViewModel.tabIndex!.compareTo(b.webViewModel.tabIndex!));
 
         addFavorites(favorites);
         addWebArchives(webArchives);
         updateSettings(settings);
-        addTabs(webViewTabs);
-
-        int currentTabIndex =
-            browserData["currentTabIndex"] ?? _currentTabIndex;
-        currentTabIndex = min(currentTabIndex, _webViewTabs.length - 1);
-
-        if (currentTabIndex >= 0) {
-          showTab(currentTabIndex);
-        }
       }
     } catch (e) {
       if (kDebugMode) {
@@ -344,12 +318,9 @@ class BrowserModel extends ChangeNotifier {
   Map<String, dynamic> toMap() {
     return {
       "favorites": _favorites.map((e) => e.toMap()).toList(),
-      "webViewTabs": _webViewTabs.map((e) => e.webViewModel.toMap()).toList(),
       "webArchives":
           _webArchives.map((key, value) => MapEntry(key, value.toMap())),
-      "currentTabIndex": _currentTabIndex,
-      "settings": _settings.toMap(),
-      "currentWebViewModel": _currentWebViewModel.toMap(),
+      "settings": _settings.toMap()
     };
   }
 

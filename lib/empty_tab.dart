@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'models/browser_model.dart';
 import 'models/webview_model.dart';
+import 'models/window_model.dart';
 
 class EmptyTab extends StatefulWidget {
   const EmptyTab({super.key});
@@ -68,10 +69,11 @@ class _EmptyTabState extends State<EmptyTab> {
   }
 
   void openNewTab(value) {
-    var browserModel = Provider.of<BrowserModel>(context, listen: false);
-    var settings = browserModel.getSettings();
+    final windowModel = Provider.of<WindowModel>(context, listen: false);
+    final browserModel = Provider.of<BrowserModel>(context, listen: false);
+    final settings = browserModel.getSettings();
 
-    browserModel.addTab(WebViewTab(
+    windowModel.addTab(WebViewTab(
       key: GlobalKey(),
       webViewModel: WebViewModel(
           url: WebUri(value.startsWith("http")
