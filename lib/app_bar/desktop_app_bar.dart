@@ -179,7 +179,11 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
                     minHeight: 25,
                   ),
                   padding: EdgeInsets.zero,
-                  icon: const Icon(Icons.add, size: 15, color: Colors.white,)),
+                  icon: const Icon(
+                    Icons.add,
+                    size: 15,
+                    color: Colors.white,
+                  )),
             ],
           ),
         ),
@@ -274,9 +278,14 @@ class _WebViewTabSelectorState extends State<WebViewTabSelector> {
 
     final tab = widget.tab;
     final url = tab.webViewModel.url;
-    final tabName =
-        tab.webViewModel.title ?? tab.webViewModel.url.toString() ?? 'New Tab';
-    var faviconUrl = tab.webViewModel.favicon != null
+    var tabName = tab.webViewModel.title ?? url?.toString() ?? '';
+    if (tabName.isEmpty) {
+      tabName = 'New Tab';
+    }
+    final tooltipText =
+        '$tabName\n${(url?.host ?? '').isEmpty ? url?.toString() : url?.host}'
+            .trim();
+    final faviconUrl = tab.webViewModel.favicon != null
         ? tab.webViewModel.favicon!.url
         : (url != null && ["http", "https"].contains(url.scheme)
             ? Uri.parse("${url.origin}/favicon.ico")
@@ -347,7 +356,7 @@ class _WebViewTabSelectorState extends State<WebViewTabSelector> {
                     child: Container(
                       constraints: const BoxConstraints(maxWidth: 400),
                       child: Text(
-                        '$tabName\n${url?.host}',
+                        tooltipText,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 3,
                         style: const TextStyle(color: Colors.white),
@@ -373,7 +382,8 @@ class _WebViewTabSelectorState extends State<WebViewTabSelector> {
                                 softWrap: false,
                                 style: TextStyle(
                                     fontSize: 12,
-                                    color: !isCurrentTab ? Colors.white : null))),
+                                    color:
+                                        !isCurrentTab ? Colors.white : null))),
                       ],
                     )),
                     IconButton(

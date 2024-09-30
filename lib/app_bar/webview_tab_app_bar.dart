@@ -2,10 +2,8 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_browser/app_bar/certificates_info_popup.dart';
 import 'package:flutter_browser/app_bar/url_info_popup.dart';
 import 'package:flutter_browser/custom_image.dart';
 import 'package:flutter_browser/main.dart';
@@ -245,13 +243,11 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
           TextField(
             onSubmitted: (value) {
               var url = WebUri(value.trim());
-              if (!url.isValidUri &&
-                  !Util.isLocalizedContent(url)) {
+              if (Util.isLocalizedContent(url) ||
+                  (url.isValidUri && url.toString().split(".").length > 1)) {
+                url = url.scheme.isEmpty ? WebUri("https://$url") : url;
+              } else {
                 url = WebUri(settings.searchEngine.searchUrl + value);
-              }
-
-              if (url.isValidUri && url.scheme.isEmpty) {
-                url = WebUri("https://$url");
               }
 
               if (webViewController != null) {
@@ -948,50 +944,54 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
               contentPadding: const EdgeInsets.all(0.0),
               content: SizedBox(
                   width: double.maxFinite,
-                  child: StatefulBuilder(builder: (context, setState) {
-                    return FutureBuilder(
-                      future: browserModel.getWindows(),
-                      builder: (context, snapshot) {
-                        final savedWindows = (snapshot.data ?? []);
-                        savedWindows.sortBy((e) => e.updatedTime,);
-                        return ListView(
-                          children: savedWindows.map((window) {
-                            return ListTile(
-                              title: Text(
-                                  window.name.isNotEmpty
-                                      ? window.name
-                                      : window.id,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis),
-                              onTap: () async {
-                                await browserModel.openWindow(window);
-                                setState(() {
-                                  Navigator.pop(context);
-                                });
-                              },
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  IconButton(
-                                    icon: const Icon(Icons.close, size: 20.0),
-                                    onPressed: () async {
-                                      await browserModel.removeWindow(window);
-                                      setState(() {
-                                        if (savedWindows.isEmpty ||
-                                            savedWindows.length == 1) {
-                                          Navigator.pop(context);
-                                        }
-                                      });
-                                    },
-                                  )
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                        );
-                      },
-                    );
-                  },)));
+                  child: StatefulBuilder(
+                    builder: (context, setState) {
+                      return FutureBuilder(
+                        future: browserModel.getWindows(),
+                        builder: (context, snapshot) {
+                          final savedWindows = (snapshot.data ?? []);
+                          savedWindows.sortBy(
+                            (e) => e.updatedTime,
+                          );
+                          return ListView(
+                            children: savedWindows.map((window) {
+                              return ListTile(
+                                title: Text(
+                                    window.name.isNotEmpty
+                                        ? window.name
+                                        : window.id,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis),
+                                onTap: () async {
+                                  await browserModel.openWindow(window);
+                                  setState(() {
+                                    Navigator.pop(context);
+                                  });
+                                },
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    IconButton(
+                                      icon: const Icon(Icons.close, size: 20.0),
+                                      onPressed: () async {
+                                        await browserModel.removeWindow(window);
+                                        setState(() {
+                                          if (savedWindows.isEmpty ||
+                                              savedWindows.length == 1) {
+                                            Navigator.pop(context);
+                                          }
+                                        });
+                                      },
+                                    )
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          );
+                        },
+                      );
+                    },
+                  )));
         });
   }
 

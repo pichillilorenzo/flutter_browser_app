@@ -43,28 +43,33 @@ void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final appDocumentsDir = await getApplicationDocumentsDirectory();
-  
+
   if (Util.isDesktop()) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   }
-  db = await databaseFactory.openDatabase(p.join(appDocumentsDir.path, "databases", "myDb.db"), options: OpenDatabaseOptions(version: 1,
-      onCreate: (Database db, int version) async {
-        await db.execute(
-            'CREATE TABLE browser (id INTEGER PRIMARY KEY, json TEXT)');
-        await db.execute(
-            'CREATE TABLE windows (id TEXT PRIMARY KEY, json TEXT)');
-      }));
+  db = await databaseFactory.openDatabase(
+      p.join(appDocumentsDir.path, "databases", "myDb.db"),
+      options: OpenDatabaseOptions(
+          version: 1,
+          onCreate: (Database db, int version) async {
+            await db.execute(
+                'CREATE TABLE browser (id INTEGER PRIMARY KEY, json TEXT)');
+            await db.execute(
+                'CREATE TABLE windows (id TEXT PRIMARY KEY, json TEXT)');
+          }));
 
   if (Util.isDesktop()) {
     await windowManager.ensureInitialized();
 
     WindowOptions windowOptions = WindowOptions(
-        center: true,
-        backgroundColor: Colors.transparent,
-        titleBarStyle:
-            Util.isWindows() ? TitleBarStyle.normal : TitleBarStyle.hidden,
-        minimumSize: const Size(1280, 720));
+      center: true,
+      backgroundColor: Colors.transparent,
+      titleBarStyle:
+          Util.isWindows() ? TitleBarStyle.normal : TitleBarStyle.hidden,
+      minimumSize: const Size(1280, 720),
+      size: const Size(1280, 720),
+    );
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       if (!Util.isWindows()) {
         await windowManager.setAsFrameless();
@@ -115,7 +120,8 @@ void main(List<String> args) async {
             windowModel!.setCurrentWebViewModel(webViewModel);
             return windowModel;
           },
-          create: (BuildContext context) => WindowModel(id: null, waitingToBeOpened: true),
+          create: (BuildContext context) =>
+              WindowModel(id: null, waitingToBeOpened: true),
         ),
       ],
       child: const FlutterBrowserApp(),
