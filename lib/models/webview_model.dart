@@ -24,11 +24,14 @@ class WebViewModel extends ChangeNotifier {
   FindInteractionController? findInteractionController;
   Uint8List? screenshot;
   bool needsToCompleteInitialLoad;
+  final DateTime _createdTime;
+  DateTime _lastOpenedTime;
+
   final keepAlive = InAppWebViewKeepAlive();
 
   WebViewModel(
       {int? tabIndex,
-        WebUri? url,
+      WebUri? url,
       String? title,
       Favicon? favicon,
       double progress = 0.0,
@@ -39,23 +42,27 @@ class WebViewModel extends ChangeNotifier {
       List<String>? javaScriptConsoleHistory,
       List<LoadedResource>? loadedResources,
       bool isSecure = false,
+      DateTime? createdTime,
+      DateTime? lastOpenedTime,
       this.windowId,
       this.settings,
       this.webViewController,
-        this.pullToRefreshController,
-        this.findInteractionController,
-      this.needsToCompleteInitialLoad = true}) {
-    _tabIndex = tabIndex;
-    _url = url;
-    _favicon = favicon;
-    _progress = progress;
-    _loaded = loaded;
-    _isDesktopMode = isDesktopMode;
-    _isIncognitoMode = isIncognitoMode;
-    _javaScriptConsoleResults = javaScriptConsoleResults ?? <Widget>[];
-    _javaScriptConsoleHistory = javaScriptConsoleHistory ?? <String>[];
-    _loadedResources = loadedResources ?? <LoadedResource>[];
-    _isSecure = isSecure;
+      this.pullToRefreshController,
+      this.findInteractionController,
+      this.needsToCompleteInitialLoad = true})
+      : _createdTime = createdTime ?? DateTime.now(),
+        _lastOpenedTime = lastOpenedTime ?? DateTime.now(),
+        _tabIndex = tabIndex,
+        _url = url,
+        _favicon = favicon,
+        _progress = progress,
+        _loaded = loaded,
+        _isDesktopMode = isDesktopMode,
+        _isIncognitoMode = isIncognitoMode,
+        _javaScriptConsoleResults = javaScriptConsoleResults ?? <Widget>[],
+        _javaScriptConsoleHistory = javaScriptConsoleHistory ?? <String>[],
+        _loadedResources = loadedResources ?? <LoadedResource>[],
+        _isSecure = isSecure {
     settings = settings ?? InAppWebViewSettings();
   }
 
@@ -127,6 +134,17 @@ class WebViewModel extends ChangeNotifier {
   set isIncognitoMode(bool value) {
     if (value != _isIncognitoMode) {
       _isIncognitoMode = value;
+      notifyListeners();
+    }
+  }
+
+  DateTime get createdTime => _createdTime;
+
+  DateTime get lastOpenedTime => _lastOpenedTime;
+
+  set lastOpenedTime(DateTime value) {
+    if (value != _lastOpenedTime) {
+      _lastOpenedTime = value;
       notifyListeners();
     }
   }
@@ -227,6 +245,12 @@ class WebViewModel extends ChangeNotifier {
                 map["javaScriptConsoleHistory"]?.cast<String>(),
             isSecure: map["isSecure"],
             settings: InAppWebViewSettings.fromMap(map["settings"]),
+            createdTime: map["createdTime"] != null
+                ? DateTime.tryParse(map["createdTime"])
+                : null,
+            lastOpenedTime: map["lastOpenedTime"] != null
+                ? DateTime.tryParse(map["lastOpenedTime"])
+                : null,
           )
         : null;
   }
@@ -244,6 +268,8 @@ class WebViewModel extends ChangeNotifier {
       "isSecure": _isSecure,
       "settings": settings?.toMap(),
       "screenshot": screenshot,
+      "createdTime": _createdTime.toIso8601String(),
+      "lastOpenedTime": _lastOpenedTime.toIso8601String(),
     };
   }
 

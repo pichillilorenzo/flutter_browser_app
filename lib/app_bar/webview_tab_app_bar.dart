@@ -425,7 +425,14 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                 )),
               ),
             ),
+      const SizedBox.square(
+        dimension: 5,
+      ),
       PopupMenuButton<String>(
+        icon: const Icon(
+          Icons.more_vert,
+        ),
+        position: PopupMenuPosition.under,
         onSelected: _popupMenuChoiceAction,
         itemBuilder: (popupMenuContext) {
           var items = [

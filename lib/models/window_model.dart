@@ -91,6 +91,7 @@ class WindowModel extends ChangeNotifier {
     _webViewTabs.add(webViewTab);
     _currentTabIndex = _webViewTabs.length - 1;
     webViewTab.webViewModel.tabIndex = _currentTabIndex;
+    webViewTab.webViewModel.lastOpenedTime = DateTime.now();
 
     _currentWebViewModel.updateWithValue(webViewTab.webViewModel);
 
@@ -104,6 +105,7 @@ class WindowModel extends ChangeNotifier {
     }
     _currentTabIndex = _webViewTabs.length - 1;
     if (_currentTabIndex >= 0) {
+      webViewTabs.last.webViewModel.lastOpenedTime = DateTime.now();
       _currentWebViewModel.updateWithValue(webViewTabs.last.webViewModel);
     }
 
@@ -115,7 +117,9 @@ class WindowModel extends ChangeNotifier {
     _webViewTabs.removeAt(index);
     InAppWebViewController.disposeKeepAlive(webViewTab.webViewModel.keepAlive);
 
-    _currentTabIndex = _webViewTabs.length - 1;
+    if (Util.isMobile() || _currentTabIndex >= _webViewTabs.length) {
+      _currentTabIndex = _webViewTabs.length - 1;
+    }
 
     for (int i = index; i < _webViewTabs.length; i++) {
       _webViewTabs[i].webViewModel.tabIndex = i;
@@ -134,8 +138,10 @@ class WindowModel extends ChangeNotifier {
   void showTab(int index) {
     if (_currentTabIndex != index) {
       _currentTabIndex = index;
+      final webViewModel = _webViewTabs[_currentTabIndex].webViewModel;
+      webViewModel.lastOpenedTime = DateTime.now();
       _currentWebViewModel
-          .updateWithValue(_webViewTabs[_currentTabIndex].webViewModel);
+          .updateWithValue(webViewModel);
 
       notifyListeners();
     }

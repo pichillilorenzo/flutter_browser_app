@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -21,7 +22,6 @@ class DesktopAppBar extends StatefulWidget {
 class _DesktopAppBarState extends State<DesktopAppBar> {
   @override
   Widget build(BuildContext context) {
-    final browserModel = Provider.of<BrowserModel>(context, listen: true);
     final windowModel = Provider.of<WindowModel>(context, listen: true);
 
     final tabSelectors = windowModel.webViewTabs.map((webViewTab) {
@@ -230,6 +230,9 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
                       width: double.infinity,
                     )),
               ))),
+      OpenTabsViewer(
+        webViewTabs: windowModel.webViewTabs,
+      ),
     ];
 
     return Container(
@@ -408,5 +411,178 @@ class _WebViewTabSelectorState extends State<WebViewTabSelector> {
             )),
       ),
     );
+  }
+}
+
+class OpenTabsViewer extends StatefulWidget {
+  final List<WebViewTab> webViewTabs;
+
+  const OpenTabsViewer({super.key, required this.webViewTabs});
+
+  @override
+  State<OpenTabsViewer> createState() => _OpenTabsViewerState();
+}
+
+class _OpenTabsViewerState extends State<OpenTabsViewer> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        padding: const EdgeInsets.all(4.0),
+        child: MenuAnchor(
+          builder: (context, controller, child) {
+            return IconButton(
+                onPressed: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+                constraints: const BoxConstraints(
+                  maxWidth: 25,
+                  minWidth: 25,
+                  maxHeight: 25,
+                  minHeight: 25,
+                ),
+                padding: EdgeInsets.zero,
+                icon: const Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 15,
+                  color: Colors.white,
+                ));
+          },
+          menuChildren: [
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                minWidth: 200,
+              ),
+              child: TextFormField(
+                controller: _controller,
+                maxLines: 1,
+                style: Theme.of(context).textTheme.labelLarge,
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.search),
+                  hintText: 'Search open tabs',
+                  contentPadding: EdgeInsets.only(top: 15),
+                  isDense: true,
+                ),
+                onChanged: (value) {
+                  setState(() {});
+                },
+              ),
+            ),
+            MenuItemButton(
+              onPressed: null,
+              child: Text(
+                widget.webViewTabs.isEmpty ? 'No tabs open' : 'Tabs open',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+            ),
+            ...(widget.webViewTabs.where(
+              (element) {
+                final search = _controller.text.toLowerCase().trim();
+                final containsInTitle = element.webViewModel.title
+                        ?.toLowerCase()
+                        .contains(search) ??
+                    false;
+                final containsInUrl = element.webViewModel.url
+                        ?.toString()
+                        .toLowerCase()
+                        .contains(search) ??
+                    false;
+                return search.isEmpty || containsInTitle || containsInUrl;
+              },
+            ).map((w) {
+              final url = w.webViewModel.url;
+              final title = (w.webViewModel.title ?? '').isNotEmpty
+                  ? w.webViewModel.title!
+                  : 'New Tab';
+              var subtitle =
+                  (url?.host ?? '').isEmpty ? url?.toString() : url?.host;
+              final diffTime =
+                  DateTime.now().difference(w.webViewModel.lastOpenedTime);
+              var diffTimeSubtitle = 'now';
+              if (diffTime.inDays > 0) {
+                diffTimeSubtitle =
+                    '${diffTime.inDays} ${diffTime.inDays == 1 ? 'day' : 'days'} ago';
+              } else if (diffTime.inMinutes > 0) {
+                diffTimeSubtitle = '${diffTime.inMinutes} min ago';
+              } else if (diffTime.inSeconds > 0) {
+                diffTimeSubtitle = '${diffTime.inSeconds} sec ago';
+              }
+
+              final faviconUrl = w.webViewModel.favicon != null
+                  ? w.webViewModel.favicon!.url
+                  : (url != null && ["http", "https"].contains(url.scheme)
+                      ? Uri.parse("${url.origin}/favicon.ico")
+                      : null);
+
+              return MenuItemButton(
+                onPressed: () {
+                  final windowModel =
+                      Provider.of<WindowModel>(context, listen: false);
+                  windowModel.showTab(windowModel.webViewTabs.indexOf(w));
+                },
+                leadingIcon: Container(
+                  padding: const EdgeInsets.all(8),
+                  child: CustomImage(url: faviconUrl, maxWidth: 15, height: 15),
+                ),
+                trailingIcon: IconButton(
+                    onPressed: () {
+                      final windowModel =
+                          Provider.of<WindowModel>(context, listen: false);
+                      windowModel.closeTab(widget.webViewTabs.indexOf(w));
+                    },
+                    constraints: const BoxConstraints(
+                      maxWidth: 25,
+                      minWidth: 25,
+                      maxHeight: 25,
+                      minHeight: 25,
+                    ),
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(
+                      Icons.cancel,
+                      size: 15,
+                    )),
+                child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: 250,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                        Row(
+                          children: [
+                            Flexible(
+                                child: Text(
+                              subtitle ?? '',
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.labelSmall,
+                            )),
+                            Text(
+                              " - $diffTimeSubtitle",
+                              style: Theme.of(context).textTheme.labelSmall,
+                            )
+                          ],
+                        )
+                      ].whereNotNull().toList(),
+                    )),
+              );
+            }).toList())
+          ].whereNotNull().toList(),
+        ));
   }
 }
