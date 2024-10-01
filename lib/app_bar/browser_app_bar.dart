@@ -6,7 +6,8 @@ import 'package:flutter_browser/util.dart';
 
 class BrowserAppBar extends StatefulWidget implements PreferredSizeWidget {
   BrowserAppBar({super.key})
-      : preferredSize = Size.fromHeight(Util.isMobile() ? kToolbarHeight : 90.0);
+      : preferredSize =
+            Size.fromHeight(Util.isMobile() ? kToolbarHeight : 90.0);
 
   @override
   State<BrowserAppBar> createState() => _BrowserAppBarState();
@@ -26,24 +27,24 @@ class _BrowserAppBarState extends State<BrowserAppBar> {
       children.add(const DesktopAppBar());
     }
 
-    children.add(
-        _isFindingOnPage
-            ? FindOnPageAppBar(
-          hideFindOnPage: () {
-            setState(() {
-              _isFindingOnPage = false;
-            });
-          },
-        )
-            : WebViewTabAppBar(
-          showFindOnPage: () {
-            setState(() {
-              _isFindingOnPage = true;
-            });
-          },
-        )
-    );
+    children.add(_isFindingOnPage
+        ? FindOnPageAppBar(
+            hideFindOnPage: () {
+              setState(() {
+                _isFindingOnPage = false;
+              });
+            },
+          )
+        : WebViewTabAppBar(
+            showFindOnPage: () {
+              setState(() {
+                _isFindingOnPage = true;
+              });
+            },
+          ));
 
-    return Column(children: children,);
+    return Column(
+      children: children,
+    );
   }
 }

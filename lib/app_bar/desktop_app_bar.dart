@@ -13,7 +13,9 @@ import '../util.dart';
 import '../webview_tab.dart';
 
 class DesktopAppBar extends StatefulWidget {
-  const DesktopAppBar({super.key});
+  final bool showTabs;
+
+  const DesktopAppBar({super.key, this.showTabs = true});
 
   @override
   State<DesktopAppBar> createState() => _DesktopAppBarState();
@@ -24,31 +26,35 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
   Widget build(BuildContext context) {
     final windowModel = Provider.of<WindowModel>(context, listen: true);
 
-    final tabSelectors = windowModel.webViewTabs.map((webViewTab) {
-      final index = windowModel.webViewTabs.indexOf(webViewTab);
-      final currentIndex = windowModel.getCurrentTabIndex();
+    final tabSelectors = !widget.showTabs
+        ? <Widget>[]
+        : windowModel.webViewTabs.map((webViewTab) {
+            final index = windowModel.webViewTabs.indexOf(webViewTab);
+            final currentIndex = windowModel.getCurrentTabIndex();
 
-      return Flexible(
-          flex: 1,
-          fit: FlexFit.loose,
-          child: IntrinsicHeight(
-            child: Row(
-              children: [
-                Expanded(
-                    child: WebViewTabSelector(tab: webViewTab, index: index)),
-                SizedBox(
-                  height: 15,
-                  child: VerticalDivider(
-                      thickness: 1,
-                      width: 1,
-                      color: index == currentIndex - 1 || index == currentIndex
-                          ? Colors.transparent
-                          : Colors.black45),
-                )
-              ],
-            ),
-          ));
-    }).toList();
+            return Flexible(
+                flex: 1,
+                fit: FlexFit.loose,
+                child: IntrinsicHeight(
+                  child: Row(
+                    children: [
+                      Expanded(
+                          child: WebViewTabSelector(
+                              tab: webViewTab, index: index)),
+                      SizedBox(
+                        height: 15,
+                        child: VerticalDivider(
+                            thickness: 1,
+                            width: 1,
+                            color: index == currentIndex - 1 ||
+                                    index == currentIndex
+                                ? Colors.transparent
+                                : Colors.black45),
+                      )
+                    ],
+                  ),
+                ));
+          }).toList();
 
     final windowActions = [];
     if (!Util.isWindows()) {
@@ -168,23 +174,25 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
               const SizedBox(
                 width: 5,
               ),
-              IconButton(
-                  onPressed: () {
-                    _addNewTab();
-                  },
-                  constraints: const BoxConstraints(
-                    maxWidth: 25,
-                    minWidth: 25,
-                    maxHeight: 25,
-                    minHeight: 25,
-                  ),
-                  padding: EdgeInsets.zero,
-                  icon: const Icon(
-                    Icons.add,
-                    size: 15,
-                    color: Colors.white,
-                  )),
-            ],
+              !widget.showTabs
+                  ? null
+                  : IconButton(
+                      onPressed: () {
+                        _addNewTab();
+                      },
+                      constraints: const BoxConstraints(
+                        maxWidth: 25,
+                        minWidth: 25,
+                        maxHeight: 25,
+                        minHeight: 25,
+                      ),
+                      padding: EdgeInsets.zero,
+                      icon: const Icon(
+                        Icons.add,
+                        size: 15,
+                        color: Colors.white,
+                      )),
+            ].whereNotNull().toList().cast<Widget>(),
           ),
         ),
       ),
@@ -205,35 +213,42 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onDoubleTap: () async {
-                  windowManager.maximize();
+                  await windowManager.maximize();
                 },
-                child: ContextMenuRegion(
-                    behavior: const [ContextMenuShowBehavior.secondaryTap],
-                    contextMenu: GenericContextMenu(
-                      buttonConfigs: [
-                        ContextMenuButtonConfig(
-                          "New Tab",
-                          onPressed: () {
-                            _addNewTab();
-                          },
+                child: !widget.showTabs
+                    ? const SizedBox(
+                        height: 30,
+                        width: double.infinity,
+                      )
+                    : ContextMenuRegion(
+                        behavior: const [ContextMenuShowBehavior.secondaryTap],
+                        contextMenu: GenericContextMenu(
+                          buttonConfigs: [
+                            ContextMenuButtonConfig(
+                              "New Tab",
+                              onPressed: () {
+                                _addNewTab();
+                              },
+                            ),
+                            ContextMenuButtonConfig(
+                              "Close All",
+                              onPressed: () {
+                                windowModel.closeAllTabs();
+                              },
+                            ),
+                          ],
                         ),
-                        ContextMenuButtonConfig(
-                          "Close All",
-                          onPressed: () {
-                            windowModel.closeAllTabs();
-                          },
-                        ),
-                      ],
-                    ),
-                    child: const SizedBox(
-                      height: 30,
-                      width: double.infinity,
-                    )),
+                        child: const SizedBox(
+                          height: 30,
+                          width: double.infinity,
+                        )),
               ))),
-      OpenTabsViewer(
-        webViewTabs: windowModel.webViewTabs,
-      ),
-    ];
+      !widget.showTabs
+          ? null
+          : OpenTabsViewer(
+              webViewTabs: windowModel.webViewTabs,
+            ),
+    ].whereNotNull().toList();
 
     return Container(
       color: Theme.of(context).colorScheme.primary,

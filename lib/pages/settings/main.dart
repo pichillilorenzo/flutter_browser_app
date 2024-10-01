@@ -8,11 +8,13 @@ import 'package:flutter_font_icons/flutter_font_icons.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 
+import '../../app_bar/custom_app_bar_wrapper.dart';
 import '../../custom_popup_menu_item.dart';
 
 class PopupSettingsMenuActions {
   // ignore: constant_identifier_names
   static const String RESET_BROWSER_SETTINGS = "Reset Browser Settings";
+
   // ignore: constant_identifier_names
   static const String RESET_WEBVIEW_SETTINGS = "Reset WebView Settings";
 
@@ -35,7 +37,8 @@ class _SettingsPageState extends State<SettingsPage> {
     return DefaultTabController(
         length: 3,
         child: Scaffold(
-          appBar: AppBar(
+          appBar: CustomAppBarWrapper(
+              appBar: AppBar(
             bottom: TabBar(
                 onTap: (value) {
                   FocusScope.of(context).unfocus();
@@ -105,7 +108,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 },
               )
             ],
-          ),
+          )),
           body: const TabBarView(
             physics: NeverScrollableScrollPhysics(),
             children: [
