@@ -95,15 +95,15 @@ jobs:
             build/dist/*/*.zip
 
       - name: Extract version from pubspec.yaml
-        id: extract_version
-        run: |
-          version=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2 | tr -d '\r')
-          echo "VERSION=$version" >> $GITHUB_ENV
+        id: yq
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq -r '.version' 'pubspec.yaml'
 
       - name: Upload Release
         uses: softprops/action-gh-release@v1
         with:
-          name: "${{ env.VERSION }}"
+          name: "${{ steps.yq.outputs.result }}"
           token: ${{ secrets.TOKEN }}
           files: |
             build/app/outputs/flutter-apk/app-x86_64-release.apk
@@ -148,15 +148,15 @@ jobs:
             build/dist/*/*.zip
 
       - name: Extract version from pubspec.yaml
-        id: extract_version
-        run: |
-          version=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2 | tr -d '\r')
-          echo "VERSION=$version" >> $GITHUB_ENV
+        id: yq
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq -r '.version' 'pubspec.yaml'
 
       - name: Upload Release
         uses: softprops/action-gh-release@v1
         with:
-          name: "${{ env.VERSION }}"
+          name: "${{ steps.yq.outputs.result }}"
           token: ${{ secrets.TOKEN }}
           files: |
             build/dist/*/*.msix
