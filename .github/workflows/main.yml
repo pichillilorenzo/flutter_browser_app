@@ -42,7 +42,6 @@ jobs:
 
       - name: Restore packages
         run: |
-          cd flutter_browser_app
           flutter pub get
 
       - name: Install appdmg
@@ -53,7 +52,6 @@ jobs:
 
       - name: Build APK
         run: |
-          cd flutter_browser_app
           flutter build apk --release --split-per-abi
 
       - name: Upload APK to Artifacts
@@ -67,12 +65,10 @@ jobs:
 
       - name: Build IPA
         run: |
-          cd flutter_browser_app
           flutter build ios --release --no-codesign
 
       - name: Create IPA
         run: |
-          cd flutter_browser_app
           mkdir build/ios/iphoneos/Payload
           cp -R build/ios/iphoneos/Runner.app build/ios/iphoneos/Payload/Runner.app
           cd build/ios/iphoneos/
@@ -88,7 +84,6 @@ jobs:
 
       - name: Build MacOS
         run: |
-          cd flutter_browser_app
           flutter_distributor package --platform macos --targets dmg,zip --skip-clean
 
       - name: Upload MacOS to Artifacts
@@ -136,7 +131,6 @@ jobs:
           cache: true
       - name: Restore Packages
         run: |
-          cd flutter_browser_app
           flutter pub get
 
       - name: Install flutter_distributor
@@ -144,7 +138,6 @@ jobs:
 
       - name: Build Windows
         run: |
-          cd flutter_browser_app
           flutter_distributor package --platform windows --targets msix,zip --skip-clean
 
       - name: Upload Windows APP to Artifacts
