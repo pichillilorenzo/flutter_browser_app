@@ -96,9 +96,8 @@ jobs:
 
       - name: Extract version from pubspec.yaml
         id: yq
-        uses: mikefarah/yq@master
-        with:
-          cmd: yq -r '.version' 'pubspec.yaml'
+        run: |
+          yq -r '.version' 'pubspec.yaml'
 
       - name: Upload Release
         uses: softprops/action-gh-release@v1
@@ -122,6 +121,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: master
+
+      - name: Install yq command line utility
+        run: choco install yq
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -149,9 +151,8 @@ jobs:
 
       - name: Extract version from pubspec.yaml
         id: yq
-        uses: mikefarah/yq@master
-        with:
-          cmd: yq -r '.version' 'pubspec.yaml'
+        run: |
+          yq -r '.version' 'pubspec.yaml'
 
       - name: Upload Release
         uses: softprops/action-gh-release@v1

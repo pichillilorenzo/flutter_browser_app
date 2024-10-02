@@ -1,6 +1,6 @@
 display_name: Flutter Browser
 publisher_display_name: pichillilorenzo
-identity_name: com.pichillilorenzo.flutter_browser
+identity_name: com.pichillilorenzo.flutter-browser
 logo_path: assets/icon/icon.png
 capabilities: internetClient, location, microphone, webcam
 languages: en-us
