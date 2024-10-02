@@ -91,8 +91,8 @@ jobs:
         with:
           name: mac
           path: |
-            build/dist/*/*.dmg
-            build/dist/*/*.zip
+            dist/*/*.dmg
+            dist/*/*.zip
 
       - name: Extract version from pubspec.yaml
         id: yq
@@ -109,8 +109,8 @@ jobs:
             build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
             build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
             build/ios/iphoneos/ios_no_sign.ipa
-            build/dist/*/*.dmg
-            build/dist/*/*.zip
+            dist/*/*.dmg
+            dist/*/*.zip
 
       - run: echo "🍏 This job's status is ${{ job.status }}."
 
@@ -146,8 +146,8 @@ jobs:
         with:
           name: windows
           path: |
-            build/dist/*/*.msix
-            build/dist/*/*.zip
+            dist/*/*.msix
+            dist/*/*.zip
 
       - name: Extract version from pubspec.yaml
         id: yq
@@ -160,7 +160,7 @@ jobs:
           name: "${{ steps.yq.outputs.result }}"
           token: ${{ secrets.TOKEN }}
           files: |
-            build/dist/*/*.msix
-            build/dist/*/*.zip
+            dist/*/*.msix
+            dist/*/*.zip
 
       - run: echo "🍏 Windows job's status is ${{ job.status }}."
