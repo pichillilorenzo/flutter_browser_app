@@ -100,7 +100,7 @@ jobs:
           yq -r '.version' 'pubspec.yaml'
 
       - name: Upload Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: "${{ steps.yq.outputs.result }}"
           token: ${{ secrets.TOKEN }}
@@ -116,7 +116,8 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
-
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -155,7 +156,7 @@ jobs:
           yq -r '.version' 'pubspec.yaml'
 
       - name: Upload Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: "${{ steps.yq.outputs.result }}"
           token: ${{ secrets.TOKEN }}
