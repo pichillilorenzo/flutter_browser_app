@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
 
+import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_browser/util.dart';
 import '../main.dart';
@@ -78,7 +79,7 @@ class BrowserModel extends ChangeNotifier {
     }
   }
 
-  BrowserModel() {}
+  BrowserModel();
 
   UnmodifiableListView<FavoriteModel> get favorites =>
       UnmodifiableListView(_favorites);
@@ -86,44 +87,15 @@ class BrowserModel extends ChangeNotifier {
   UnmodifiableMapView<String, WebArchiveModel> get webArchives =>
       UnmodifiableMapView(_webArchives);
 
-  Future<void> openWindow(WindowModel? window) async {
+  Future<void> openWindow(WindowModel? windowModel) async {
     if (Util.isMobile()) {
       return;
     }
 
-    if (window != null) {
-      window.waitingToBeOpened = true;
-      await window.flushInfo();
-    }
-
-    final resolvedExecutable = Util.isMacOS() ? Platform.resolvedExecutable
-        .replaceFirst('/Contents/MacOS/flutter_browser_app', '') : Platform.resolvedExecutable;
+    final window = await DesktopMultiWindow.createWindow(windowModel?.id);
+    window.show();
     if (kDebugMode) {
-      print('Resolved executable: $resolvedExecutable');
-    }
-
-    if (Util.isMacOS()) {
-      await Process.run('open', [
-        '-n',
-        '-a',
-        resolvedExecutable
-      ]).then(
-        (value) {
-          if (kDebugMode) {
-            print('PID ${value.pid}');
-            print(value.stdout);
-            print(value.stderr);
-          }
-        },
-      );
-    } else if (Util.isWindows()) {
-      await Process.start('cmd', ['/c', 'start', resolvedExecutable]).then(
-            (value) {
-          if (kDebugMode) {
-            print('PID ${value.pid}');
-          }
-        },
-      );
+      print("Window created: ${window.windowId}");
     }
 
     notifyListeners();
@@ -260,15 +232,14 @@ class BrowserModel extends ChangeNotifier {
   }
 
   Future<void> flush() async {
-    final browser = await db?.rawQuery('SELECT * FROM browser WHERE id = ?', [1]);
+    final browser =
+        await db?.rawQuery('SELECT * FROM browser WHERE id = ?', [1]);
     int? count;
     if (browser == null || browser.length == 0) {
-      count = await db?.rawInsert(
-          'INSERT INTO browser(id, json) VALUES(?, ?)',
+      count = await db?.rawInsert('INSERT INTO browser(id, json) VALUES(?, ?)',
           [1, json.encode(toJson())]);
     } else {
-      count = await db?.rawUpdate(
-          'UPDATE browser SET json = ? WHERE id = ?',
+      count = await db?.rawUpdate('UPDATE browser SET json = ? WHERE id = ?',
           [json.encode(toJson()), 1]);
     }
 
@@ -278,36 +249,35 @@ class BrowserModel extends ChangeNotifier {
   }
 
   Future<void> restore() async {
-    final browsers = await db?.rawQuery('SELECT * FROM browser WHERE id = ?', [1]);
+    final browsers =
+        await db?.rawQuery('SELECT * FROM browser WHERE id = ?', [1]);
     if (browsers == null || browsers.length == 0) {
       return;
     }
     final browser = browsers[0];
     Map<String, dynamic> browserData = json.decode(browser['json'] as String);
     try {
+      clearFavorites();
+      clearWebArchives();
 
-        clearFavorites();
-        clearWebArchives();
+      List<Map<String, dynamic>> favoritesList =
+          browserData["favorites"]?.cast<Map<String, dynamic>>() ?? [];
+      List<FavoriteModel> favorites =
+          favoritesList.map((e) => FavoriteModel.fromMap(e)!).toList();
 
-        List<Map<String, dynamic>> favoritesList =
-            browserData["favorites"]?.cast<Map<String, dynamic>>() ?? [];
-        List<FavoriteModel> favorites =
-            favoritesList.map((e) => FavoriteModel.fromMap(e)!).toList();
+      Map<String, dynamic> webArchivesMap =
+          browserData["webArchives"]?.cast<String, dynamic>() ?? {};
+      Map<String, WebArchiveModel> webArchives = webArchivesMap.map(
+          (key, value) => MapEntry(
+              key, WebArchiveModel.fromMap(value?.cast<String, dynamic>())!));
 
-        Map<String, dynamic> webArchivesMap =
-            browserData["webArchives"]?.cast<String, dynamic>() ?? {};
-        Map<String, WebArchiveModel> webArchives = webArchivesMap.map(
-            (key, value) => MapEntry(
-                key, WebArchiveModel.fromMap(value?.cast<String, dynamic>())!));
+      BrowserSettings settings = BrowserSettings.fromMap(
+              browserData["settings"]?.cast<String, dynamic>()) ??
+          BrowserSettings();
 
-        BrowserSettings settings = BrowserSettings.fromMap(
-                browserData["settings"]?.cast<String, dynamic>()) ??
-            BrowserSettings();
-
-        addFavorites(favorites);
-        addWebArchives(webArchives);
-        updateSettings(settings);
-
+      addFavorites(favorites);
+      addWebArchives(webArchives);
+      updateSettings(settings);
     } catch (e) {
       if (kDebugMode) {
         print(e);

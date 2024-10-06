@@ -39,8 +39,16 @@ const double TAB_VIEWER_TOP_SCALE_BOTTOM_OFFSET = 230.0;
 WebViewEnvironment? webViewEnvironment;
 Database? db;
 
+int windowId = 0;
+String? windowModelId;
+
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (args.firstOrNull == 'multi_window') {
+    windowId = int.parse(args[1]);
+    windowModelId = args.length > 2 ? args[2] : null;
+  }
 
   final appDocumentsDir = await getApplicationDocumentsDirectory();
 
@@ -52,6 +60,7 @@ void main(List<String> args) async {
       p.join(appDocumentsDir.path, "databases", "myDb.db"),
       options: OpenDatabaseOptions(
           version: 1,
+          singleInstance: false,
           onCreate: (Database db, int version) async {
             await db.execute(
                 'CREATE TABLE browser (id INTEGER PRIMARY KEY, json TEXT)');
@@ -121,7 +130,7 @@ void main(List<String> args) async {
             return windowModel;
           },
           create: (BuildContext context) =>
-              WindowModel(id: null, waitingToBeOpened: true),
+              WindowModel(id: null),
         ),
       ],
       child: const FlutterBrowserApp(),

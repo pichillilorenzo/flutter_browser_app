@@ -21,7 +21,6 @@ class WindowModel extends ChangeNotifier {
   final List<WebViewTab> _webViewTabs = [];
   int _currentTabIndex = -1;
   late WebViewModel _currentWebViewModel;
-  bool _waitingToBeOpened = false;
   bool _shouldSave = false;
   bool _showTabScroller = false;
 
@@ -53,13 +52,11 @@ class WindowModel extends ChangeNotifier {
   WindowModel(
       {String? id,
       String? name,
-      bool? waitingToBeOpened,
       bool? shouldSave,
       DateTime? updatedTime,
       DateTime? createdTime})
       : _id = id ?? 'window_${const Uuid().v4()}',
         _name = name ?? '',
-        _waitingToBeOpened = waitingToBeOpened ?? true,
         _shouldSave = Util.isMobile() ? true : (shouldSave ?? false),
         _createdTime = createdTime ?? DateTime.now(),
         _updatedTime = updatedTime ?? DateTime.now() {
@@ -70,14 +67,6 @@ class WindowModel extends ChangeNotifier {
 
   UnmodifiableListView<WebViewTab> get webViewTabs =>
       UnmodifiableListView(_webViewTabs);
-
-  bool get waitingToBeOpened => _waitingToBeOpened;
-
-  set waitingToBeOpened(bool value) {
-    _waitingToBeOpened = value;
-
-    notifyListeners();
-  }
 
   String get name => _name;
 
@@ -140,8 +129,7 @@ class WindowModel extends ChangeNotifier {
       _currentTabIndex = index;
       final webViewModel = _webViewTabs[_currentTabIndex].webViewModel;
       webViewModel.lastOpenedTime = DateTime.now();
-      _currentWebViewModel
-          .updateWithValue(webViewModel);
+      _currentWebViewModel.updateWithValue(webViewModel);
 
       notifyListeners();
     }
@@ -209,15 +197,14 @@ class WindowModel extends ChangeNotifier {
       return;
     }
     _updatedTime = DateTime.now();
-    final window = await db?.rawQuery('SELECT * FROM windows WHERE id = ?', [id]);
+    final window =
+        await db?.rawQuery('SELECT * FROM windows WHERE id = ?', [id]);
     int? count;
-    if (window == null || window.length == 0) {
-      count = await db?.rawInsert(
-          'INSERT INTO windows(id, json) VALUES(?, ?)',
+    if (window == null || window.isEmpty) {
+      count = await db?.rawInsert('INSERT INTO windows(id, json) VALUES(?, ?)',
           [id, json.encode(toJson())]);
     } else {
-      count = await db?.rawUpdate(
-          'UPDATE windows SET json = ? WHERE id = ?',
+      count = await db?.rawUpdate('UPDATE windows SET json = ? WHERE id = ?',
           [json.encode(toJson()), id]);
     }
     if ((count == null || count == 0) && kDebugMode) {
@@ -226,33 +213,29 @@ class WindowModel extends ChangeNotifier {
   }
 
   Future<void> restoreInfo() async {
-    String? id;
-    Map<String, dynamic>? browserData;
     try {
-      final windows = await db?.rawQuery('SELECT * FROM windows');
-      if (windows == null) {
-        return;
-      }
+      List<Map<String, Object?>>? windows;
 
-      for (final w in windows) {
-        final wId = w['id'] as String;
-        if (wId.startsWith('window_')) {
-          final source = w['json'] as String;
-          Map<String, dynamic> wBrowserData = json.decode(source);
-          if (Util.isMobile() || wBrowserData['waitingToBeOpened']) {
-            id = wId;
-            browserData = wBrowserData;
-            break;
-          }
+      if (Util.isDesktop()) {
+        if (windowModelId != null) {
+          windows = await db
+              ?.rawQuery('SELECT * FROM windows WHERE id = ?', [windowModelId]);
+        } else {
+          return;
         }
+      } else {
+        windows = await db?.rawQuery('SELECT * FROM windows');
       }
 
-      if (id == null || browserData == null) {
+      if (windows == null || windows.isEmpty) {
         return;
       }
 
-      _id = id;
-      _waitingToBeOpened = false;
+      final w = windows[0];
+      _id = w['id'] as String;
+
+      final source = w['json'] as String;
+      final browserData = json.decode(source);
 
       _shouldSave = browserData["shouldSave"] ?? false;
 
@@ -271,8 +254,7 @@ class WindowModel extends ChangeNotifier {
 
       addTabs(webViewTabs);
 
-      int currentTabIndex =
-          browserData["currentTabIndex"] ?? _currentTabIndex;
+      int currentTabIndex = browserData["currentTabIndex"] ?? _currentTabIndex;
       currentTabIndex = min(currentTabIndex, _webViewTabs.length - 1);
 
       if (currentTabIndex >= 0) {
@@ -280,7 +262,6 @@ class WindowModel extends ChangeNotifier {
       }
 
       await flushInfo();
-
     } catch (e) {
       if (kDebugMode) {
         print(e);
@@ -293,12 +274,13 @@ class WindowModel extends ChangeNotifier {
     final window = WindowModel(
         id: map["id"],
         name: map["name"],
-        waitingToBeOpened: map["waitingToBeOpened"],
         shouldSave: map["shouldSave"],
-        updatedTime:
-            map["updatedTime"] != null ? DateTime.tryParse(map["updatedTime"]) : null,
-        createdTime:
-            map["createdTime"] != null ? DateTime.tryParse(map["createdTime"]) : null);
+        updatedTime: map["updatedTime"] != null
+            ? DateTime.tryParse(map["updatedTime"])
+            : null,
+        createdTime: map["createdTime"] != null
+            ? DateTime.tryParse(map["createdTime"])
+            : null);
     List<Map<String, dynamic>> webViewTabList =
         map["webViewTabs"]?.cast<Map<String, dynamic>>() ?? [];
     List<WebViewTab> webViewTabs = webViewTabList
@@ -320,7 +302,6 @@ class WindowModel extends ChangeNotifier {
       "webViewTabs": _webViewTabs.map((e) => e.webViewModel.toMap()).toList(),
       "currentTabIndex": _currentTabIndex,
       "currentWebViewModel": _currentWebViewModel.toMap(),
-      "waitingToBeOpened": _waitingToBeOpened,
       "shouldSave": _shouldSave,
       "updatedTime": _updatedTime.toIso8601String(),
       "createdTime": _createdTime.toIso8601String()

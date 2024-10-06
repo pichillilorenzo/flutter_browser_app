@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  desktop_multi_window
   dynamic_color
   flutter_inappwebview_windows
   permission_handler_windows

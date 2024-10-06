@@ -56,6 +56,8 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     ),
   );
 
+  bool shouldSelectText = true;
+
   @override
   void initState() {
     super.initState();
@@ -83,16 +85,25 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     super.dispose();
   }
 
+  int _prevTabIndex = -1;
+
   @override
   Widget build(BuildContext context) {
-    return Selector<WebViewModel, WebUri?>(
-        selector: (context, webViewModel) => webViewModel.url,
-        builder: (context, url, child) {
-          if (url == null) {
-            _searchController?.text = "";
-          }
-          if (url != null && _focusNode != null && !_focusNode!.hasFocus) {
-            _searchController?.text = url.toString();
+    return Selector<WebViewModel, ({WebUri? item1, int? item2})>(
+        selector: (context, webViewModel) => (item1: webViewModel.url, item2: webViewModel.tabIndex),
+        builder: (context, record, child) {
+          if (_prevTabIndex != record.item2) {
+            _searchController?.text = record.item1?.toString() ?? '';
+            _prevTabIndex = record.item2 ?? _prevTabIndex;
+            _focusNode?.unfocus();
+          } else {
+            if (record.item1 == null) {
+              _searchController?.text = "";
+            }
+            if (record.item1 != null && _focusNode != null &&
+                !_focusNode!.hasFocus) {
+              _searchController?.text = record.item1.toString();
+            }
           }
 
           Widget? leading = _buildAppBarHomePageWidget();
@@ -102,23 +113,23 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
               builder: (context, isIncognitoMode, child) {
                 return leading != null
                     ? AppBar(
-                        backgroundColor: isIncognitoMode
-                            ? Colors.black38
-                            : Theme.of(context).colorScheme.primaryContainer,
-                        leading: leading,
-                        leadingWidth: 130,
-                        titleSpacing: 0.0,
-                        title: _buildSearchTextField(),
-                        actions: _buildActionsMenu(),
-                      )
+                  backgroundColor: isIncognitoMode
+                      ? Colors.black38
+                      : Theme.of(context).colorScheme.primaryContainer,
+                  leading: leading,
+                  leadingWidth: 130,
+                  titleSpacing: 0.0,
+                  title: _buildSearchTextField(),
+                  actions: _buildActionsMenu(),
+                )
                     : AppBar(
-                        backgroundColor: isIncognitoMode
-                            ? Colors.black38
-                            : Theme.of(context).colorScheme.primaryContainer,
-                        titleSpacing: 10.0,
-                        title: _buildSearchTextField(),
-                        actions: _buildActionsMenu(),
-                      );
+                  backgroundColor: isIncognitoMode
+                      ? Colors.black38
+                      : Theme.of(context).colorScheme.primaryContainer,
+                  titleSpacing: 10.0,
+                  title: _buildSearchTextField(),
+                  actions: _buildActionsMenu(),
+                );
               });
         });
   }
@@ -128,7 +139,6 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     var settings = browserModel.getSettings();
 
     var webViewModel = Provider.of<WebViewModel>(context, listen: true);
-    var webViewController = webViewModel.webViewController;
 
     if (Util.isMobile() && !settings.homePageEnabled) {
       return null;
@@ -150,9 +160,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
           ),
           padding: EdgeInsets.zero,
           onPressed: () async {
-            if (webViewController != null) {
-              webViewController.goBack();
-            }
+            webViewModel.webViewController?.goBack();
           },
         ),
         IconButton(
@@ -168,9 +176,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
           ),
           padding: EdgeInsets.zero,
           onPressed: () async {
-            if (webViewController != null) {
-              webViewController.goForward();
-            }
+            webViewModel.webViewController?.goForward();
           },
         ),
         IconButton(
@@ -186,9 +192,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
           ),
           padding: EdgeInsets.zero,
           onPressed: () async {
-            if (webViewController != null) {
-              webViewController.reload();
-            }
+            webViewModel.webViewController?.reload();
           },
         )
       ]);
@@ -207,12 +211,13 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         ),
         padding: EdgeInsets.zero,
         onPressed: () {
-          if (webViewController != null) {
+          if (webViewModel.webViewController != null) {
             var url = settings.homePageEnabled &&
                     settings.customUrlHomePage.isNotEmpty
                 ? WebUri(settings.customUrlHomePage)
                 : WebUri(settings.searchEngine.url);
-            webViewController.loadUrl(urlRequest: URLRequest(url: url));
+            webViewModel.webViewController
+                ?.loadUrl(urlRequest: URLRequest(url: url));
           } else {
             addNewTab();
           }
@@ -233,7 +238,6 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     final settings = browserModel.getSettings();
 
     final webViewModel = Provider.of<WebViewModel>(context, listen: true);
-    final webViewController = webViewModel.webViewController;
 
     return SizedBox(
       height: 40.0,
@@ -249,12 +253,24 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                 url = WebUri(settings.searchEngine.searchUrl + value);
               }
 
-              if (webViewController != null) {
-                webViewController.loadUrl(urlRequest: URLRequest(url: url));
+              if (webViewModel.webViewController != null) {
+                webViewModel.webViewController
+                    ?.loadUrl(urlRequest: URLRequest(url: url));
               } else {
                 addNewTab(url: url);
                 webViewModel.url = url;
               }
+            },
+            onTap: () {
+              if (!shouldSelectText ||
+                  _searchController == null ||
+                  _searchController!.text.isEmpty) return;
+              shouldSelectText = false;
+              _searchController!.selection = TextSelection(
+                  baseOffset: 0, extentOffset: _searchController!.text.length);
+            },
+            onTapOutside: (event) {
+              shouldSelectText = true;
             },
             keyboardType: TextInputType.url,
             focusNode: _focusNode,
@@ -444,7 +460,6 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                       Provider.of<BrowserModel>(statefulContext, listen: true);
                   var webViewModel =
                       Provider.of<WebViewModel>(statefulContext, listen: true);
-                  var webViewController = webViewModel.webViewController;
 
                   var isFavorite = false;
                   FavoriteModel? favorite;
@@ -471,7 +486,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                                 color: Colors.black,
                               ),
                               onPressed: () {
-                                webViewController?.goBack();
+                                webViewModel.webViewController?.goBack();
                                 Navigator.pop(popupMenuContext);
                               })),
                     );
@@ -487,7 +502,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                               color: Colors.black,
                             ),
                             onPressed: () {
-                              webViewController?.goForward();
+                              webViewModel.webViewController?.goForward();
                               Navigator.pop(popupMenuContext);
                             })),
                     SizedBox(
@@ -531,8 +546,9 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                                 String webArchivePath =
                                     "$WEB_ARCHIVE_DIR${Platform.pathSeparator}${url.scheme}-${url.host}${url.path.replaceAll("/", "-")}${DateTime.now().microsecondsSinceEpoch}.${Util.isAndroid() ? WebArchiveFormat.MHT.toValue() : WebArchiveFormat.WEBARCHIVE.toValue()}";
 
-                                String? savedPath =
-                                    (await webViewController?.saveWebArchive(
+                                String? savedPath = (await webViewModel
+                                    .webViewController
+                                    ?.saveWebArchive(
                                         filePath: webArchivePath,
                                         autoname: false));
 
@@ -602,7 +618,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                               color: Colors.black,
                             ),
                             onPressed: () {
-                              webViewController?.reload();
+                              webViewModel.webViewController?.reload();
                               Navigator.pop(popupMenuContext);
                             })),
                   ]);
