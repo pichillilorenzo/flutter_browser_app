@@ -5,6 +5,7 @@
 #include "flutter_window.h"
 #include "utils.h"
 
+#include <iostream>
 #include "window_manager_plus/window_manager_plus_plugin.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
@@ -44,7 +45,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
       auto window = std::make_shared<FlutterWindow>(project);
       Win32Window::Point origin(10, 10);
       Win32Window::Size size(1280, 720);
-      if (!window->CreateAndShow(L"flutter_browser_app", origin, size)) {
+      if (!window->Create(L"flutter_browser_app", origin, size)) {
         std::cerr << "Failed to create a new window" << std::endl;
       }
       window->SetQuitOnClose(false);

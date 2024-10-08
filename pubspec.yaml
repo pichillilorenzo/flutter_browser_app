@@ -40,7 +40,7 @@ dependencies:
   # For material you.
   dynamic_color: ^1.7.0
 
-  flutter_inappwebview: ^6.1.4
+  flutter_inappwebview: ^6.1.5
   flutter_downloader: ^1.11.8
   path_provider: ^2.1.4
   permission_handler: ^11.3.1
@@ -64,7 +64,7 @@ dependencies:
   sqflite: ^2.3.3+2
   sqflite_common_ffi: ^2.3.3+1
   sqlite3_flutter_libs: ^0.5.24
-  window_manager_plus: ^1.0.3
+  window_manager_plus: ^1.0.4
   path: any
 
 dev_dependencies:
