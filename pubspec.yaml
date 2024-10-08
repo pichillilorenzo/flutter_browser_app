@@ -59,15 +59,12 @@ dependencies:
   intl: any
   uuid: ^4.5.0
   collection: any
-  window_manager: ^0.4.2
   context_menus: ^2.0.0+1
   multi_window: ^0.2.0
   sqflite: ^2.3.3+2
   sqflite_common_ffi: ^2.3.3+1
   sqlite3_flutter_libs: ^0.5.24
-  desktop_multi_window:
-    git:
-      url: https://github.com/pichillilorenzo/desktop_multi_window_plus
+  window_manager_plus: ^1.0.3
   path: any
 
 dev_dependencies:

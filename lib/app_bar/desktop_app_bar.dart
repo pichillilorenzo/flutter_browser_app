@@ -3,7 +3,7 @@ import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
-import 'package:window_manager/window_manager.dart';
+import 'package:window_manager_plus/window_manager_plus.dart';
 
 import '../custom_image.dart';
 import '../models/browser_model.dart';
@@ -64,7 +64,7 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
         ),
         IconButton(
             onPressed: () {
-              windowManager.close();
+              WindowManagerPlus.current.close();
             },
             constraints: const BoxConstraints(
               maxWidth: 13,
@@ -91,8 +91,8 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
         ),
         IconButton(
             onPressed: () async {
-              if (!(await windowManager.isFullScreen())) {
-                windowManager.minimize();
+              if (!(await  WindowManagerPlus.current.isFullScreen())) {
+                 WindowManagerPlus.current.minimize();
               }
             },
             constraints: const BoxConstraints(
@@ -120,8 +120,8 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
         ),
         IconButton(
             onPressed: () async {
-              windowManager
-                  .setFullScreen(!(await windowManager.isFullScreen()));
+               WindowManagerPlus.current
+                  .setFullScreen(!(await  WindowManagerPlus.current.isFullScreen()));
             },
             constraints: const BoxConstraints(
               maxWidth: 13,
@@ -201,19 +201,19 @@ class _DesktopAppBarState extends State<DesktopAppBar> {
               hitTestBehavior: HitTestBehavior.opaque,
               onEnter: (details) {
                 if (!Util.isWindows()) {
-                  windowManager.setMovable(true);
+                   WindowManagerPlus.current.setMovable(true);
                 }
                 setState(() {});
               },
               onExit: (details) {
                 if (!Util.isWindows()) {
-                  windowManager.setMovable(false);
+                   WindowManagerPlus.current.setMovable(false);
                 }
               },
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onDoubleTap: () async {
-                  await windowManager.maximize();
+                  await  WindowManagerPlus.current.maximize();
                 },
                 child: !widget.showTabs
                     ? const SizedBox(

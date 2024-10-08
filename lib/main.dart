@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:window_manager/window_manager.dart';
+import 'package:window_manager_plus/window_manager_plus.dart';
 import 'package:path/path.dart' as p;
 
 import 'browser.dart';
@@ -45,9 +45,10 @@ String? windowModelId;
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (args.firstOrNull == 'multi_window') {
-    windowId = int.parse(args[1]);
-    windowModelId = args.length > 2 ? args[2] : null;
+  if (Util.isDesktop()) {
+    windowId = args.isNotEmpty ? int.tryParse(args[0]) ?? 0 : 0;
+    windowModelId = args.length > 1 ? args[1] : null;
+    await WindowManagerPlus.ensureInitialized(windowId);
   }
 
   final appDocumentsDir = await getApplicationDocumentsDirectory();
@@ -69,8 +70,6 @@ void main(List<String> args) async {
           }));
 
   if (Util.isDesktop()) {
-    await windowManager.ensureInitialized();
-
     WindowOptions windowOptions = WindowOptions(
       center: true,
       backgroundColor: Colors.transparent,
@@ -79,13 +78,13 @@ void main(List<String> args) async {
       minimumSize: const Size(1280, 720),
       size: const Size(1280, 720),
     );
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
+    WindowManagerPlus.current.waitUntilReadyToShow(windowOptions, () async {
       if (!Util.isWindows()) {
-        await windowManager.setAsFrameless();
-        await windowManager.setHasShadow(true);
+        await WindowManagerPlus.current.setAsFrameless();
+        await WindowManagerPlus.current.setHasShadow(true);
       }
-      await windowManager.show();
-      await windowManager.focus();
+      await WindowManagerPlus.current.show();
+      await WindowManagerPlus.current.focus();
     });
   }
 
@@ -150,12 +149,12 @@ class _FlutterBrowserAppState extends State<FlutterBrowserApp>
   @override
   void initState() {
     super.initState();
-    windowManager.addListener(this);
+    WindowManagerPlus.current.addListener(this);
   }
 
   @override
   void dispose() {
-    windowManager.removeListener(this);
+    WindowManagerPlus.current.removeListener(this);
     super.dispose();
   }
 
@@ -181,17 +180,17 @@ class _FlutterBrowserAppState extends State<FlutterBrowserApp>
   }
 
   @override
-  void onWindowFocus() {
+  void onWindowFocus([int? windowId]) {
     setState(() {});
     if (!Util.isWindows()) {
-      windowManager.setMovable(false);
+      WindowManagerPlus.current.setMovable(false);
     }
   }
 
   @override
-  void onWindowBlur() {
+  void onWindowBlur([int? windowId]) {
     if (!Util.isWindows()) {
-      windowManager.setMovable(true);
+      WindowManagerPlus.current.setMovable(true);
     }
   }
 }

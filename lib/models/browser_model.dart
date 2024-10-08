@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
 
-import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_browser/util.dart';
+import 'package:window_manager_plus/window_manager_plus.dart';
 import '../main.dart';
 import 'web_archive_model.dart';
 import 'window_model.dart';
@@ -92,10 +92,15 @@ class BrowserModel extends ChangeNotifier {
       return;
     }
 
-    final window = await DesktopMultiWindow.createWindow(windowModel?.id);
-    window.show();
-    if (kDebugMode) {
-      print("Window created: ${window.windowId}");
+    final window = await WindowManagerPlus.createWindow(windowModel != null ? [windowModel.id] : null);
+    if (window != null) {
+      if (kDebugMode) {
+        print("Window created: $window}");
+      }
+    } else {
+      if (kDebugMode) {
+        print("Cannot create window");
+      }
     }
 
     notifyListeners();
