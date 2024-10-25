@@ -913,10 +913,10 @@ packages:
     dependency: "direct main"
     description:
       name: window_manager_plus
-      sha256: b090f178c6c4066a37415ec82eb24315280bf0ca0b3f53a500a66cd2897545d3
+      sha256: c3a7e030fb7f61a0e04db8c49b24c43affaaf5fbff5da375d5bb822a7e01b9f0
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.4"
+    version: "1.0.5"
   xdg_directories:
     dependency: transitive
     description:

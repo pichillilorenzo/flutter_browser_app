@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_browser/models/browser_model.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/models/window_model.dart';
@@ -146,15 +149,35 @@ class FlutterBrowserApp extends StatefulWidget {
 
 class _FlutterBrowserAppState extends State<FlutterBrowserApp>
     with WindowListener {
+
+  // https://github.com/pichillilorenzo/window_manager_plus/issues/5
+  late final AppLifecycleListener? _appLifecycleListener;
+
   @override
   void initState() {
     super.initState();
     WindowManagerPlus.current.addListener(this);
+
+    // https://github.com/pichillilorenzo/window_manager_plus/issues/5
+    if (WindowManagerPlus.current.id > 0 && Platform.isMacOS) {
+      _appLifecycleListener = AppLifecycleListener(
+        onStateChange: _handleStateChange,
+      );
+    }
+  }
+
+  void _handleStateChange(AppLifecycleState state) {
+    // https://github.com/pichillilorenzo/window_manager_plus/issues/5
+    if (WindowManagerPlus.current.id > 0 && Platform.isMacOS && state == AppLifecycleState.hidden) {
+      SchedulerBinding.instance.handleAppLifecycleStateChanged(
+          AppLifecycleState.inactive);
+    }
   }
 
   @override
   void dispose() {
     WindowManagerPlus.current.removeListener(this);
+    _appLifecycleListener?.dispose();
     super.dispose();
   }
 
